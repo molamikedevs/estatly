@@ -1,21 +1,44 @@
-# React + TypeScript + Vite + shadcn/ui
+# Estatly
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+An internal property management platform for real estate agencies.
+Built to streamline how agents, managers, and admins handle listings,
+clients, and viewings — inspired by the back-office tools used by
+agencies in markets like Dubai.
 
-## Adding components
+## Status
 
-To add components to your app, run the following command:
+🚧 Currently in active development
+
+## Tech Stack
+
+- **Frontend:** React 18 + TypeScript + Vite
+- **Routing:** React Router v6
+- **State:** TanStack Query (server state) + Context API (UI state)
+- **Forms:** React Hook Form + Zod validation
+- **Backend:** Supabase (PostgreSQL + Auth + Storage)
+- **Styling:** Tailwind CSS v4 + Shadcn/ui
+- **Charts:** Recharts
+- **Dates:** date-fns
+
+## Features (In Progress)
+
+- [ ] Multi-role authentication (Admin / Manager / Agent)
+- [ ] Property listings management with approval workflow
+- [ ] Property detail pages with image galleries
+- [ ] Client management
+- [ ] Viewing scheduling
+- [ ] Dashboard with stats and analytics
+- [ ] Agent performance tracking
+- [ ] Dark mode
+
+## Development
 
 ```bash
-npx shadcn@latest add button
+pnpm install
+cp .env.example .env.local  # then add your Supabase credentials
+pnpm run dev
 ```
 
-This will place the ui components in the `src/components` directory.
+## Author
 
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button"
-```
+Lamin Foday ([molamikedevs](https://github.com/molamikedevs))
