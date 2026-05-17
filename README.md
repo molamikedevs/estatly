@@ -11,7 +11,7 @@ agencies in markets like Dubai.
 
 ## Tech Stack
 
-- **Frontend:** React 18 + TypeScript + Vite
+- **Frontend:** React 19 + TypeScript + Vite
 - **Routing:** React Router v6
 - **State:** TanStack Query (server state) + Context API (UI state)
 - **Forms:** React Hook Form + Zod validation

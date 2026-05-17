@@ -1,21 +1,39 @@
-import { Button } from "@/components/ui/button"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import Account from "./pages/Account"
+import Agent from "./pages/Agent"
+import Agents from "./pages/Agents"
+import AppLayout from "./pages/AppLayout"
+import Client from "./pages/Client"
+import Clients from "./pages/Clients"
+import { default as Dashboard, default as Login } from "./pages/Login"
+import NewProperty from "./pages/NewProperty"
+import PageNotFound from "./pages/PageNotFound"
+import Properties from "./pages/Properties"
+import Property from "./pages/Property"
+import Settings from "./pages/Settings"
+import Viewings from "./pages/Viewings"
 
-export function App() {
+export default function App() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route index element={<Navigate replace to="dashboard" />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="properties" element={<Properties />} />
+          <Route path="properties/new" element={<NewProperty />} />
+          <Route path="properties/:propertyId" element={<Property />} />
+          <Route path="agents" element={<Agents />} />
+          <Route path="agents/:agentId" element={<Agent />} />
+          <Route path="clients" element={<Clients />} />
+          <Route path="clients/:clientId" element={<Client />} />
+          <Route path="viewings" element={<Viewings />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="account" element={<Account />} />
+        </Route>
+        <Route path="login" element={<Login />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
-
-export default App
