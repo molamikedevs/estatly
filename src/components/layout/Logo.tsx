@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { Link } from "react-router-dom"
 
 export default function Logo({ collapsed = false }: { collapsed?: boolean }) {
   return (
@@ -10,14 +11,14 @@ export default function Logo({ collapsed = false }: { collapsed?: boolean }) {
         <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/15 to-transparent" />
       </div>
       {!collapsed && (
-        <div className="flex flex-col">
+        <Link to="/dashboard" className="flex flex-col">
           <span className="text-[15px] leading-none font-semibold tracking-tight">
             Estatly
           </span>
           <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
             Property Suite
           </span>
-        </div>
+        </Link>
       )}
     </div>
   )

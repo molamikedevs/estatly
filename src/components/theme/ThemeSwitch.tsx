@@ -17,6 +17,7 @@ export default function ThemeSwitch() {
       size="icon"
       onClick={toggle}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+      className="cursor-pointer"
     >
       <Sun className="h-[18px] w-[18px] scale-100 rotate-0 transition-all duration-300 dark:scale-0 dark:-rotate-90" />
       <Moon className="absolute h-[18px] w-[18px] scale-0 rotate-90 transition-all duration-300 dark:scale-100 dark:rotate-0" />

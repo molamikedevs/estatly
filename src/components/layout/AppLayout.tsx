@@ -1,6 +1,6 @@
-import AppSidebar from "@/components/layout/AppSidebar";
-import Header from "@/components/layout/Header";
-import { Outlet } from "react-router-dom";
+import AppSidebar from "@/components/layout/AppSidebar"
+import Header from "@/components/layout/Header"
+import { Outlet } from "react-router-dom"
 
 export default function AppLayout() {
   return (
@@ -15,5 +15,5 @@ export default function AppLayout() {
         </main>
       </div>
     </div>
-  );
+  )
 }
