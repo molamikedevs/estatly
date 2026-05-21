@@ -1,3 +1,4 @@
+import UpdatePasswordForm from "@/features/auth/UpdatePasswordForm"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
@@ -35,6 +36,7 @@ export default function App() {
         <Routes>
           {/* PUBLIC ROUTES */}
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<UpdatePasswordForm />} />
 
           {/* PROTECTED ROUTES (require authentication) */}
           <Route

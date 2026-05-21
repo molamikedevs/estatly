@@ -1,3 +1,7 @@
+import FieldLabelText from "@/components/form-components/FieldLabelText"
+import IconField from "@/components/form-components/IconField"
+import PasswordField from "@/components/form-components/PasswordField"
+import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
@@ -7,48 +11,48 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useProfileFields } from "@/hooks/form/useProfileFields"
 import type { ProfileFormValues } from "@/types/index"
-import { Briefcase, Lock, Mail, Phone, User as UserIcon } from "lucide-react"
-import type { Control } from "react-hook-form"
-import { Controller, useWatch } from "react-hook-form"
-
-const BIO_MAX = 280
+import {
+  Briefcase,
+  KeyRound,
+  Lock,
+  Mail,
+  Phone,
+  User as UserIcon,
+  X,
+} from "lucide-react"
+import { Controller, type Control, type UseFormSetValue } from "react-hook-form"
 
 interface ProfileFieldsProps {
   control: Control<ProfileFormValues>
+  setValue: UseFormSetValue<ProfileFormValues>
   email: string
 }
 
-export default function ProfileFields({ control, email }: ProfileFieldsProps) {
-  const bioValue = useWatch({ control, name: "bio" }) ?? ""
+export default function ProfileFields({
+  control,
+  setValue,
+  email,
+}: ProfileFieldsProps) {
+  const { showPasswordSection, togglePasswordSection, bio } = useProfileFields({
+    control,
+    setValue,
+  })
 
   return (
     <FieldGroup className="space-y-5">
-      {/* Full name */}
-      <Controller
+      <IconField
         control={control}
-        name="fullName"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="profile-fullName">
-              Full name <span className="text-destructive">*</span>
-            </FieldLabel>
-            <div className="relative">
-              <UserIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                {...field}
-                id="profile-fullName"
-                placeholder="Jane Doe"
-                className="h-10 pl-9"
-                aria-invalid={fieldState.invalid}
-              />
-            </div>
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
+        name="full_name"
+        id="profile-fullName"
+        label="Full name"
+        icon={UserIcon}
+        placeholder="Jane Doe"
+        required
       />
 
-      {/* Email — read-only, outside schema */}
+      {/* Email — read-only */}
       <Field>
         <FieldLabel
           htmlFor="profile-email"
@@ -57,7 +61,7 @@ export default function ProfileFields({ control, email }: ProfileFieldsProps) {
           Email address
         </FieldLabel>
         <div className="relative">
-          <Mail className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Mail className="icon-class" />
           <Input
             id="profile-email"
             type="email"
@@ -72,62 +76,28 @@ export default function ProfileFields({ control, email }: ProfileFieldsProps) {
         </FieldDescription>
       </Field>
 
-      {/* Phone */}
-      <Controller
+      <IconField
         control={control}
         name="phone"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="profile-phone">
-              Phone number{" "}
-              <span className="font-normal text-muted-foreground">
-                (optional)
-              </span>
-            </FieldLabel>
-            <div className="relative">
-              <Phone className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                {...field}
-                id="profile-phone"
-                type="tel"
-                placeholder="+234 800 000 0000"
-                className="h-10 pl-9"
-                aria-invalid={fieldState.invalid}
-              />
-            </div>
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
+        id="profile-phone"
+        label="Phone number"
+        icon={Phone}
+        type="tel"
+        placeholder="+234 800 000 0000"
+        optional
       />
 
-      {/* Specialization */}
-      <Controller
+      <IconField
         control={control}
         name="specialization"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="profile-specialization">
-              Specialization{" "}
-              <span className="font-normal text-muted-foreground">
-                (optional)
-              </span>
-            </FieldLabel>
-            <div className="relative">
-              <Briefcase className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                {...field}
-                id="profile-specialization"
-                placeholder="e.g. Residential sales, Commercial leasing"
-                className="h-10 pl-9"
-                aria-invalid={fieldState.invalid}
-              />
-            </div>
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
+        id="profile-specialization"
+        label="Specialization"
+        icon={Briefcase}
+        placeholder="e.g. Residential sales, Commercial leasing"
+        optional
       />
 
-      {/* Bio */}
+      {/* Bio — has a live character counter, so kept inline */}
       <Controller
         control={control}
         name="bio"
@@ -135,19 +105,16 @@ export default function ProfileFields({ control, email }: ProfileFieldsProps) {
           <Field data-invalid={fieldState.invalid}>
             <div className="flex items-center justify-between">
               <FieldLabel htmlFor="profile-bio">
-                Bio{" "}
-                <span className="font-normal text-muted-foreground">
-                  (optional)
-                </span>
+                <FieldLabelText optional>Bio</FieldLabelText>
               </FieldLabel>
               <span
                 className={
-                  bioValue.length > BIO_MAX - 20
+                  bio.isNearLimit
                     ? "text-[10px] text-warning tabular-nums"
                     : "text-[10px] text-muted-foreground tabular-nums"
                 }
               >
-                {bioValue.length}/{BIO_MAX}
+                {bio.length}/{bio.max}
               </span>
             </div>
             <Textarea
@@ -162,6 +129,59 @@ export default function ProfileFields({ control, email }: ProfileFieldsProps) {
           </Field>
         )}
       />
+
+      {/* ── Password section ───────────────────────────── */}
+      <div className="-mx-1 border-t border-border/60 pt-5">
+        {!showPasswordSection ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={togglePasswordSection}
+            className="gap-2"
+          >
+            <KeyRound className="h-3.5 w-3.5" />
+            Change password
+          </Button>
+        ) : (
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Change password</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Leave blank to keep your current password
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={togglePasswordSection}
+                aria-label="Close password section"
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <PasswordField
+              control={control}
+              name="password"
+              id="profile-password"
+              label="New password"
+              placeholder="At least 8 characters"
+            />
+
+            <PasswordField
+              control={control}
+              name="confirmPassword"
+              id="profile-confirmPassword"
+              label="Confirm new password"
+              placeholder="Re-enter password"
+            />
+          </div>
+        )}
+      </div>
     </FieldGroup>
   )
 }

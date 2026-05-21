@@ -1,5 +1,10 @@
-import { supabase } from "@/lib/supabase"
-import type { AuthUser, UserLogin, UserProfile } from "@/types/index"
+import { supabase, supabaseUrl } from "@/lib/supabase"
+import type {
+  AuthUser,
+  UpdateDataProps,
+  UserLogin,
+  UserProfile,
+} from "@/types/index"
 
 export async function loginApi({ email, password }: UserLogin) {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -12,7 +17,7 @@ export async function loginApi({ email, password }: UserLogin) {
   return data
 }
 
-export async function getCurrentUser(): Promise<AuthUser | null> {
+export async function getCurrentUserApi(): Promise<AuthUser | null> {
   // Step 1: Check if there's an active session
   const { data: session } = await supabase.auth.getSession()
   if (!session.session) return null
@@ -40,6 +45,77 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     ...data.user,
     user_profile: profile,
   }
+}
+
+export async function updateProfileApi({
+  full_name,
+  password,
+  avatar,
+  bio,
+  specialization,
+  phone,
+}: UpdateDataProps) {
+  // Get current user ID
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error("No authenticated user")
+
+  // ---- 1. Update password (auth concern) ----
+  if (password) {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw new Error(error.message)
+  }
+
+  // ---- 2. Upload avatar to storage if provided ----
+  let avatarUrl: string | undefined
+
+  if (avatar) {
+    // Sanitize filename to avoid issues with spaces, special chars
+    const fileExt = avatar.name.split(".").pop()
+    const fileName = `avatar-${user.id}-${Date.now()}.${fileExt}`
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(fileName, avatar, { upsert: true })
+
+    if (uploadError) throw new Error(uploadError.message)
+
+    avatarUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${fileName}`
+  }
+
+  // ---- 3. Update user_profiles table with everything else ----
+  const profileUpdate: Partial<UserProfile> = {}
+
+  if (full_name !== undefined) profileUpdate.full_name = full_name
+  if (bio !== undefined) profileUpdate.bio = bio
+  if (specialization !== undefined)
+    profileUpdate.specialization = specialization
+  if (phone !== undefined) profileUpdate.phone = phone
+  if (avatarUrl !== undefined) profileUpdate.avatar = avatarUrl
+
+  // Only update if there's actually something to update
+  if (Object.keys(profileUpdate).length > 0) {
+    const { data: updatedProfile, error: profileError } = await supabase
+      .from("user_profiles")
+      .update(profileUpdate)
+      .eq("user_id", user.id)
+      .select()
+      .single()
+
+    if (profileError) throw new Error(profileError.message)
+
+    return updatedProfile
+  }
+
+  // If nothing changed in the profile, just return current profile
+  const { data: currentProfile } = await supabase
+    .from("user_profiles")
+    .select("*")
+    .eq("user_id", user.id)
+    .single()
+
+  return currentProfile
 }
 
 export async function logoutApi() {

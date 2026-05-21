@@ -5,36 +5,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { useUser } from "@/features/auth/useUser"
-import { profileSchema } from "@/lib/validation"
-import type { ProfileFormValues } from "@/types/index"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import { AvatarUploader } from "./AvatarUploader"
+import { useProfileForm } from "@/hooks/form/useProfileForm"
+import AvatarUploader from "./AvatarUploader"
 import { FormFooter } from "./FormFooter"
 import ProfileFields from "./ProfileFields"
-
-// ─── Avatar state helpers ─────────────────────────────────────────────────────
-
-interface AvatarState {
-  file: File | null
-  preview: string | null
-  remove: boolean
-  error: string | null
-}
-
-const DEFAULT_AVATAR: AvatarState = {
-  file: null,
-  preview: null,
-  remove: false,
-  error: null,
-}
-
-const MAX_AVATAR_SIZE = 2 * 1024 * 1024
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"]
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 interface UpdateProfileFormProps {
   open: boolean
@@ -45,107 +19,10 @@ export default function UpdateProfileForm({
   open,
   onOpenChange,
 }: UpdateProfileFormProps) {
-  const { user } = useUser()
-  const profile = user?.user_profile
-
-  const [avatar, setAvatar] = useState<AvatarState>(DEFAULT_AVATAR)
-
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      fullName: "",
-      phone: "",
-      specialization: "",
-      bio: "",
-    },
-    mode: "onBlur",
+  const { form, onSubmit, email, isPending, canSave } = useProfileForm({
+    open,
+    onOpenChange,
   })
-
-  const {
-    formState: { isSubmitting, isDirty },
-    watch,
-    reset,
-  } = form
-
-  // Reset everything when the sheet opens or the user object changes
-  useEffect(() => {
-    if (!open || !profile) return
-
-    reset({
-      fullName: profile.full_name ?? "",
-      phone: profile.phone ?? "",
-      specialization: profile.specialization ?? "",
-      bio: profile.bio ?? "",
-    })
-
-    // Revoke any stale blob URL before clearing state
-    setAvatar((prev) => {
-      if (prev.preview) URL.revokeObjectURL(prev.preview)
-      return DEFAULT_AVATAR
-    })
-  }, [open, profile, reset])
-
-  // Clean up blob URL on unmount
-  useEffect(() => {
-    return () => {
-      if (avatar.preview) URL.revokeObjectURL(avatar.preview)
-    }
-  }, [avatar.preview])
-
-  // ── Avatar handlers ──────────────────────────────────────────────────────
-
-  function handleAvatarFile(file: File) {
-    if (!ACCEPTED_TYPES.includes(file.type)) {
-      setAvatar((prev) => ({ ...prev, error: "Use a JPG, PNG or WebP image" }))
-      return
-    }
-    if (file.size > MAX_AVATAR_SIZE) {
-      setAvatar((prev) => ({ ...prev, error: "Image must be under 2 MB" }))
-      return
-    }
-
-    setAvatar((prev) => {
-      if (prev.preview) URL.revokeObjectURL(prev.preview)
-      return {
-        file,
-        preview: URL.createObjectURL(file),
-        remove: false,
-        error: null,
-      }
-    })
-  }
-
-  function handleAvatarRemove() {
-    setAvatar((prev) => {
-      if (prev.preview) URL.revokeObjectURL(prev.preview)
-      return { file: null, preview: null, remove: true, error: null }
-    })
-  }
-
-  // ── Submit ───────────────────────────────────────────────────────────────
-
-  async function onSubmit(values: ProfileFormValues) {
-    // TODO: hook up mutation
-    // await updateProfile({ ...values, avatar: avatar.file, removeAvatar: avatar.remove })
-    await new Promise((r) => setTimeout(r, 1200))
-    console.log("Saved", values, {
-      avatarFile: avatar.file,
-      removeAvatar: avatar.remove,
-    })
-    onOpenChange(false)
-  }
-
-  // ── Derived values ───────────────────────────────────────────────────────
-
-  const isAvatarDirty = avatar.file !== null || avatar.remove
-  const canSave = (isDirty || isAvatarDirty) && !isSubmitting
-
-  const displayName =
-    watch("fullName") || profile?.full_name || user?.email || ""
-  const avatarSrc =
-    avatar.preview ?? (avatar.remove ? null : (profile?.avatar ?? null))
-
-  // ── Render ───────────────────────────────────────────────────────────────
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -161,26 +38,24 @@ export default function UpdateProfileForm({
         </SheetHeader>
 
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={onSubmit}
           className="flex flex-1 flex-col overflow-hidden"
         >
           <div className="flex-1 scrollbar-thin space-y-6 overflow-y-auto px-6 py-6">
-            <AvatarUploader
-              src={avatarSrc}
-              displayName={displayName}
-              error={avatar.error}
-              removing={avatar.remove}
-              onFileChange={handleAvatarFile}
-              onRemove={handleAvatarRemove}
+            <AvatarUploader />
+            <ProfileFields
+              control={form.control}
+              setValue={form.setValue}
+              email={email}
             />
-
-            <ProfileFields control={form.control} email={user?.email ?? ""} />
           </div>
 
           <FormFooter
             canSave={canSave}
-            isSubmitting={isSubmitting}
+            isSubmitting={isPending}
             onCancel={() => onOpenChange(false)}
+            submitLabel="Save changes"
+            submittingLabel="Saving…"
           />
         </form>
       </SheetContent>

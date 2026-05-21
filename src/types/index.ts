@@ -28,3 +28,19 @@ export interface UserLogin {
   email: string
   password: string
 }
+
+export interface UpdateDataProps {
+  full_name?: string
+  password?: string
+  avatar?: File
+  bio?: string
+  specialization?: string
+  phone?: string
+}
+
+export interface CreateAgentFormValues {
+  full_name: string
+  email: string
+  password: string
+  role: Exclude<UserRole, "admin">
+}

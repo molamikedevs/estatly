@@ -5,12 +5,16 @@ interface FormFooterProps {
   canSave: boolean
   isSubmitting: boolean
   onCancel: () => void
+  submitLabel?: string
+  submittingLabel?: string
 }
 
 export function FormFooter({
   canSave,
   isSubmitting,
   onCancel,
+  submitLabel = "Save changes",
+  submittingLabel = "Saving…",
 }: FormFooterProps) {
   return (
     <div className="flex items-center justify-end gap-2 border-t bg-muted/30 px-6 py-4">
@@ -31,10 +35,10 @@ export function FormFooter({
         {isSubmitting ? (
           <>
             <Spinner size="sm" />
-            Saving…
+            {submittingLabel}
           </>
         ) : (
-          "Save changes"
+          submitLabel
         )}
       </Button>
     </div>

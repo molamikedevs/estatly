@@ -1,3 +1,5 @@
-export default function Agents(){
-  return <div>Agents</div>
+import AgentLists from "@/features/agents/AgentLists"
+
+export default function Agents() {
+  return <AgentLists />
 }

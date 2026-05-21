@@ -1,91 +1,63 @@
+import IconField from "@/components/form-components/IconField"
+import PasswordField from "@/components/form-components/PasswordField"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react"
-import { useState } from "react"
+import { useLogin } from "@/features/auth/useLogin"
+import { loginSchema } from "@/lib/validation"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2, Mail } from "lucide-react"
+import { useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
-import { useLogin } from "./useLogin"
+import type { z } from "zod"
+
+type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const { isPending, login } = useLogin()
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email || !password) return
-    login(
-      { email, password },
-      {
-        onSettled: () => {
-          setEmail("")
-          setPassword("")
-        },
-        onError: () => setPassword(""), // only wipe password on error
-      }
-    )
-  }
+  const { control, handleSubmit, resetField } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+    mode: "onBlur",
+  })
+
+  const onSubmit = handleSubmit((values) => {
+    login(values, {
+      // Keep the email on a failed attempt — only clear the password.
+      onError: () => resetField("password"),
+    })
+  })
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="email" className="text-xs font-medium">
-          Email address
-        </Label>
-        <div className="relative">
-          <Mail className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@agency.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-11 pl-9"
-            required
-          />
-        </div>
-      </div>
+    <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      <IconField
+        control={control}
+        name="email"
+        id="login-email"
+        label="Email address"
+        icon={Mail}
+        type="email"
+        autoComplete="email"
+        placeholder="you@agency.com"
+        required
+      />
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password" className="text-xs font-medium">
-            Password
-          </Label>
+      <PasswordField
+        control={control}
+        name="password"
+        id="login-password"
+        label="Password"
+        placeholder="••••••••"
+        autoComplete="current-password"
+        required
+        labelAddon={
           <Link
             to="/forgot-password"
             className="text-xs font-medium text-primary transition-colors hover:text-primary/80"
           >
             Forgot password?
           </Link>
-        </div>
-        <div className="relative">
-          <Lock className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="current-password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="h-11 pr-10 pl-9"
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((v) => !v)}
-            className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       <Button
         type="submit"
