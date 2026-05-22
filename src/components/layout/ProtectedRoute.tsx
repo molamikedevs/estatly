@@ -1,7 +1,7 @@
+import Spinner from "@/components/spinner"
 import { useUser } from "@/features/auth/useUser"
 import { useEffect, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
-import Spinner from "../spinner"
 
 interface Props {
   children: ReactNode

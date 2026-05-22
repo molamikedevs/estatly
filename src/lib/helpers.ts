@@ -24,3 +24,16 @@ export function getInitials(name: string) {
     .join("")
     .toUpperCase()
 }
+
+export function formatPrice(price: number, listingType: string) {
+  const formatted = new Intl.NumberFormat("en-AE", {
+    style: "currency",
+    currency: "AED",
+    maximumFractionDigits: 0,
+  }).format(price)
+  return listingType === "rent" ? `${formatted}/yr` : formatted
+}
+
+export function formatSize(sqm: number) {
+  return `${Math.round(sqm)} m²`
+}

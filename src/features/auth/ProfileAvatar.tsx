@@ -17,10 +17,10 @@ export default function ProfileAvatar() {
     )
   }
 
-  const displayName = user.user_profile?.full_name || user.email || "User"
+  const displayName = user?.user_profile?.full_name || user?.email || "User"
   const initials = getInitials(displayName) || "U"
-  const avatarUrl = user.user_profile?.avatar ?? undefined
-  const isActive = user.user_profile?.is_active
+  const avatarUrl = user?.user_profile?.avatar ?? undefined
+  const isActive = user?.user_profile?.is_active
 
   return (
     <button

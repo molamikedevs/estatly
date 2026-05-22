@@ -8,9 +8,9 @@ export default function AiAssistant() {
           <Sparkles className="h-4 w-4" />
         </div>
         <div className="flex-1">
-          <p className="text-xs leading-tight font-semibold">Upgrade to Pro</p>
+          <p className="text-xs leading-tight font-semibold">Just ask me!</p>
           <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-            Unlock advanced analytics & reports
+            I here to help you have a smooth ride😄
           </p>
         </div>
       </div>

@@ -1,11 +1,17 @@
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export default function AddProperty() {
+  const navigate = useNavigate()
   return (
-    <Button size="sm" className="gap-1.5 shadow-sm">
+    <Button
+      onClick={() => navigate("/properties/new")}
+      size="sm"
+      className="cursor-pointer gap-2 shadow-sm"
+    >
       <Plus className="h-4 w-4" />
-      <span className="hidden cursor-pointer sm:inline">New Property</span>
+      Add property
     </Button>
   )
 }

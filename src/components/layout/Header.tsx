@@ -1,7 +1,6 @@
 import ThemeSwitch from "@/components/theme/ThemeSwitch"
 import Logout from "@/features/auth/Logout"
 import ProfileAvatar from "@/features/auth/ProfileAvatar"
-import AddProperty from "@/features/properties/AddProperty"
 import SearchInput from "../Search"
 
 export default function Header() {
@@ -10,8 +9,6 @@ export default function Header() {
       <SearchInput />
 
       <div className="ml-auto flex items-center gap-1.5">
-        <AddProperty />
-
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
 
         <ProfileAvatar />

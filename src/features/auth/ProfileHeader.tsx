@@ -9,7 +9,7 @@ interface Props {
   setIsEditOpen: (open: boolean) => void
 }
 
-export default function ProfileHeaderCard({ setIsEditOpen }: Props) {
+export default function ProfileHeader({ setIsEditOpen }: Props) {
   const { user } = useUser()
   const profile = user?.user_profile
   const verified = Boolean(user?.email_confirmed_at)
@@ -49,7 +49,7 @@ export default function ProfileHeaderCard({ setIsEditOpen }: Props) {
             className="gap-2 shadow-sm sm:mb-1"
             onClick={() => setIsEditOpen(true)}
           >
-            <Pencil className="h-3.5 w-3.5" />
+            <Pencil className="h-3.5 w-3.5 cursor-pointer" />
             Edit profile
           </Button>
         </div>

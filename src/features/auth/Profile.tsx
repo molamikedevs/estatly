@@ -5,7 +5,7 @@ import { useState } from "react"
 import InfoField from "./InfoField"
 
 import ProfileActivity from "./ProfileActivity"
-import ProfileHeaderCard from "./ProfileHeaderCard"
+import ProfileHeader from "./ProfileHeader"
 import UpdateProfileForm from "./UpdateProfileForm"
 
 export default function Profile() {
@@ -22,7 +22,7 @@ export default function Profile() {
     <>
       <div className="mx-auto w-full max-w-4xl space-y-6">
         {/* ── Header card ───────────────────────────── */}
-        <ProfileHeaderCard setIsEditOpen={setIsEditOpen} />
+        <ProfileHeader setIsEditOpen={setIsEditOpen} />
 
         {/* ── About ─────────────────────────────────── */}
         <div className="rounded-2xl border bg-card p-6 shadow-card sm:p-8">

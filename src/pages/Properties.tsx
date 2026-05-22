@@ -1,3 +1,5 @@
-export default function Properties(){
-  return <div>Properties</div>
+import PropertiesList from "@/features/properties/PropertiesList"
+
+export default function Properties() {
+  return <PropertiesList />
 }
