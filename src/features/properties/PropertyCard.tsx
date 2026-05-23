@@ -7,7 +7,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 const statusStyles: Record<string, string> = {
-  published: "bg-success-muted text-success",
+  published: "bg-background/85 text-success",
   draft: "bg-warning-muted text-warning",
   archived: "bg-muted text-muted-foreground",
 }

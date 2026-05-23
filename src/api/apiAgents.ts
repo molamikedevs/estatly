@@ -30,15 +30,10 @@ export async function createAgentApi({
 }
 
 export async function getAgentsApi() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("No authenticated user")
-
   const { data, error } = await supabase
     .from("user_profiles")
     .select("*")
-    .neq("user_id", user.id)
+    .eq("role", "agent")
 
   if (error) throw new Error(error.message)
 

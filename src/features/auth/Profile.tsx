@@ -1,4 +1,4 @@
-import Spinner from "@/components/spinner"
+import Spinner from "@/components/Spinner"
 import { useUser } from "@/features/auth/useUser"
 import { Briefcase, Mail, Phone, User as UserIcon } from "lucide-react"
 import { useState } from "react"

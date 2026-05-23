@@ -1,4 +1,4 @@
-import Spinner from "@/components/spinner"
+import Spinner from "@/components/Spinner"
 import { useUser } from "@/features/auth/useUser"
 import { useEffect, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"

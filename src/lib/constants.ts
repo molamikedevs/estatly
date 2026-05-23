@@ -15,32 +15,31 @@ export const workspaceItems: NavItem[] = [
     to: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    visible: () => true, // All roles
+    visible: () => true,
   },
   {
     to: "/properties",
     label: "Properties",
     icon: Building2,
-    badge: 12,
-    visible: () => true, // All roles
+    visible: () => true,
   },
   {
     to: "/agents",
     label: "Agents",
     icon: Users,
-    visible: (role) => can.accessAgentsPage(role), // admin + manager only
+    visible: (role) => can.accessAgentsPage(role),
   },
   {
     to: "/clients",
     label: "Clients",
     icon: User,
-    visible: () => true, // All roles
+    visible: () => true,
   },
   {
     to: "/viewings",
     label: "Viewings",
     icon: Calendar,
-    badge: 3,
-    visible: () => true, // All roles
+    visible: () => true,
   },
 ]
+export const PAGE_SIZE = 8

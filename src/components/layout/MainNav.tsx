@@ -1,4 +1,5 @@
 import { useUser } from "@/features/auth/useUser"
+import { useProperties } from "@/features/properties/useProperties"
 import type { NavItem } from "@/lib/constants"
 import { workspaceItems } from "@/lib/constants"
 import { can } from "@/lib/permissions"
@@ -20,15 +21,25 @@ export default function MainNav({
   collapsed?: boolean
 }) {
   const { user } = useUser()
+  const { properties } = useProperties()
   const role = user?.user_profile?.role
 
   // Don't render anything until we know the role
   if (!role) return null
 
-  // Filter items based on the user's role
-  const visibleWorkspaceItems = workspaceItems.filter((item) =>
-    item.visible(role)
-  )
+  // Dynamic counts
+  const counts: Record<string, number | undefined> = {
+    "/properties": properties?.length,
+  }
+
+  // Filter by role, then attach live badge counts
+  const visibleWorkspaceItems = workspaceItems
+    .filter((item) => item.visible(role))
+    .map((item) => ({
+      ...item,
+      badge: counts[item.to],
+    }))
+
   const visibleAccountItems = accountItems.filter((item) => item.visible(role))
 
   return (

@@ -1,11 +1,11 @@
+import BackLink from "@/components/BackLink"
 import StatCard from "@/components/layout/StatCard"
-import Spinner from "@/components/spinner"
+import Spinner from "@/components/Spinner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { formatDate, formatPrice, formatSize } from "@/lib/helpers"
 import { cn } from "@/lib/utils"
 import {
-  ArrowLeft,
   Bath,
   BedDouble,
   CalendarDays,
@@ -17,7 +17,6 @@ import {
   Sofa,
   Sparkles,
 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 import PropertyAgentCard from "./PropertyAgentCard"
 import PropertyEmptyState from "./PropertyEmptyState"
 import PropertyGallery from "./PropertyGallery"
@@ -31,7 +30,6 @@ const statusStyles: Record<string, string> = {
 
 export default function PropertyDetails() {
   const { isLoading, property } = useProperty()
-  const navigate = useNavigate()
 
   if (isLoading) return <Spinner label="Loading property" />
   if (!property) {
@@ -49,13 +47,7 @@ export default function PropertyDetails() {
   return (
     <div className="space-y-6">
       {/* ── Back link ──────────────────────────── */}
-      <button
-        onClick={() => navigate("/properties")}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to properties
-      </button>
+      <BackLink route="/properties" label="Back to properties" />
 
       {/* ── Gallery ────────────────────────────── */}
       <PropertyGallery images={galleryImages} title={property.title} />

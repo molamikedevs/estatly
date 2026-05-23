@@ -1,4 +1,4 @@
-import Spinner from "@/components/spinner"
+import Spinner from "@/components/Spinner"
 import { useUser } from "@/features/auth/useUser"
 import type { UserRole } from "@/types"
 import { useEffect, type ReactNode } from "react"
