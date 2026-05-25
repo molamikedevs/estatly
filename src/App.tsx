@@ -1,24 +1,29 @@
 import ProtectedRoute from "@/components/layout/ProtectedRoute"
 import RoleProtected from "@/components/layout/RoleProtected"
-import UpdatePasswordForm from "@/features/auth/UpdatePasswordForm"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { lazy, Suspense } from "react"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
 import AppLayout from "@/components/layout/AppLayout"
-import Agent from "@/pages/Agent"
-import Agents from "@/pages/Agents"
-import Client from "@/pages/Client"
-import Clients from "@/pages/Clients"
-import Dashboard from "@/pages/Dashboard"
-import Login from "@/pages/Login"
-import NewProperty from "@/pages/NewProperty"
-import PageNotFound from "@/pages/PageNotFound"
-import ProfilePage from "@/pages/ProfilePage"
-import Properties from "@/pages/Properties"
-import Property from "@/pages/Property"
-import Settings from "@/pages/Settings"
-import Viewings from "@/pages/Viewings"
+import Spinner from "@/components/Spinner"
+
+// ── Lazy-loaded pages — each becomes its own chunk ──
+const Login = lazy(() => import("@/pages/Login"))
+const UpdatePasswordForm = lazy(
+  () => import("@/features/auth/UpdatePasswordForm")
+)
+const Dashboard = lazy(() => import("@/pages/Dashboard"))
+const Properties = lazy(() => import("@/pages/Properties"))
+const Property = lazy(() => import("@/pages/Property"))
+const Clients = lazy(() => import("@/pages/Clients"))
+const Client = lazy(() => import("@/pages/Client"))
+const Viewings = lazy(() => import("@/pages/Viewings"))
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"))
+const Agents = lazy(() => import("@/pages/Agents"))
+const Agent = lazy(() => import("@/pages/Agent"))
+const Settings = lazy(() => import("@/pages/Settings"))
+const PageNotFound = lazy(() => import("@/pages/PageNotFound"))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,72 +38,65 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools />
       <BrowserRouter>
-        <Routes>
-          {/* PUBLIC ROUTES */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<UpdatePasswordForm />} />
+        <Suspense fallback={<Spinner />}>
+          <Routes>
+            {/* PUBLIC ROUTES */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<UpdatePasswordForm />} />
 
-          {/* PROTECTED ROUTES (require authentication) */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* Default redirect */}
-            <Route index element={<Navigate replace to="/dashboard" />} />
-
-            {/* Dashboard — all authenticated users */}
-            <Route path="/dashboard" element={<Dashboard />} />
-
-            {/* Properties — all authenticated users */}
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/properties/new" element={<NewProperty />} />
-            <Route path="/properties/:propertyId" element={<Property />} />
-
-            {/* Clients — all authenticated users (RLS filters per role) */}
-            <Route path="/clients" element={<Clients />} />
-            <Route path="/clients/:clientId" element={<Client />} />
-
-            {/* Viewings — all authenticated users (RLS filters per role) */}
-            <Route path="/viewings" element={<Viewings />} />
-
-            {/* Profile — current user's own profile */}
-            <Route path="/profile/:profileId" element={<ProfilePage />} />
-
-            {/* Agents — admin and manager only */}
+            {/* PROTECTED ROUTES (require authentication) */}
             <Route
-              path="/agents"
               element={
-                <RoleProtected allowed={["admin", "manager"]}>
-                  <Agents />
-                </RoleProtected>
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
               }
-            />
-            <Route
-              path="/agents/:agentId"
-              element={
-                <RoleProtected allowed={["admin", "manager"]}>
-                  <Agent />
-                </RoleProtected>
-              }
-            />
+            >
+              <Route index element={<Navigate replace to="/dashboard" />} />
 
-            {/* Settings — admin only */}
-            <Route
-              path="/settings"
-              element={
-                <RoleProtected allowed={["admin"]}>
-                  <Settings />
-                </RoleProtected>
-              }
-            />
-          </Route>
+              <Route path="/dashboard" element={<Dashboard />} />
 
-          {/* 404 */}
-          <Route path="*" element={<PageNotFound />} />
-        </Routes>
+              <Route path="/properties" element={<Properties />} />
+              <Route path="/properties/:propertyId" element={<Property />} />
+
+              <Route path="/clients" element={<Clients />} />
+              <Route path="/clients/:clientId" element={<Client />} />
+
+              <Route path="/viewings" element={<Viewings />} />
+
+              <Route path="/profile/:profileId" element={<ProfilePage />} />
+
+              <Route
+                path="/agents"
+                element={
+                  <RoleProtected allowed={["admin", "manager"]}>
+                    <Agents />
+                  </RoleProtected>
+                }
+              />
+              <Route
+                path="/agents/:agentId"
+                element={
+                  <RoleProtected allowed={["admin", "manager"]}>
+                    <Agent />
+                  </RoleProtected>
+                }
+              />
+
+              <Route
+                path="/settings"
+                element={
+                  <RoleProtected allowed={["admin"]}>
+                    <Settings />
+                  </RoleProtected>
+                }
+              />
+            </Route>
+
+            {/* 404 */}
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </QueryClientProvider>
   )

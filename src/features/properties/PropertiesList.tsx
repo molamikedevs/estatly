@@ -1,54 +1,31 @@
-import type { Property } from "@/types/index"
-import { useSearchParams } from "react-router-dom"
+import Pagination from "@/components/Pagination"
+
 import AddProperty from "./AddProperty"
 import PropertiesEmptyState from "./PropertiesEmptyState"
 import PropertiesOperations from "./PropertiesOperations"
 import PropertyCard from "./PropertyCard"
 import PropertyCardSkeleton from "./PropertyCardSkeleton"
-import { useProperties } from "./useProperties"
 
-import Pagination from "@/components/Pagination"
-import { PAGE_SIZE } from "@/lib/constants"
+import ConfirmDelete from "@/components/ConfirmDelete"
+import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
+import PropertyFormSheet from "./PropertyFormSheet"
 
 export default function PropertiesList() {
-  const { isLoading, properties } = useProperties()
-  const [searchParams] = useSearchParams()
-
-  const total = properties?.length ?? 0
-
-  const listingFilter = searchParams.get("listing_type") || "all"
-  const sortBy = searchParams.get("sortBy") || "newest"
-  const currentPage = Number(searchParams.get("page")) || 1
-
-  // ── Filter ──────────────────────────────────
-  const filters: Record<string, Property[] | undefined> = {
-    all: properties,
-    rent: properties?.filter((p) => p.listing_type === "rent"),
-    sale: properties?.filter((p) => p.listing_type === "sale"),
-  }
-
-  const filteredProperties = filters[listingFilter] ?? properties ?? []
-
-  // ── Sort ────────────────────────────────────
-  const sorters: Record<string, (a: Property, b: Property) => number> = {
-    newest: (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    "price-asc": (a, b) => a.price - b.price,
-    "price-desc": (a, b) => b.price - a.price,
-    popular: (a, b) => b.views_count - a.views_count,
-  }
-
-  const visibleProperties = [...filteredProperties].sort(
-    sorters[sortBy] ?? sorters.newest
-  )
-
-  // ── Paginate ────────────────────────────────
-  const paginatedProperties = visibleProperties.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  )
-
-  const isFiltered = listingFilter !== "all"
+  const {
+    isFiltered,
+    paginatedProperties,
+    total,
+    isLoading,
+    visibleProperties,
+    editProperty,
+    deleteProperty,
+    editOpen,
+    isDeleting,
+    handleEdit,
+    setDeleteProperty,
+    setEditOpen,
+    handleConfirmDelete,
+  } = usePropertiesOperations()
 
   return (
     <div className="space-y-6">
@@ -66,10 +43,8 @@ export default function PropertiesList() {
         <AddProperty />
       </div>
 
-      {/* Filter + sort operations */}
       {!isLoading && total > 0 && <PropertiesOperations />}
 
-      {/* Content */}
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -82,12 +57,33 @@ export default function PropertiesList() {
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onEdit={handleEdit}
+                onDelete={setDeleteProperty}
+              />
             ))}
           </div>
+
+          <PropertyFormSheet
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            property={editProperty}
+          />
+
           <Pagination count={visibleProperties.length} />
         </>
       )}
+
+      {/* Delete confirmation — rendered once, driven by deleteProperty state */}
+      <ConfirmDelete
+        open={Boolean(deleteProperty)}
+        onOpenChange={(open) => !open && setDeleteProperty(undefined)}
+        onConfirm={handleConfirmDelete}
+        isPending={isDeleting}
+        resourceName={deleteProperty?.title}
+      />
     </div>
   )
 }

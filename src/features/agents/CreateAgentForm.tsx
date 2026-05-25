@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/sheet"
 
 import { createAgentSchema } from "@/lib/validation"
-import type { CreateAgentFormValues } from "@/types/index"
+import type { CreateAgentFormValues } from "@/types/global"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { FormFooter } from "../auth/FormFooter"

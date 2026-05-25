@@ -1,11 +1,7 @@
-/* ────────────────────────────────────────────────────────────── IconField — a controlled text input with a leading icon
-   ────────────────────────────────────────────────────────────── */
-
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import type { IconFieldProps } from "@/types/form-types"
-import { Controller, type FieldValues } from "react-hook-form"
-import FieldLabelText from "./FieldLabelText"
+import type { IconFieldProps } from "@/types/global"
+import type { FieldValues } from "react-hook-form"
+import ControlledField from "./ControlledField"
 
 export default function IconField<T extends FieldValues>({
   control,
@@ -20,31 +16,28 @@ export default function IconField<T extends FieldValues>({
   optional,
 }: IconFieldProps<T>) {
   return (
-    <Controller
+    <ControlledField
       control={control}
       name={name}
-      render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={id}>
-            <FieldLabelText required={required} optional={optional}>
-              {label}
-            </FieldLabelText>
-          </FieldLabel>
-          <div className="relative">
-            <Icon className="icon-class" />
-            <Input
-              {...field}
-              id={id}
-              type={type}
-              placeholder={placeholder}
-              autoComplete={autoComplete}
-              className="h-10 pl-9"
-              aria-invalid={fieldState.invalid}
-            />
-          </div>
-          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-        </Field>
+      id={id}
+      label={label}
+      required={required}
+      optional={optional}
+    >
+      {(field, fieldState) => (
+        <div className="relative">
+          <Icon className="icon-class" />
+          <Input
+            {...field}
+            id={id}
+            type={type}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            className="h-10 pl-9"
+            aria-invalid={fieldState.invalid}
+          />
+        </div>
       )}
-    />
+    </ControlledField>
   )
 }

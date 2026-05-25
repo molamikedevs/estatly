@@ -1,10 +1,6 @@
 import { supabase, supabaseUrl } from "@/lib/supabase"
-import type {
-  AuthUser,
-  UpdateDataProps,
-  UserLogin,
-  UserProfile,
-} from "@/types/index"
+import type { AuthUser, UserLogin, UserProfile } from "@/types/database"
+import type { UpdateDataProps } from "@/types/global"
 
 export async function loginApi({ email, password }: UserLogin) {
   const { data, error } = await supabase.auth.signInWithPassword({

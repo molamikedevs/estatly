@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase"
-import type { UserRole } from "@/types/index"
+import type { UserRole } from "@/types/database"
 
 export async function createAgentApi({
   full_name,

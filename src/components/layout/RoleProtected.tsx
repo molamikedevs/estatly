@@ -1,6 +1,6 @@
 import Spinner from "@/components/Spinner"
 import { useUser } from "@/features/auth/useUser"
-import type { UserRole } from "@/types"
+import type { UserRole } from "@/types/database"
 import { useEffect, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 

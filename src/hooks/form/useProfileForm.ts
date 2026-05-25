@@ -1,7 +1,7 @@
 import { useUpdateProfile } from "@/features/auth/useUpdateProfile"
 import { useUser } from "@/features/auth/useUser"
 import { profileSchema } from "@/lib/validation"
-import type { ProfileFormValues } from "@/types/index"
+import type { ProfileFormValues } from "@/types/global"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"

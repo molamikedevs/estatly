@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { getInitials } from "@/lib/helpers"
 import { cn } from "@/lib/utils"
-import type { UserProfile } from "@/types/index"
+import type { UserProfile } from "@/types/database"
 import { Mail, Phone } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 

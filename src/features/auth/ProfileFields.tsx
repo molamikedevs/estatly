@@ -1,18 +1,16 @@
-import FieldLabelText from "@/components/form-components/FieldLabelText"
 import IconField from "@/components/form-components/IconField"
 import PasswordField from "@/components/form-components/PasswordField"
+import TextareaField from "@/components/form-components/TextareaField"
 import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
-  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { useProfileFields } from "@/hooks/form/useProfileFields"
-import type { ProfileFormValues } from "@/types/index"
+import type { ProfileFormValues } from "@/types/global"
 import {
   Briefcase,
   KeyRound,
@@ -22,7 +20,7 @@ import {
   User as UserIcon,
   X,
 } from "lucide-react"
-import { Controller, type Control, type UseFormSetValue } from "react-hook-form"
+import { type Control, type UseFormSetValue } from "react-hook-form"
 
 interface ProfileFieldsProps {
   control: Control<ProfileFormValues>
@@ -98,36 +96,15 @@ export default function ProfileFields({
       />
 
       {/* Bio — has a live character counter, so kept inline */}
-      <Controller
+
+      <TextareaField
         control={control}
         name="bio"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <div className="flex items-center justify-between">
-              <FieldLabel htmlFor="profile-bio">
-                <FieldLabelText optional>Bio</FieldLabelText>
-              </FieldLabel>
-              <span
-                className={
-                  bio.isNearLimit
-                    ? "text-[10px] text-warning tabular-nums"
-                    : "text-[10px] text-muted-foreground tabular-nums"
-                }
-              >
-                {bio.length}/{bio.max}
-              </span>
-            </div>
-            <Textarea
-              {...field}
-              id="profile-bio"
-              placeholder="A short introduction shown on your public profile"
-              rows={4}
-              className="resize-none"
-              aria-invalid={fieldState.invalid}
-            />
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
+        id="profile-bio"
+        label="Bio"
+        placeholder="A short introduction shown on your public profile"
+        maxLength={bio.max}
+        optional
       />
 
       {/* ── Password section ───────────────────────────── */}

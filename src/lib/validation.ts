@@ -5,6 +5,7 @@ import { z } from "zod"
    ───────────────────────────────────────────── */
 
 const BIO_MAX = 280
+const CURRENT_YEAR = new Date().getFullYear()
 
 export const profileSchema = z
   .object({
@@ -81,4 +82,76 @@ export const passwordSchema = z
 export const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
+})
+
+const numberText = (message: string) =>
+  z
+    .string()
+    .min(1, message)
+    .refine((v) => !Number.isNaN(Number(v)) && Number(v) > 0, message)
+
+export const propertySchema = z.object({
+  title: z
+    .string()
+    .min(10, "Title must be at least 10 characters")
+    .max(120, "Title is too long"),
+
+  description: z
+    .string()
+    .min(30, "Description must be at least 30 characters")
+    .max(2000, "Description is too long"),
+
+  listing_type: z.enum(["rent", "sale"], {
+    message: "Select a listing type",
+  }),
+
+  property_type: z.enum(
+    [
+      "apartment",
+      "villa",
+      "townhouse",
+      "penthouse",
+      "studio",
+      "office",
+      "land",
+    ],
+    { message: "Select a property type" }
+  ),
+
+  status: z.enum(["published", "draft", "archived"]),
+
+  price: numberText("Enter a valid price"),
+  bedrooms: numberText("Enter the number of bedrooms"),
+  bathrooms: numberText("Enter the number of bathrooms"),
+  size_sqm: numberText("Enter a valid size"),
+
+  year_built: z
+    .string()
+    .refine(
+      (v) => v === "" || (Number(v) >= 1800 && Number(v) <= CURRENT_YEAR),
+      `Enter a year between 1800 and ${CURRENT_YEAR}`
+    ),
+
+  city: z.string().min(2, "City is required").max(80, "City name is too long"),
+
+  neighborhood: z
+    .string()
+    .min(2, "Neighborhood is required")
+    .max(80, "Neighborhood is too long"),
+
+  address: z
+    .string()
+    .min(5, "Address is required")
+    .max(200, "Address is too long"),
+
+  furnished: z.boolean(),
+
+  features: z.array(z.string()).max(20, "Too many features"),
+  amenities: z.array(z.string()).max(20, "Too many amenities"),
+
+  gallery_images: z
+    .array(
+      z.object({ id: z.string(), url: z.string(), file: z.any().optional() })
+    )
+    .max(10, "Up to 10 images allowed"),
 })

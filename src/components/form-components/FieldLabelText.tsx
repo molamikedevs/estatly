@@ -1,4 +1,4 @@
-import type { FieldLabelTextProps } from "@/types/form-types"
+import type { FieldLabelTextProps } from "@/types/global"
 
 export default function FieldLabelText({
   children,

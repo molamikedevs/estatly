@@ -1,4 +1,4 @@
-import type { ProfileFormValues } from "@/types/index"
+import type { ProfileFormValues } from "@/types/global"
 import { useState } from "react"
 import { useWatch, type Control, type UseFormSetValue } from "react-hook-form"
 

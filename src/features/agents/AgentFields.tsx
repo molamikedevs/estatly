@@ -1,22 +1,11 @@
+import { FieldGroup } from "@/components/ui/field"
+import { ROLE_OPTIONS } from "@/lib/constants"
+import type { AgentFieldsProps } from "@/types/global"
+import { Mail, ShieldCheck, User as UserIcon } from "lucide-react"
+
 import IconField from "@/components/form-components/IconField"
 import PasswordField from "@/components/form-components/PasswordField"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import type { AgentFieldsProps } from "@/types/form-types"
-
-import { Mail, ShieldCheck, User as UserIcon } from "lucide-react"
-import { Controller } from "react-hook-form"
+import SelectField from "@/components/form-components/SelectField"
 
 export default function AgentFields({ control }: AgentFieldsProps) {
   return (
@@ -44,34 +33,15 @@ export default function AgentFields({ control }: AgentFieldsProps) {
         required
       />
 
-      {/* Role — select, kept inline */}
-      <Controller
+      <SelectField
         control={control}
         name="role"
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="agent-role">
-              Role <span className="text-destructive">*</span>
-            </FieldLabel>
-            <div className="relative">
-              <ShieldCheck className={`icon-class z-10`} />
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger
-                  id="agent-role"
-                  className="h-10 pl-9"
-                  aria-invalid={fieldState.invalid}
-                >
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="agent">Agent</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
+        id="agent-role"
+        label="Role"
+        icon={ShieldCheck}
+        options={ROLE_OPTIONS}
+        placeholder="Select a role"
+        required
       />
 
       <PasswordField

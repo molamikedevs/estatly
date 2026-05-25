@@ -1,5 +1,5 @@
 import { loginApi } from "@/api/apiAuth"
-import type { UserLogin } from "@/types/index"
+import type { UserLogin } from "@/types/database"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"

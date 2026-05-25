@@ -5,7 +5,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import type { PasswordFieldProps } from "@/types/form-types"
+import type { PasswordFieldProps } from "@/types/global"
 import { Lock } from "lucide-react"
 import { useState } from "react"
 import { Controller, type FieldValues } from "react-hook-form"
