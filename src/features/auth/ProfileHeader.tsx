@@ -1,8 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import UserAvatar from "@/components/UserAvatar"
 import { useUser } from "@/features/auth/useUser"
-import { getInitials } from "@/lib/helpers"
 import { BadgeCheck, Mail, Pencil, Shield } from "lucide-react"
 
 interface Props {
@@ -25,15 +24,14 @@ export default function ProfileHeader({ setIsEditOpen }: Props) {
       <div className="px-6 pb-6 sm:px-8">
         <div className="-mt-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <Avatar className="h-24 w-24 shadow-elevated ring-4 ring-card">
-              <AvatarImage
-                src={profile?.avatar ?? undefined}
-                alt={displayName}
-              />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-2xl font-semibold text-primary-foreground">
-                {getInitials(displayName)}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              name={displayName}
+              src={profile?.avatar}
+              size="2xl"
+              ring
+              className="shadow-elevated ring-4"
+            />
+
             <div className="sm:pb-1">
               <h2 className="text-2xl font-semibold tracking-tight">
                 {displayName}
@@ -44,6 +42,7 @@ export default function ProfileHeader({ setIsEditOpen }: Props) {
               </p>
             </div>
           </div>
+
           <Button
             size="sm"
             className="gap-2 shadow-sm sm:mb-1"

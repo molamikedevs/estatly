@@ -37,3 +37,18 @@ export function formatPrice(price: number, listingType: string) {
 export function formatSize(sqm: number) {
   return `${Math.round(sqm)} m²`
 }
+
+export function formatViewingDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  })
+}
+
+export function formatViewingTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+}

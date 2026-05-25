@@ -89,3 +89,40 @@ export type GalleryImage = {
   url: string
   file?: File
 }
+
+export type ViewingStatus = "scheduled" | "completed" | "cancelled" | "no_show"
+
+export interface ViewingProperty {
+  title: string
+  city: string
+  neighborhood: string
+  main_image: string | null
+}
+
+export interface ViewingClient {
+  full_name: string
+  email: string
+  phone: string | null
+}
+
+export interface ViewingAgent {
+  full_name: string
+  email: string
+  avatar: string | null
+}
+
+export interface Viewing {
+  id: number
+  created_at: string
+  property_id: number
+  client_id: number
+  agent_id: string
+  scheduled_at: string
+  duration_minutes: number
+  status: ViewingStatus
+  notes: string | null
+  feedback: string | null
+  property: ViewingProperty | null
+  client: ViewingClient | null
+  agent: ViewingAgent | null
+}

@@ -1,20 +1,19 @@
-import Spinner from "@/components/Spinner"
 import { useUser } from "@/features/auth/useUser"
 import { Briefcase, Mail, Phone, User as UserIcon } from "lucide-react"
 import { useState } from "react"
 import InfoField from "./InfoField"
-
 import ProfileActivity from "./ProfileActivity"
+import ProfileError from "./ProfileError"
 import ProfileHeader from "./ProfileHeader"
+import ProfileSkeleton from "./ProfileSkeleton"
 import UpdateProfileForm from "./UpdateProfileForm"
 
 export default function Profile() {
   const { user, isLoading } = useUser()
-
   const [isEditOpen, setIsEditOpen] = useState(false)
 
-  if (isLoading) return <Spinner label="Loading your profile" />
-  if (!user) return null
+  if (isLoading) return <ProfileSkeleton />
+  if (!user) return <ProfileError />
 
   const profile = user.user_profile
 
@@ -71,7 +70,8 @@ export default function Profile() {
         {/* ── Account activity ──────────────────────── */}
         <ProfileActivity />
       </div>
-      {/* ── UPdate Profile Form ──────────────────────── */}
+
+      {/* ── Update Profile Form ───────────────────────── */}
       <UpdateProfileForm open={isEditOpen} onOpenChange={setIsEditOpen} />
     </>
   )

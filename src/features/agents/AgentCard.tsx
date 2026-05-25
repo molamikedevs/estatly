@@ -1,6 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { getInitials } from "@/lib/helpers"
+import UserAvatar from "@/components/UserAvatar"
 import { cn } from "@/lib/utils"
 import type { UserProfile } from "@/types/database"
 import { Mail, Phone } from "lucide-react"
@@ -22,12 +21,7 @@ export default function AgentCard({ agent }: { agent: UserProfile }) {
     >
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Avatar className="h-11 w-11 ring-2 ring-card">
-          <AvatarImage src={agent.avatar ?? undefined} alt={displayName} />
-          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-sm font-semibold text-primary-foreground">
-            {getInitials(displayName) || "A"}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar name={displayName} src={agent.avatar} size="md" ring />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold transition-colors group-hover:text-primary">
             {displayName}

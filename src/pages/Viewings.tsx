@@ -1,3 +1,5 @@
-export default function Viewings(){
-  return <div>Viewings</div>
+import ViewingsTable from "@/features/viewings/ViewingsTable"
+
+export default function Viewings() {
+  return <ViewingsTable />
 }
