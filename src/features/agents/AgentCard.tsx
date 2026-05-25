@@ -1,14 +1,9 @@
-import { Badge } from "@/components/ui/badge"
+import RoleBadge from "@/components/RoleBadge"
 import UserAvatar from "@/components/UserAvatar"
 import { cn } from "@/lib/utils"
 import type { UserProfile } from "@/types/database"
 import { Mail, Phone } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-
-const roleStyles: Record<string, string> = {
-  admin: "bg-accent text-accent-foreground",
-  agent: "bg-muted text-muted-foreground",
-}
 
 export default function AgentCard({ agent }: { agent: UserProfile }) {
   const navigate = useNavigate()
@@ -30,15 +25,7 @@ export default function AgentCard({ agent }: { agent: UserProfile }) {
             {agent.specialization || "No specialization"}
           </p>
         </div>
-        <Badge
-          variant="secondary"
-          className={cn(
-            "shrink-0 border-0 text-[10px] font-semibold capitalize",
-            roleStyles[agent.role] ?? roleStyles.agent
-          )}
-        >
-          {agent.role}
-        </Badge>
+        <RoleBadge role={agent.role} />
       </div>
 
       {/* Contact details */}

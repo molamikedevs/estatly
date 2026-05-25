@@ -16,12 +16,17 @@ export default function Profile() {
   if (!user) return <ProfileError />
 
   const profile = user.user_profile
+  if (!profile) return <ProfileError />
 
   return (
     <>
       <div className="mx-auto w-full max-w-4xl space-y-6">
         {/* ── Header card ───────────────────────────── */}
-        <ProfileHeader setIsEditOpen={setIsEditOpen} />
+        <ProfileHeader
+          profile={profile}
+          verified={Boolean(user.email_confirmed_at)}
+          onEdit={() => setIsEditOpen(true)} // ← owner gets the Edit button
+        />
 
         {/* ── About ─────────────────────────────────── */}
         <div className="rounded-2xl border bg-card p-6 shadow-card sm:p-8">

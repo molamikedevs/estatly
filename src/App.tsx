@@ -17,7 +17,6 @@ const Dashboard = lazy(() => import("@/pages/Dashboard"))
 const Properties = lazy(() => import("@/pages/Properties"))
 const Property = lazy(() => import("@/pages/Property"))
 const Clients = lazy(() => import("@/pages/Clients"))
-const Client = lazy(() => import("@/pages/Client"))
 const Viewings = lazy(() => import("@/pages/Viewings"))
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"))
 const Agents = lazy(() => import("@/pages/Agents"))
@@ -60,7 +59,7 @@ export default function App() {
               <Route path="/properties/:propertyId" element={<Property />} />
 
               <Route path="/clients" element={<Clients />} />
-              <Route path="/clients/:clientId" element={<Client />} />
+              <Route path="/clients/:clientId" element={<Agent />} />
 
               <Route path="/viewings" element={<Viewings />} />
 
