@@ -6,9 +6,13 @@ import { Button } from "./ui/button"
 
 interface PaginationProps {
   count: number
+  label?: string
 }
 
-export default function Pagination({ count }: PaginationProps) {
+export default function Pagination({
+  count,
+  label = "items",
+}: PaginationProps) {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const currentPage = Number(searchParams.get("page")) || 1
@@ -41,7 +45,7 @@ export default function Pagination({ count }: PaginationProps) {
         <span className="tabular font-medium text-foreground">{from}</span>–
         <span className="tabular font-medium text-foreground">{to}</span> of{" "}
         <span className="tabular font-medium text-foreground">{count}</span>{" "}
-        properties
+        {label}
       </p>
 
       {/* Controls */}

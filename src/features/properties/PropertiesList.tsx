@@ -72,7 +72,7 @@ export default function PropertiesList() {
             property={editProperty}
           />
 
-          <Pagination count={visibleProperties.length} />
+          <Pagination count={visibleProperties.length} label="properties" />
         </>
       )}
 
