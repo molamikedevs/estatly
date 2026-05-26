@@ -9,21 +9,31 @@ import {
 import { TableCell, TableRow } from "@/components/ui/table"
 import UserAvatar from "@/components/UserAvatar"
 import { formatViewingDate, formatViewingTime } from "@/lib/helpers"
-import type { Viewing } from "@/types/database"
-import { Clock, ImageOff, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import type { Viewing, ViewingStatus } from "@/types/database"
+import {
+  Ban,
+  CalendarClock,
+  Check,
+  Clock,
+  FileSignature,
+  ImageOff,
+  MoreHorizontal,
+  Trash2,
+  UserX,
+} from "lucide-react"
 import { useState } from "react"
 import ViewingStatusBadge from "./ViewingStatusBadge"
 
 interface ViewingRowProps {
   viewing: Viewing
-  onEdit?: (viewing: Viewing) => void
+  onStatusChange: (viewing: Viewing, status: ViewingStatus) => void
   onDelete?: (viewing: Viewing) => void
 }
 
 export default function ViewingRow({
   viewing,
-  onEdit,
   onDelete,
+  onStatusChange,
 }: ViewingRowProps) {
   const [imgError, setImgError] = useState(false)
   const { property, client, agent } = viewing
@@ -49,11 +59,11 @@ export default function ViewingRow({
             )}
           </div>
           <div className="min-w-0">
-            <p className="line-clamp-1 text-sm font-medium">
+            <p className="truncate text-sm font-medium" title={property?.title}>
               {property?.title ?? "Unknown property"}
             </p>
             {property && (
-              <p className="line-clamp-1 text-xs text-muted-foreground">
+              <p className="truncate text-xs text-muted-foreground">
                 {property.neighborhood}, {property.city}
               </p>
             )}
@@ -63,21 +73,23 @@ export default function ViewingRow({
 
       {/* Client */}
       <TableCell>
-        <p className="text-sm font-medium">
-          {client?.full_name ?? "Unknown client"}
-        </p>
-        {client?.email && (
-          <p className="line-clamp-1 text-xs text-muted-foreground">
-            {client.email}
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">
+            {client?.full_name ?? "Unknown client"}
           </p>
-        )}
+          {client?.email && (
+            <p className="truncate text-xs text-muted-foreground">
+              {client.email}
+            </p>
+          )}
+        </div>
       </TableCell>
 
       {/* Agent */}
       <TableCell>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <UserAvatar name={agent?.full_name} src={agent?.avatar} size="xs" />
-          <span className="line-clamp-1 text-sm">
+          <span className="truncate text-sm">
             {agent?.full_name ?? "Unassigned"}
           </span>
         </div>
@@ -85,14 +97,16 @@ export default function ViewingRow({
 
       {/* Schedule */}
       <TableCell>
-        <p className="tabular text-sm font-medium">
-          {formatViewingDate(viewing.scheduled_at)}
-        </p>
-        <p className="tabular flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          {formatViewingTime(viewing.scheduled_at)} · {viewing.duration_minutes}{" "}
-          min
-        </p>
+        <div className="min-w-0">
+          <p className="tabular truncate text-sm font-medium">
+            {formatViewingDate(viewing.scheduled_at)}
+          </p>
+          <p className="tabular flex items-center gap-1 truncate text-xs text-muted-foreground">
+            <Clock className="h-3 w-3 shrink-0" />
+            {formatViewingTime(viewing.scheduled_at)} ·{" "}
+            {viewing.duration_minutes}m
+          </p>
+        </div>
       </TableCell>
 
       {/* Status */}
@@ -101,42 +115,67 @@ export default function ViewingRow({
       </TableCell>
 
       {/* Actions */}
-      <TableCell>
-        {(onEdit || onDelete) && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
-                aria-label="Viewing actions"
+      <TableCell className="pr-4 text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[state=open]:bg-muted data-[state=open]:text-foreground"
+              aria-label="Viewing actions"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem
+              onClick={() => onStatusChange(viewing, "scheduled")}
+              className="gap-2 text-sm"
+            >
+              <CalendarClock className="h-3.5 w-3.5 text-info" />
+              Scheduled
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onStatusChange(viewing, "completed")}
+              className="gap-2 text-sm"
+            >
+              <Check className="h-3.5 w-3.5 text-success" />
+              Completed
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onStatusChange(viewing, "offer-made")}
+              className="gap-2 text-sm"
+            >
+              <FileSignature className="h-3.5 w-3.5 text-primary" />
+              Offer made
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onStatusChange(viewing, "cancelled")}
+              className="gap-2 text-sm"
+            >
+              <Ban className="h-3.5 w-3.5 text-destructive" />
+              Cancelled
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onStatusChange(viewing, "no-show")}
+              className="gap-2 text-sm"
+            >
+              <UserX className="h-3.5 w-3.5 text-warning" />
+              No-show
+            </DropdownMenuItem>
+
+            {onDelete && <DropdownMenuSeparator />}
+            {onDelete && (
+              <DropdownMenuItem
+                onClick={() => onDelete(viewing)}
+                className="gap-2 text-sm text-destructive focus:text-destructive"
               >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
-              {onEdit && (
-                <DropdownMenuItem
-                  onClick={() => onEdit(viewing)}
-                  className="gap-2 text-sm"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                  Edit
-                </DropdownMenuItem>
-              )}
-              {onEdit && onDelete && <DropdownMenuSeparator />}
-              {onDelete && (
-                <DropdownMenuItem
-                  onClick={() => onDelete(viewing)}
-                  className="gap-2 text-sm text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   )

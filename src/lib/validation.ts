@@ -125,12 +125,11 @@ export const propertySchema = z.object({
   bathrooms: numberText("Enter the number of bathrooms"),
   size_sqm: numberText("Enter a valid size"),
 
-  year_built: z
-    .string()
-    .refine(
-      (v) => v === "" || (Number(v) >= 1800 && Number(v) <= CURRENT_YEAR),
-      `Enter a year between 1800 and ${CURRENT_YEAR}`
-    ),
+  year_built: z.string().refine((v) => {
+    if (v === "") return true // optional — empty is fine
+    const year = new Date(v).getFullYear()
+    return !Number.isNaN(year) && year >= 1800 && year <= CURRENT_YEAR
+  }, `Enter a year between 1800 and ${CURRENT_YEAR}`),
 
   city: z.string().min(2, "City is required").max(80, "City name is too long"),
 
@@ -154,4 +153,19 @@ export const propertySchema = z.object({
       z.object({ id: z.string(), url: z.string(), file: z.any().optional() })
     )
     .max(10, "Up to 10 images allowed"),
+})
+
+export const viewingSchema = z.object({
+  property_id: z.string().min(1, "Select a property"),
+  client_id: z.string().min(1, "Select a client"),
+  scheduled_at: z.string().min(1, "Pick a date and time"),
+  duration_minutes: z.string().min(1, "Select a duration"),
+  status: z.enum([
+    "scheduled",
+    "completed",
+    "cancelled",
+    "no-show",
+    "offer-made",
+  ]),
+  notes: z.string().max(500, "Notes are too long").optional().or(z.literal("")),
 })

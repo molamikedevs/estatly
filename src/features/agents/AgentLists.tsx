@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button"
+import CreateButton from "@/components/CreateButton"
 import { useUser } from "@/features/auth/useUser"
-import { Plus } from "lucide-react"
 import { useState } from "react"
 import AgentCard from "./AgentCard"
 import AgentCardSkeleton from "./AgentCardSkeleton"
@@ -31,14 +30,12 @@ export default function AgentLists() {
           </p>
         </div>
         {canCreateAgent && hasAgents && (
-          <Button
-            onClick={() => setOpenCreateAgentForm(true)}
-            size="sm"
-            className="gap-2 shadow-sm"
-          >
-            <Plus className="h-4 w-4" />
-            Create agent
-          </Button>
+          <CreateButton
+            label="Create agent"
+            renderSheet={({ open, onOpenChange }) => (
+              <CreateAgentForm open={open} onOpenChange={onOpenChange} />
+            )}
+          />
         )}
       </div>
 

@@ -9,12 +9,13 @@ import type {
 } from "react-hook-form"
 import { z } from "zod"
 
-import { profileSchema, propertySchema } from "@/lib/validation"
+import { profileSchema, propertySchema, viewingSchema } from "@/lib/validation"
 import type { UserRole } from "./database"
 
 // ─── Form Value Types (inferred from Zod) ─────────────
 
 export type PropertyFormValues = z.infer<typeof propertySchema>
+export type ViewingFormValues = z.infer<typeof viewingSchema>
 export type ProfileFormValues = z.infer<typeof profileSchema>
 
 export interface CreateAgentFormValues {

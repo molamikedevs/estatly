@@ -1,4 +1,3 @@
-// features/agents/AgentProfile.tsx
 import ProfileHeader from "@/features/auth/ProfileHeader"
 
 import BackLink from "@/components/BackLink"

@@ -1,23 +1,13 @@
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { useState } from "react"
+import CreateButton from "@/components/CreateButton"
 import PropertyFormSheet from "./PropertyFormSheet"
 
 export default function AddProperty() {
-  const [open, setOpen] = useState(false)
-
   return (
-    <>
-      <Button
-        onClick={() => setOpen(true)}
-        size="sm"
-        className="cursor-pointer gap-2 shadow-sm"
-      >
-        <Plus className="h-4 w-4" />
-        Add property
-      </Button>
-
-      <PropertyFormSheet open={open} onOpenChange={setOpen} />
-    </>
+    <CreateButton
+      label="Add property"
+      renderSheet={({ open, onOpenChange }) => (
+        <PropertyFormSheet open={open} onOpenChange={onOpenChange} />
+      )}
+    />
   )
 }

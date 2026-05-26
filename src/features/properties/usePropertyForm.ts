@@ -39,7 +39,7 @@ function propertyToFormValues(p: Property): PropertyFormValues {
     bedrooms: String(p.bedrooms),
     bathrooms: String(p.bathrooms),
     size_sqm: String(p.size_sqm),
-    year_built: p.year_built ? String(p.year_built) : "",
+    year_built: p.year_built ? new Date(p.year_built, 0, 1).toISOString() : "",
     gallery_images: (p.gallery_images ?? []).map((url) => ({
       id: crypto.randomUUID(),
       url,

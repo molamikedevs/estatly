@@ -1,3 +1,4 @@
+import DatePickerField from "@/components/DatePickerField"
 import FormSection from "@/components/form-components/FormSection"
 import IconField from "@/components/form-components/IconField"
 import SelectField from "@/components/form-components/SelectField"
@@ -19,7 +20,6 @@ import {
   Bath,
   BedDouble,
   Building2,
-  CalendarDays,
   DollarSign,
   MapPin,
   Ruler,
@@ -140,14 +140,15 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
                 placeholder="2"
                 required
               />
-              <IconField
+
+              <DatePickerField
                 control={control}
                 name="year_built"
                 id="year"
                 label="Year built"
-                icon={CalendarDays}
-                type="number"
-                placeholder="2019"
+                fromYear={1800}
+                toYear={new Date().getFullYear()}
+                disableFuture
                 optional
               />
             </div>

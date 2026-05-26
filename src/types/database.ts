@@ -79,18 +79,18 @@ export interface Property {
   agent?: PropertyAgent | null
 }
 
-export interface PropertyFormProps {
-  property?: Property
-  onClose: () => void
-}
-
 export type GalleryImage = {
   id: string
   url: string
   file?: File
 }
 
-export type ViewingStatus = "scheduled" | "completed" | "cancelled" | "no_show"
+export type ViewingStatus =
+  | "scheduled"
+  | "completed"
+  | "cancelled"
+  | "no-show"
+  | "offer-made"
 
 export interface ViewingProperty {
   title: string
@@ -125,4 +125,31 @@ export interface Viewing {
   property: ViewingProperty | null
   client: ViewingClient | null
   agent: ViewingAgent | null
+}
+
+export type ClientStatus = "active" | "closed-won" | "closed-lost" | "inactive"
+
+export interface Client {
+  id: number
+  created_at: string
+  full_name: string
+  email: string
+  phone?: string
+  nationality?: string
+  budget_min?: number
+  budget_max?: number
+  preferred_type?: string
+  preferred_locations?: string[]
+  notes?: string
+  assigned_agent_id?: string
+  status: ClientStatus
+}
+
+export interface PropertyFormProps {
+  property?: Property
+  onClose: () => void
+}
+export interface ViewingFormProps {
+  viewing?: Viewing
+  onClose: () => void
 }

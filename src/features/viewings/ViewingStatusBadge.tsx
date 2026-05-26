@@ -9,7 +9,11 @@ const config: Record<ViewingStatus, { label: string; className: string }> = {
     label: "Cancelled",
     className: "bg-destructive/10 text-destructive",
   },
-  no_show: { label: "No show", className: "bg-warning-muted text-warning" },
+  "no-show": { label: "No show", className: "bg-warning-muted text-warning" },
+  "offer-made": {
+    label: "Offer made",
+    className: "bg-accent text-accent-foreground",
+  },
 }
 
 export default function ViewingStatusBadge({
