@@ -129,20 +129,28 @@ export interface Viewing {
 
 export type ClientStatus = "active" | "closed-won" | "closed-lost" | "inactive"
 
+export interface ClientAgent {
+  full_name: string
+  avatar: string | null
+  email: string
+}
+
 export interface Client {
   id: number
   created_at: string
   full_name: string
   email: string
-  phone?: string
-  nationality?: string
-  budget_min?: number
-  budget_max?: number
-  preferred_type?: string
-  preferred_locations?: string[]
-  notes?: string
-  assigned_agent_id?: string
+  phone: string | null
+  nationality: string | null
+  budget_min: number | null
+  budget_max: number | null
+  preferred_type: string | null
+  preferred_locations: string[] | null
+  notes: string | null
+  assigned_agent_id: string | null
   status: ClientStatus
+  // Joined
+  agent: ClientAgent | null
 }
 
 export interface PropertyFormProps {
@@ -151,5 +159,9 @@ export interface PropertyFormProps {
 }
 export interface ViewingFormProps {
   viewing?: Viewing
+  onClose: () => void
+}
+export interface ClientFormProps {
+  client?: Client
   onClose: () => void
 }

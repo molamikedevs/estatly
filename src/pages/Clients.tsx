@@ -1,3 +1,5 @@
-export default function Clients(){
-  return <div>Clients</div>
+import ClientsTable from "@/features/clients/ClientsTable"
+
+export default function Clients() {
+  return <ClientsTable />
 }

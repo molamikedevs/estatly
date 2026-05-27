@@ -85,3 +85,10 @@ export const viewingStatusOptions = [
   { value: "cancelled", label: "Cancelled" },
   { value: "no-show", label: "No show" },
 ]
+
+export const CLIENT_STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "closed-won", label: "Closed (won)" },
+  { value: "closed-lost", label: "Closed (lost)" },
+  { value: "inactive", label: "Inactive" },
+]

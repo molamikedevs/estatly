@@ -169,3 +169,35 @@ export const viewingSchema = z.object({
   ]),
   notes: z.string().max(500, "Notes are too long").optional().or(z.literal("")),
 })
+
+export const clientSchema = z.object({
+  full_name: z
+    .string()
+    .min(2, "Full name is required")
+    .max(80, "Name is too long"),
+  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+  phone: z
+    .string()
+    .max(20, "Phone number is too long")
+    .optional()
+    .or(z.literal("")),
+  nationality: z.string().max(60, "Too long").optional().or(z.literal("")),
+  budget_min: z
+    .string()
+    .refine((v) => v === "" || Number(v) >= 0, "Enter a valid amount")
+    .optional()
+    .or(z.literal("")),
+  budget_max: z
+    .string()
+    .refine((v) => v === "" || Number(v) >= 0, "Enter a valid amount")
+    .optional()
+    .or(z.literal("")),
+  preferred_type: z.string().optional().or(z.literal("")),
+  preferred_locations: z.array(z.string()).max(10, "Too many locations"),
+  notes: z
+    .string()
+    .max(1000, "Notes are too long")
+    .optional()
+    .or(z.literal("")),
+  status: z.enum(["active", "closed-won", "closed-lost", "inactive"]),
+})

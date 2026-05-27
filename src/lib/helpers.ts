@@ -52,3 +52,24 @@ export function formatViewingTime(iso: string) {
     hour12: false,
   })
 }
+
+export function formatBudgetShort(amount: number) {
+  if (amount >= 1_000_000) {
+    return `${(amount / 1_000_000).toFixed(amount % 1_000_000 === 0 ? 0 : 1)}M`
+  }
+  if (amount >= 1_000) {
+    return `${Math.round(amount / 1_000)}K`
+  }
+  return String(amount)
+}
+
+export function formatBudgetRange(
+  min: number | null,
+  max: number | null
+): string {
+  if (min == null && max == null) return "Not specified"
+  if (min != null && max != null)
+    return `AED ${formatBudgetShort(min)} – ${formatBudgetShort(max)}`
+  if (min != null) return `From AED ${formatBudgetShort(min)}`
+  return `Up to AED ${formatBudgetShort(max!)}`
+}
