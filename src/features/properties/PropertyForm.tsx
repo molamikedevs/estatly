@@ -9,12 +9,7 @@ import TextField from "@/components/form-components/TextField"
 import GalleryUploader from "@/components/GalleryUploader"
 import { FieldGroup } from "@/components/ui/field"
 import { usePropertyForm } from "@/features/properties/usePropertyForm"
-import {
-  DESC_MAX,
-  LISTING_TYPE_OPTIONS,
-  propertyTypes,
-  STATUS_OPTIONS,
-} from "@/lib/constants"
+import { DESC_MAX, LISTING_TYPE_OPTIONS, propertyTypes } from "@/lib/constants"
 import type { PropertyFormProps } from "@/types/database"
 import {
   Bath,
@@ -78,13 +73,6 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
                 label="Property type"
                 options={propertyTypes}
                 required
-              />
-              <SelectField
-                control={control}
-                name="status"
-                id="status"
-                label="Status"
-                options={STATUS_OPTIONS}
               />
             </div>
           </FieldGroup>

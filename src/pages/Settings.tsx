@@ -1,3 +1,5 @@
-export default function Settings(){
-  return <div>Settings</div>
+import AgencySettings from "@/features/settings/AgencySettings"
+
+export default function Settings() {
+  return <AgencySettings />
 }

@@ -6,8 +6,13 @@ import { Mail, ShieldCheck, User as UserIcon } from "lucide-react"
 import IconField from "@/components/form-components/IconField"
 import PasswordField from "@/components/form-components/PasswordField"
 import SelectField from "@/components/form-components/SelectField"
+import { useUser } from "@/features/auth/useUser"
 
 export default function AgentFields({ control }: AgentFieldsProps) {
+  const { user } = useUser()
+  const role = user?.user_profile?.role
+  const isAdmin = role === "admin"
+
   return (
     <FieldGroup className="space-y-5">
       <IconField
@@ -33,16 +38,29 @@ export default function AgentFields({ control }: AgentFieldsProps) {
         required
       />
 
-      <SelectField
-        control={control}
-        name="role"
-        id="agent-role"
-        label="Role"
-        icon={ShieldCheck}
-        options={ROLE_OPTIONS}
-        placeholder="Select a role"
-        required
-      />
+      {isAdmin ? (
+        <SelectField
+          control={control}
+          name="role"
+          id="agent-role"
+          label="Role"
+          icon={ShieldCheck}
+          options={ROLE_OPTIONS}
+          placeholder="Select a role"
+          required
+        />
+      ) : (
+        <IconField
+          control={control}
+          name="role"
+          id="agent-role"
+          label="Role"
+          icon={ShieldCheck}
+          type="text"
+          placeholder="Enter role"
+          required
+        />
+      )}
 
       <PasswordField
         control={control}

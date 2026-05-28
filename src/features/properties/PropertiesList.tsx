@@ -8,7 +8,9 @@ import PropertyCardSkeleton from "./PropertyCardSkeleton"
 
 import ConfirmDelete from "@/components/ConfirmDelete"
 import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
+import type { Property, PropertyStatus } from "@/types/database"
 import PropertyFormSheet from "./PropertyFormSheet"
+import { useUpdatePropertyStatus } from "./useUpdatePropertyStatus"
 
 export default function PropertiesList() {
   const {
@@ -27,6 +29,11 @@ export default function PropertiesList() {
     handleConfirmDelete,
   } = usePropertiesOperations()
 
+  const { updateStatus } = useUpdatePropertyStatus()
+
+  function handleStatusChange(property: Property, status: PropertyStatus) {
+    updateStatus({ id: property.id, status })
+  }
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -62,6 +69,7 @@ export default function PropertiesList() {
                 property={property}
                 onEdit={handleEdit}
                 onDelete={setDeleteProperty}
+                onStatusChange={handleStatusChange}
               />
             ))}
           </div>

@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase"
-import type { GalleryImage, Property } from "@/types/database"
+import type { GalleryImage, Property, PropertyStatus } from "@/types/database"
 import type { PropertyFormValues } from "@/types/global"
 
 export async function createUpdatePropertyApi(
@@ -97,6 +97,24 @@ export async function getPropertiesApi(): Promise<Property[]> {
   return data ?? []
 }
 
+export async function updatePropertyStatusApi(
+  id: number,
+  status: PropertyStatus
+) {
+  const { data, error } = await supabase
+    .from("properties")
+    .update({ status })
+    .eq("id", id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error("updatePropertyStatusApi error:", error)
+    throw new Error(error.message)
+  }
+  return data
+}
+
 export async function getPropertyApi(id: number): Promise<Property> {
   const { data, error } = await supabase
     .from("properties")
@@ -115,12 +133,7 @@ export async function getPropertyApi(id: number): Promise<Property> {
 }
 
 export async function deletePropertyApi(id: string | number) {
-  const { data, error } = await supabase
-    .from("properties")
-    .delete()
-    .eq("id", id)
+  const { error } = await supabase.from("properties").delete().eq("id", id)
 
   if (error) throw new Error("Property could not be deleted")
-
-  return data
 }

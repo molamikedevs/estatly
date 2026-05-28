@@ -7,6 +7,9 @@ export const can = {
   editAnyProperty: (role: UserRole) => ["admin", "manager"].includes(role),
   deleteProperty: (role: UserRole) => ["admin", "manager"].includes(role),
   publishProperty: (role: UserRole) => ["admin", "manager"].includes(role),
+  // Agents can set sale-lifecycle statuses (offer/sold/rented), managers can too
+  setSaleStatus: (role: UserRole) =>
+    ["admin", "manager", "agent"].includes(role),
 
   // Clients
   viewAllClients: (role: UserRole) => ["admin", "manager"].includes(role),

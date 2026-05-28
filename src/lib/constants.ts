@@ -92,3 +92,10 @@ export const CLIENT_STATUS_OPTIONS = [
   { value: "closed-lost", label: "Closed (lost)" },
   { value: "inactive", label: "Inactive" },
 ]
+
+export const currencyOptions = [
+  { value: "USD", label: "USD — US Dollar" },
+  { value: "EUR", label: "EUR — Euro" },
+  { value: "GBP", label: "GBP — British Pound" },
+  { value: "AED", label: "AED — UAE Dirham" },
+]

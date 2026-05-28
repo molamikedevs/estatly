@@ -4,18 +4,27 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useUser } from "@/features/auth/useUser"
 import { formatPrice, formatSize } from "@/lib/helpers"
+import { can } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
-import type { Property } from "@/types/database"
+import type { Property, PropertyStatus } from "@/types/database"
 import {
+  BadgeCheck,
   Bath,
   BedDouble,
+  CheckCircle,
+  Handshake,
   ImageOff,
+  KeyRound,
   MapPin,
   MoreVertical,
   Pencil,
+  RotateCcw,
   Ruler,
   Trash2,
 } from "lucide-react"
@@ -32,20 +41,39 @@ interface PropertyCardProps {
   property: Property
   onEdit?: (property: Property) => void
   onDelete?: (property: Property) => void
+  onStatusChange?: (property: Property, status: PropertyStatus) => void
 }
 
 export default function PropertyCard({
   property,
   onEdit,
   onDelete,
+  onStatusChange,
 }: PropertyCardProps) {
   const navigate = useNavigate()
   const [imgError, setImgError] = useState(false)
+  const { user } = useUser()
+  const role = user?.user_profile?.role
 
   const isRent = property.listing_type === "rent"
 
+  // Permissions flags
+  const canPublish = role ? can.publishProperty(role) : false
+  const canSetSaleStatus = role ? can.setSaleStatus(role) : false
+  const canDelete = role ? can.deleteProperty(role) : false
+
+  // Agent can edit only their own; managers/admins can edit any
+  const isOwner = property.agent_id === user?.id
+  const canEdit = role
+    ? can.editAnyProperty(role) || (role === "agent" && isOwner)
+    : false
+
   function goToDetail() {
     navigate(`/properties/${property.id}`)
+  }
+
+  function handleStatus(status: PropertyStatus) {
+    onStatusChange?.(property, status)
   }
 
   return (
@@ -89,37 +117,109 @@ export default function PropertyCard({
         </Badge>
 
         {/* actions menu — appears on hover, bottom right */}
-        {(onEdit || onDelete) && (
+        {(canEdit || canPublish || canSetSaleStatus || canDelete) && (
           <div className="absolute right-3 bottom-3 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="icon"
                   variant="secondary"
-                  className="h-8 w-8 shadow-sm"
+                  className="h-8 w-8 shadow-sm backdrop-blur-sm transition-colors data-[state=open]:bg-muted"
                   aria-label="Property actions"
                 >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-36">
-                {onEdit && (
-                  <DropdownMenuItem
-                    onClick={() => onEdit(property)}
-                    className="gap-2 text-sm"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    Edit
-                  </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-52">
+                {/* ── Manage ─────────────────────── */}
+                {canEdit && onEdit && (
+                  <>
+                    <DropdownMenuLabel className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                      Manage
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem
+                      onClick={() => onEdit(property)}
+                      className="gap-2 text-sm"
+                    >
+                      <Pencil className="h-4 w-4 text-muted-foreground" />
+                      Edit details
+                    </DropdownMenuItem>
+                  </>
                 )}
-                {onDelete && (
-                  <DropdownMenuItem
-                    onClick={() => onDelete(property)}
-                    className="gap-2 text-sm text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete
-                  </DropdownMenuItem>
+
+                {/* ── Approval ───────────────────── */}
+                {canPublish && property.status === "pending-approval" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => handleStatus("published")}
+                      className="gap-2 text-sm"
+                    >
+                      <BadgeCheck className="h-4 w-4 text-success" />
+                      Approve & publish
+                    </DropdownMenuItem>
+                  </>
+                )}
+
+                {/* ── Listing status ─────────────── */}
+                {canSetSaleStatus && property.status !== "pending-approval" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                      Listing status
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem
+                      onClick={() => handleStatus("under-offer")}
+                      className="gap-2 text-sm"
+                    >
+                      <Handshake className="h-4 w-4 text-warning" />
+                      Mark under offer
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleStatus("sold")}
+                      className="gap-2 text-sm"
+                    >
+                      <CheckCircle className="h-4 w-4 text-success" />
+                      Mark sold
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleStatus("rented")}
+                      className="gap-2 text-sm"
+                    >
+                      <KeyRound className="h-4 w-4 text-info" />
+                      Mark rented
+                    </DropdownMenuItem>
+                  </>
+                )}
+
+                {/* ── Re-list ────────────────────── */}
+                {canPublish &&
+                  (property.status === "sold" ||
+                    property.status === "rented") && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleStatus("published")}
+                        className="gap-2 text-sm"
+                      >
+                        <RotateCcw className="h-4 w-4 text-muted-foreground" />
+                        Re-list property
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                {/* ── Delete ─────────────────────── */}
+                {canDelete && onDelete && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => onDelete(property)}
+                      className="gap-2 text-sm text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete property
+                    </DropdownMenuItem>
+                  </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>

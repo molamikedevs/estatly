@@ -15,7 +15,12 @@ export type PropertyType =
   | "office"
   | "land"
 
-export type PropertyStatus = "published" | "draft" | "archived"
+export type PropertyStatus =
+  | "published"
+  | "under-offer"
+  | "pending-approval"
+  | "rented"
+  | "sold"
 
 // ─── User / Auth ──────────────────────────────────────
 
@@ -164,4 +169,14 @@ export interface ViewingFormProps {
 export interface ClientFormProps {
   client?: Client
   onClose: () => void
+}
+
+export interface Settings {
+  id: number
+  created_at: string
+  name: string
+  commission_rate: number
+  default_currency: string
+  contact_email: string | null
+  contact_phone: string | null
 }

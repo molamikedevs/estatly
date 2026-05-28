@@ -12,7 +12,7 @@ const EMPTY_VALUES: PropertyFormValues = {
   description: "",
   listing_type: "rent",
   property_type: "apartment",
-  status: "draft",
+  status: "pending-approval",
   price: "",
   bedrooms: "",
   bathrooms: "",

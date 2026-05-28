@@ -118,7 +118,13 @@ export const propertySchema = z.object({
     { message: "Select a property type" }
   ),
 
-  status: z.enum(["published", "draft", "archived"]),
+  status: z.enum([
+    "published",
+    "under-offer",
+    "sold",
+    "rented",
+    "pending-approval",
+  ]),
 
   price: numberText("Enter a valid price"),
   bedrooms: numberText("Enter the number of bedrooms"),
@@ -200,4 +206,26 @@ export const clientSchema = z.object({
     .optional()
     .or(z.literal("")),
   status: z.enum(["active", "closed-won", "closed-lost", "inactive"]),
+})
+
+export const settingsSchema = z.object({
+  name: z.string().min(2, "Agency name is required").max(100, "Too long"),
+  commission_rate: z
+    .string()
+    .min(1, "Commission rate is required")
+    .refine(
+      (v) => Number(v) >= 0 && Number(v) <= 100,
+      "Enter a rate between 0 and 100"
+    ),
+  default_currency: z.string().min(1, "Select a currency"),
+  contact_email: z
+    .string()
+    .email("Enter a valid email")
+    .optional()
+    .or(z.literal("")),
+  contact_phone: z
+    .string()
+    .max(20, "Phone number is too long")
+    .optional()
+    .or(z.literal("")),
 })
