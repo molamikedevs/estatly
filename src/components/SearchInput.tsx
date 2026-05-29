@@ -1,3 +1,4 @@
+import Logo from "@/components/layout/Logo"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 import { useLocation, useSearchParams } from "react-router-dom"
@@ -15,13 +16,21 @@ export default function SearchInput() {
   const placeholder = PLACEHOLDERS[pathname] ?? "Search..."
   const searchable = pathname in PLACEHOLDERS
 
-  if (!searchable) return null
+  // Not searchable → show logo on mobile/tablet, nothing on desktop
+  // (desktop already has the sidebar logo).
+  if (!searchable) {
+    return (
+      <div className="lg:hidden">
+        <Logo />
+      </div>
+    )
+  }
 
   function handleChange(next: string) {
     const params = new URLSearchParams(searchParams)
     if (next) {
       params.set("q", next)
-      params.set("page", "1") // reset to first page on new search
+      params.set("page", "1")
     } else {
       params.delete("q")
     }
