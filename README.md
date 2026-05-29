@@ -2,7 +2,7 @@
 
 An internal property management platform for real estate agencies.
 Built to streamline how agents, managers, and admins handle listings,
-clients, and viewings — inspired by the back-office tools used by
+clients, and viewings inspired by the back-office tools used by
 agencies in markets like Dubai.
 
 ## Status
