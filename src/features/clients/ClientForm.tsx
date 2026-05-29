@@ -1,7 +1,6 @@
 import IconField from "@/components/form-components/IconField"
 import SelectField from "@/components/form-components/SelectField"
 import TagField from "@/components/form-components/TagField"
-import TextareaField from "@/components/form-components/TextareaField"
 import { FieldGroup } from "@/components/ui/field"
 import { useClientForm } from "@/features/clients/useClientForm"
 import { propertyTypes } from "@/lib/constants"
@@ -117,22 +116,6 @@ export default function ClientForm({ onClose }: ClientFormProps) {
             id="status"
             label="Status"
             options={CLIENT_STATUS_OPTIONS}
-          />
-        </FieldGroup>
-
-        {/* Notes */}
-        <FieldGroup className="space-y-5 border-t border-border/60 pt-6">
-          <p className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-            Notes
-          </p>
-          <TextareaField
-            control={control}
-            name="notes"
-            id="notes"
-            label="Notes"
-            placeholder="Anything useful about this client — preferences, timeline, context…"
-            rows={3}
-            optional
           />
         </FieldGroup>
       </div>

@@ -77,35 +77,45 @@ export default function ClientsTable() {
         <ClientsEmptyState />
       ) : (
         <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
-          <Table className="w-full table-fixed">
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[24%]">Client</TableHead>
-                <TableHead className="w-[28%]">Contact</TableHead>
-                <TableHead className="w-[22%]">Budget</TableHead>
-                <TableHead className="w-[20%]">Assigned agent</TableHead>
-                <TableHead className="w-[8%] pr-4 text-right">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <ClientRowSkeleton key={i} />
-                  ))
-                : STATUS_ORDER.map((status) => (
-                    <ClientStatusGroup
-                      key={status}
-                      status={status}
-                      clients={grouped[status] ?? []}
-                      budgetCeiling={budgetCeiling}
-                      onStatusChange={handleStatusChange}
-                      onDelete={setDeleteTarget}
-                    />
-                  ))}
-            </TableBody>
-          </Table>
+          <div className="scrollbar-thin overflow-x-auto md:overflow-x-visible">
+            <Table className="w-full min-w-[760px] md:min-w-0 md:table-fixed">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="min-w-[180px] md:w-[24%] md:min-w-0">
+                    Client
+                  </TableHead>
+                  <TableHead className="min-w-[200px] md:w-[28%] md:min-w-0">
+                    Contact
+                  </TableHead>
+                  <TableHead className="min-w-[160px] md:w-[22%] md:min-w-0">
+                    Budget
+                  </TableHead>
+                  <TableHead className="min-w-[160px] md:w-[20%] md:min-w-0">
+                    Assigned agent
+                  </TableHead>
+                  <TableHead className="w-[56px] pr-4 text-right md:w-[8%]">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading
+                  ? Array.from({ length: 6 }).map((_, i) => (
+                      <ClientRowSkeleton key={i} />
+                    ))
+                  : STATUS_ORDER.map((status) => (
+                      <ClientStatusGroup
+                        key={status}
+                        status={status}
+                        clients={grouped[status] ?? []}
+                        budgetCeiling={budgetCeiling}
+                        onStatusChange={handleStatusChange}
+                        onDelete={setDeleteTarget}
+                      />
+                    ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
 

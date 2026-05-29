@@ -1,3 +1,5 @@
-export default function Dashboard(){
-  return <div>Dashboard</div>
+import DashboardLayout from "@/features/dashboard/DashboardLayout"
+
+export default function Dashboard() {
+  return <DashboardLayout />
 }

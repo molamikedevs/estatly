@@ -1,9 +1,11 @@
 import BackLink from "@/components/BackLink"
 import ConfirmDelete from "@/components/ConfirmDelete"
 import Spinner from "@/components/Spinner"
+import type { Property, PropertyStatus } from "@/types/database"
 import PropertyAgentCard from "../PropertyAgentCard"
 import PropertyEmptyState from "../PropertyEmptyState"
 import PropertyFormSheet from "../PropertyFormSheet"
+import { useUpdatePropertyStatus } from "../useUpdatePropertyStatus"
 import PropertyDescription from "./PropertyDescription"
 import PropertyDetailsHeader from "./PropertyDetailsHeader"
 import PropertyGallery from "./PropertyGallery"
@@ -26,11 +28,16 @@ export default function PropertyDetails() {
     handleConfirmDelete,
   } = usePropertyDetails()
 
+  const { updateStatus } = useUpdatePropertyStatus()
   if (isLoading) return <Spinner label="Loading property" />
   if (!property) return <PropertyEmptyState />
 
+  function handleStatusChange(property: Property, status: PropertyStatus) {
+    updateStatus({ id: property.id, status })
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="group space-y-6">
       <BackLink route="/properties" label="Back to properties" />
 
       <PropertyGallery images={galleryImages} title={property.title} />
@@ -42,6 +49,7 @@ export default function PropertyDetails() {
             property={property}
             onEdit={() => setEditOpen(true)}
             onDelete={() => setDeleteOpen(true)}
+            onStatusChange={handleStatusChange}
           />
           <PropertyStatsGrid property={property} />
           <PropertyDescription property={property} />

@@ -1,7 +1,7 @@
 import ThemeSwitch from "@/components/theme/ThemeSwitch"
 import Logout from "@/features/auth/Logout"
 import ProfileAvatar from "@/features/auth/ProfileAvatar"
-import SearchInput from "../Search"
+import SearchInput from "../SearchInput"
 
 export default function Header() {
   return (

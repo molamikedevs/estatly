@@ -1,6 +1,5 @@
 import DatePickerField from "@/components/DatePickerField"
 import SelectField from "@/components/form-components/SelectField"
-import TextareaField from "@/components/form-components/TextareaField"
 import { useClients } from "@/features/clients/useClients"
 import { useProperties } from "@/features/properties/useProperties"
 import { durationOptions } from "@/lib/constants"
@@ -78,22 +77,6 @@ export default function ViewingForm({ onClose }: ViewingFormProps) {
               required
             />
           </div>
-        </div>
-
-        {/* Notes */}
-        <div className="space-y-5 border-t border-border/60 pt-6">
-          <p className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-            Notes
-          </p>
-          <TextareaField
-            control={control}
-            name="notes"
-            id="notes"
-            label="Notes"
-            placeholder="Internal notes — access instructions, special requests…"
-            rows={3}
-            optional
-          />
         </div>
       </div>
 

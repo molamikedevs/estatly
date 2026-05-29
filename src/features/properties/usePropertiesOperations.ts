@@ -34,16 +34,27 @@ export function usePropertiesOperations() {
   const sortBy = searchParams.get("sortBy") || "newest"
   const currentPage = Number(searchParams.get("page")) || 1
 
-  // ── Filter ──────────────────────────────────
+  // add:
+  const query = searchParams.get("q")?.trim().toLowerCase() ?? ""
+
+  // ── Filter (unchanged) ──────────────────────
   const filters: Record<string, Property[] | undefined> = {
     all: properties,
     rent: properties?.filter((p) => p.listing_type === "rent"),
     sale: properties?.filter((p) => p.listing_type === "sale"),
   }
-
   const filteredProperties = filters[listingFilter] ?? properties ?? []
 
-  // ── Sort ────────────────────────────────────
+  // ── Search ──────────────────────────────────
+  const searched = query
+    ? filteredProperties.filter((p) =>
+        [p.title, p.city, p.neighborhood, p.address]
+          .filter(Boolean)
+          .some((field) => field!.toLowerCase().includes(query))
+      )
+    : filteredProperties
+
+  // ── Sort (now uses `searched`) ──────────────
   const sorters: Record<string, (a: Property, b: Property) => number> = {
     newest: (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -52,17 +63,18 @@ export function usePropertiesOperations() {
     popular: (a, b) => b.views_count - a.views_count,
   }
 
-  const visibleProperties = [...filteredProperties].sort(
+  const visibleProperties = [...searched].sort(
     sorters[sortBy] ?? sorters.newest
   )
 
-  // ── Paginate ────────────────────────────────
+  // ── Paginate (unchanged) ────────────────────
   const paginatedProperties = visibleProperties.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   )
 
-  const isFiltered = listingFilter !== "all"
+  // Update isFiltered to include search
+  const isFiltered = listingFilter !== "all" || query !== ""
 
   return {
     isFiltered,

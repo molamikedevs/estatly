@@ -1,8 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Mail } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { getInitials } from "@/lib/helpers"
+import UserAvatar from "@/components/UserAvatar"
 import { useProperty } from "./useProperty"
 
 export default function PropertyAgentCard() {
@@ -16,15 +15,12 @@ export default function PropertyAgentCard() {
         Listing agent
       </p>
       <div className="mt-3 flex items-center gap-3">
-        <Avatar className="h-12 w-12 ring-2 ring-card">
-          <AvatarImage
-            src={property.agent?.avatar ?? undefined}
-            alt={agentName}
-          />
-          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-sm font-semibold text-primary-foreground">
-            {getInitials(agentName) || "A"}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          name={agentName}
+          src={property.agent?.avatar ?? undefined}
+          size="lg"
+        />
+
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">{agentName}</p>
           {property.agent?.email && (

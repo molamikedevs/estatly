@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,7 +10,6 @@ import {
 import { useUser } from "@/features/auth/useUser"
 import { formatPrice, formatSize } from "@/lib/helpers"
 import { can } from "@/lib/permissions"
-import { cn } from "@/lib/utils"
 import type { Property, PropertyStatus } from "@/types/database"
 import {
   BadgeCheck,
@@ -30,12 +28,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-
-const statusStyles: Record<string, string> = {
-  published: "bg-background/85 text-success",
-  draft: "bg-warning-muted text-warning",
-  archived: "bg-muted text-muted-foreground",
-}
+import PropertyStatusBadge from "./PropertyStatusBadge"
 
 interface PropertyCardProps {
   property: Property
@@ -107,14 +100,15 @@ export default function PropertyCard({
         </span>
 
         {/* status — top right */}
-        <Badge
+        {/* <Badge
           className={cn(
             "pointer-events-none absolute top-3 right-3 border-0 text-[10px] font-semibold capitalize backdrop-blur-sm",
             statusStyles[property.status] ?? statusStyles.archived
           )}
         >
           {property.status}
-        </Badge>
+        </Badge> */}
+        <PropertyStatusBadge status={property.status} />
 
         {/* actions menu — appears on hover, bottom right */}
         {(canEdit || canPublish || canSetSaleStatus || canDelete) && (

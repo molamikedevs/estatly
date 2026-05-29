@@ -75,30 +75,42 @@ export default function ViewingsTable() {
       ) : (
         <>
           <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
-            <Table className="w-full table-fixed">
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[26%]">Property</TableHead>
-                  <TableHead className="w-[22%]">Client</TableHead>
-                  <TableHead className="w-[18%]">Agent</TableHead>
-                  <TableHead className="w-[15%]">Schedule</TableHead>
-                  <TableHead className="w-[11%]">Status</TableHead>
-                  <TableHead className="w-[8%] pr-4 text-right">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedViewings.map((viewing) => (
-                  <ViewingRow
-                    key={viewing.id}
-                    viewing={viewing}
-                    onStatusChange={handleStatusChange}
-                    onDelete={setDeleteTarget}
-                  />
-                ))}
-              </TableBody>
-            </Table>
+            <div className="scrollbar-thin overflow-x-auto md:overflow-x-visible">
+              <Table className="w-full min-w-[760px] md:min-w-0 md:table-fixed">
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="min-w-[200px] md:w-[26%] md:min-w-0">
+                      Property
+                    </TableHead>
+                    <TableHead className="min-w-[160px] md:w-[22%] md:min-w-0">
+                      Client
+                    </TableHead>
+                    <TableHead className="min-w-[140px] md:w-[18%] md:min-w-0">
+                      Agent
+                    </TableHead>
+                    <TableHead className="min-w-[120px] md:w-[15%] md:min-w-0">
+                      Schedule
+                    </TableHead>
+                    <TableHead className="min-w-[100px] md:w-[11%] md:min-w-0">
+                      Status
+                    </TableHead>
+                    <TableHead className="w-[56px] pr-4 text-right md:w-[8%]">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedViewings.map((viewing) => (
+                    <ViewingRow
+                      key={viewing.id}
+                      viewing={viewing}
+                      onStatusChange={handleStatusChange}
+                      onDelete={setDeleteTarget}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           <Pagination count={filteredViewings.length} label="viewings" />
