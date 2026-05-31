@@ -115,6 +115,33 @@ export async function updatePropertyStatusApi(
   return data
 }
 
+export async function incrementPropertyViewsApi(id: number): Promise<number> {
+  const { data, error: readError } = await supabase
+    .from("properties")
+    .select("views_count")
+    .eq("id", id)
+    .single()
+
+  if (readError) {
+    console.error("incrementPropertyViewsApi read error:", readError)
+    throw new Error(readError.message)
+  }
+
+  const nextCount = (data.views_count ?? 0) + 1
+
+  const { error: writeError } = await supabase
+    .from("properties")
+    .update({ views_count: nextCount })
+    .eq("id", id) // ← the missing filter
+
+  if (writeError) {
+    console.error("incrementPropertyViewsApi write error:", writeError)
+    throw new Error(writeError.message)
+  }
+
+  return nextCount
+}
+
 export async function getPropertyApi(id: number): Promise<Property> {
   const { data, error } = await supabase
     .from("properties")

@@ -16,6 +16,7 @@ import {
   Bath,
   BedDouble,
   CheckCircle,
+  Eye,
   Handshake,
   ImageOff,
   KeyRound,
@@ -99,16 +100,16 @@ export default function PropertyCard({
           For {property.listing_type}
         </span>
 
-        {/* status — top right */}
-        {/* <Badge
-          className={cn(
-            "pointer-events-none absolute top-3 right-3 border-0 text-[10px] font-semibold capitalize backdrop-blur-sm",
-            statusStyles[property.status] ?? statusStyles.archived
-          )}
-        >
-          {property.status}
-        </Badge> */}
         <PropertyStatusBadge status={property.status} />
+
+        {/* views — bottom left */}
+        {property.views_count > 0 && (
+          <span className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-background/85 px-2 py-1 text-[10px] font-medium text-muted-foreground backdrop-blur-sm">
+            <Eye className="h-3 w-3" />
+
+            {property.views_count ?? 0}
+          </span>
+        )}
 
         {/* actions menu — appears on hover, bottom right */}
         {(canEdit || canPublish || canSetSaleStatus || canDelete) && (

@@ -2,9 +2,11 @@ import BackLink from "@/components/BackLink"
 import ConfirmDelete from "@/components/ConfirmDelete"
 import Spinner from "@/components/Spinner"
 import type { Property, PropertyStatus } from "@/types/database"
+import { useEffect } from "react"
 import PropertyAgentCard from "../PropertyAgentCard"
 import PropertyEmptyState from "../PropertyEmptyState"
 import PropertyFormSheet from "../PropertyFormSheet"
+import { useIncrementPropertyViews } from "../useIncrementPropertyViews"
 import { useUpdatePropertyStatus } from "../useUpdatePropertyStatus"
 import PropertyDescription from "./PropertyDescription"
 import PropertyDetailsHeader from "./PropertyDetailsHeader"
@@ -27,6 +29,15 @@ export default function PropertyDetails() {
     isDeleting,
     handleConfirmDelete,
   } = usePropertyDetails()
+
+  const { mutate: incrementViews } = useIncrementPropertyViews()
+
+  // Bump view count once when the page mounts
+  useEffect(() => {
+    if (property?.id) {
+      incrementViews(Number(property?.id))
+    }
+  }, [property?.id, incrementViews])
 
   const { updateStatus } = useUpdatePropertyStatus()
   if (isLoading) return <Spinner label="Loading property" />
