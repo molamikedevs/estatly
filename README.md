@@ -5,7 +5,7 @@ Built to streamline how agents, managers, and admins handle listings,
 clients, and viewings — inspired by the back-office tools used by
 agencies in markets like Dubai.
 
-**Live demo:** https://your-estatly-url.vercel.app
+**Live demo:** https://estatly-three.vercel.app
 
 ## Status
 
