@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ChevronLeft } from "lucide-react"
 import { useState } from "react"
-import AiAssistant from "./AiAssistant"
 import Logo from "./Logo"
 import MainNav from "./MainNav"
 
@@ -27,7 +26,7 @@ export default function AppSidebar() {
         <MainNav collapsed={collapsed} />
       </div>
 
-      {!collapsed && <AiAssistant />}
+      {/* {!collapsed && <AiAssistant />} */}
 
       <div className="relative border-t border-sidebar-border p-2">
         <Button
