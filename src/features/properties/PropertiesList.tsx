@@ -1,15 +1,16 @@
 import Pagination from "@/components/Pagination"
 
-import AddProperty from "./AddProperty"
 import PropertiesEmptyState from "./PropertiesEmptyState"
 import PropertiesOperations from "./PropertiesOperations"
 import PropertyCard from "./PropertyCard"
 import PropertyCardSkeleton from "./PropertyCardSkeleton"
 
 import ConfirmDelete from "@/components/ConfirmDelete"
+import CreateButton from "@/components/CreateButton"
+import FormSheet from "@/components/form-components/FormSheet"
 import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
 import type { Property, PropertyStatus } from "@/types/database"
-import PropertyFormSheet from "./PropertyFormSheet"
+import PropertyForm from "./PropertyForm"
 import { useUpdatePropertyStatus } from "./useUpdatePropertyStatus"
 
 export default function PropertiesList() {
@@ -43,11 +44,20 @@ export default function PropertiesList() {
           <p className="mt-1 text-sm text-muted-foreground">
             Browse and manage your property listings
             {!isLoading && total > 0 && (
-              <span className="tabular"> · {total} total</span>
+              <span className="tabular-nums"> · {total} total</span>
             )}
           </p>
         </div>
-        <AddProperty />
+
+        {/* Create flow — CreateButton owns its own open/close state */}
+        <CreateButton
+          label="Add property"
+          size="lg"
+          title="Add new property"
+          description="Fill in the details to create a new property listing."
+        >
+          {(onClose) => <PropertyForm onClose={onClose} />}
+        </CreateButton>
       </div>
 
       {!isLoading && total > 0 && <PropertiesOperations />}
@@ -74,17 +84,25 @@ export default function PropertiesList() {
             ))}
           </div>
 
-          <PropertyFormSheet
+          {/* Edit flow — open state owned by usePropertiesOperations */}
+
+          <FormSheet
             open={editOpen}
             onOpenChange={setEditOpen}
-            property={editProperty}
-          />
+            size="lg"
+            title="Edit property"
+            description="Update the listing details below."
+          >
+            <PropertyForm
+              property={editProperty}
+              onClose={() => setEditOpen(false)}
+            />
+          </FormSheet>
 
           <Pagination count={visibleProperties.length} label="properties" />
         </>
       )}
 
-      {/* Delete confirmation — rendered once, driven by deleteProperty state */}
       <ConfirmDelete
         open={Boolean(deleteProperty)}
         onOpenChange={(open) => !open && setDeleteProperty(undefined)}

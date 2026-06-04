@@ -1,4 +1,5 @@
 import ConfirmDelete from "@/components/ConfirmDelete"
+import CreateButton from "@/components/CreateButton"
 import Pagination from "@/components/Pagination"
 import {
   Table,
@@ -9,10 +10,10 @@ import {
 } from "@/components/ui/table"
 import type { Viewing, ViewingStatus } from "@/types/database"
 import { useState } from "react"
-import AddViewing from "./AddViewing"
 import { useDeleteViewing } from "./useDeleteViewing"
 import { useUpdateViewing } from "./useUpdateViewing"
 import { useViewingsOperations } from "./useViewingsOperations"
+import ViewingForm from "./ViewingForm"
 import ViewingRow from "./ViewingRow"
 import ViewingRowSkeleton from "./ViewingRowSkeleton"
 import ViewingsEmptyState from "./ViewingsEmptyState"
@@ -51,7 +52,14 @@ export default function ViewingsTable() {
             )}
           </p>
         </div>
-        <AddViewing />
+
+        <CreateButton
+          label="Schedule viewing"
+          title="Schedule new viewing"
+          description="Book a property viewing by filling in the details below."
+        >
+          {(onClose) => <ViewingForm onClose={onClose} />}
+        </CreateButton>
       </div>
 
       {/* Filter + sort */}

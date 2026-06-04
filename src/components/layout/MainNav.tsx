@@ -4,7 +4,7 @@ import { useViewings } from "@/features/viewings/useViewings"
 import type { NavItem } from "@/lib/constants"
 import { workspaceItems } from "@/lib/constants"
 import { can } from "@/lib/permissions"
-import { Settings } from "lucide-react"
+import { Settings, Users } from "lucide-react"
 import NavSection from "./NavSection"
 
 const accountItems: NavItem[] = [
@@ -12,6 +12,12 @@ const accountItems: NavItem[] = [
     to: "/settings",
     label: "Settings",
     icon: Settings,
+    visible: (role) => can.accessSettings(role), // admin only
+  },
+  {
+    to: "/managers",
+    label: "Managers",
+    icon: Users,
     visible: (role) => can.accessSettings(role), // admin only
   },
 ]

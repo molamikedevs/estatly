@@ -1,5 +1,6 @@
+import CreateButton from "@/components/CreateButton"
 import { Building2 } from "lucide-react"
-import AddProperty from "./AddProperty"
+import PropertyForm from "./PropertyForm"
 
 export default function PropertiesEmptyState({
   filtered,
@@ -21,7 +22,16 @@ export default function PropertiesEmptyState({
       </p>
       {!filtered && (
         <div className="mt-5">
-          <AddProperty />
+          {/* Create flow — CreateButton owns its own open/close state */}
+
+          <CreateButton
+            label="Add property"
+            size="lg"
+            title="Add new property"
+            description="Fill in the details to create a new property listing."
+          >
+            {(onClose) => <PropertyForm onClose={onClose} />}
+          </CreateButton>
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+import FormSheet from "@/components/form-components/FormSheet"
 import { useUser } from "@/features/auth/useUser"
 import { Briefcase, Mail, Phone, User as UserIcon } from "lucide-react"
 import { useState } from "react"
@@ -77,7 +78,18 @@ export default function Profile() {
       </div>
 
       {/* ── Update Profile Form ───────────────────────── */}
-      <UpdateProfileForm open={isEditOpen} onOpenChange={setIsEditOpen} />
+      <FormSheet
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        size="sm"
+        title="Edit profile"
+        description="Update your profile details below."
+      >
+        <UpdateProfileForm
+          open={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+        />
+      </FormSheet>
     </>
   )
 }

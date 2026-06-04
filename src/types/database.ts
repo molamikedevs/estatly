@@ -47,7 +47,13 @@ export interface UserLogin {
   password: string
 }
 
-// ─── Property ─────────────────────────────────────────
+// ─── Create Agent ─────────────────────────────────────────
+export interface CreateAgentInput {
+  full_name: string
+  email: string
+  password: string
+  role: UserRole
+}
 
 export interface PropertyAgent {
   full_name: string

@@ -2,43 +2,43 @@ import { Button } from "@/components/ui/button"
 import { useUser } from "@/features/auth/useUser"
 import { Plus } from "lucide-react"
 import { useState } from "react"
-import AgentCard from "./AgentCard"
-import AgentCardSkeleton from "./AgentCardSkeleton"
+import ManagerCard from "./ManagerCard"
+import ManagerCardSkeleton from "./ManagerCardSkeleton.tsx"
 
 import FormSheet from "@/components/form-components/FormSheet"
-import AgentsEmptyState from "./AgentEmptyState"
-import AgentForm from "./AgentForm"
-import { useAgents } from "./useAgents"
+import ManagerEmptyState from "./ManagerEmptyState"
+import ManagerForm from "./ManagerForm"
+import { useManagers } from "./useManagers.ts"
 
-export default function AgentList() {
+export default function ManagerLists() {
   const [createOpen, setCreateOpen] = useState(false)
-  const { agents, isLoading } = useAgents()
+  const { managers, isLoading } = useManagers()
   const { user } = useUser()
 
   const role = user?.user_profile?.role
   const canCreateAgent = role === "admin" || role === "manager"
-  const hasAgents = !isLoading && agents && agents.length > 0
+  const hasManagers = !isLoading && managers && managers.length > 0
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Agents</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">Managers</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Manage your agency team and their access
-            {hasAgents && (
-              <span className="tabular-nums"> · {agents.length} total</span>
+            {hasManagers && (
+              <span className="tabular-nums"> · {managers.length} total</span>
             )}
           </p>
         </div>
 
-        {canCreateAgent && hasAgents && (
+        {canCreateAgent && hasManagers && (
           <Button
             onClick={() => setCreateOpen(true)}
             className="gap-2 shadow-sm"
           >
             <Plus className="h-4 w-4" />
-            Create agent
+            Create manager
           </Button>
         )}
       </div>
@@ -46,18 +46,18 @@ export default function AgentList() {
       {isLoading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <AgentCardSkeleton key={i} />
+            <ManagerCardSkeleton key={i} />
           ))}
         </div>
-      ) : !hasAgents ? (
-        <AgentsEmptyState
+      ) : !hasManagers ? (
+        <ManagerEmptyState
           isAdmin={canCreateAgent}
           onCreate={() => setCreateOpen(true)}
         />
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {agents.map((agent) => (
-            <AgentCard key={agent.user_id} agent={agent} />
+          {managers.map((manager) => (
+            <ManagerCard key={manager.user_id} manager={manager} />
           ))}
         </div>
       )}
@@ -65,10 +65,10 @@ export default function AgentList() {
       <FormSheet
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Create new agent"
-        description="The agent will receive sign-in credentials and can immediately access the platform."
+        title="Create new manager"
+        description="The manager will receive sign-in credentials and can immediately access the platform."
       >
-        <AgentForm onClose={() => setCreateOpen(false)} />
+        <ManagerForm onClose={() => setCreateOpen(false)} />
       </FormSheet>
     </div>
   )

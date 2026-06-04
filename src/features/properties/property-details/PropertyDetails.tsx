@@ -1,11 +1,12 @@
 import BackLink from "@/components/BackLink"
 import ConfirmDelete from "@/components/ConfirmDelete"
+import FormSheet from "@/components/form-components/FormSheet"
 import Spinner from "@/components/Spinner"
 import type { Property, PropertyStatus } from "@/types/database"
 import { useEffect } from "react"
 import PropertyAgentCard from "../PropertyAgentCard"
 import PropertyEmptyState from "../PropertyEmptyState"
-import PropertyFormSheet from "../PropertyFormSheet"
+import PropertyForm from "../PropertyForm"
 import { useIncrementPropertyViews } from "../useIncrementPropertyViews"
 import { useUpdatePropertyStatus } from "../useUpdatePropertyStatus"
 import PropertyDescription from "./PropertyDescription"
@@ -74,11 +75,15 @@ export default function PropertyDetails() {
         </aside>
       </div>
 
-      <PropertyFormSheet
+      <FormSheet
         open={editOpen}
         onOpenChange={setEditOpen}
-        property={property}
-      />
+        size="lg"
+        title="Edit property"
+        description="Update the listing details below."
+      >
+        <PropertyForm property={property} onClose={() => setEditOpen(false)} />
+      </FormSheet>
 
       <ConfirmDelete
         open={deleteOpen}

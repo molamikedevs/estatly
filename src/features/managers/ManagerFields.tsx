@@ -7,7 +7,7 @@ import { ROLE_OPTIONS } from "@/lib/constants"
 import type { AgentFieldsProps } from "@/types/global"
 import { Mail, ShieldCheck, User as UserIcon } from "lucide-react"
 
-export default function AgentFields({ control }: AgentFieldsProps) {
+export default function ManagerFields({ control }: AgentFieldsProps) {
   const { user } = useUser()
   const role = user?.user_profile?.role
   const isAdmin = role === "admin"
@@ -16,7 +16,7 @@ export default function AgentFields({ control }: AgentFieldsProps) {
   // This is a UI guardrail — the database must still enforce this.
   const roleOptions = isAdmin
     ? ROLE_OPTIONS
-    : ROLE_OPTIONS.filter((o) => o.value === "agent")
+    : ROLE_OPTIONS.filter((o) => o.value === "manager")
 
   return (
     <FieldGroup className="space-y-5">
@@ -38,7 +38,7 @@ export default function AgentFields({ control }: AgentFieldsProps) {
         label="Email address"
         icon={Mail}
         type="email"
-        placeholder="agent@agency.com"
+        placeholder="jane@manager.com"
         autoComplete="off"
         required
       />

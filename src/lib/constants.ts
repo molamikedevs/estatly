@@ -1,6 +1,6 @@
 import { can } from "@/lib/permissions"
 import type { UserRole } from "@/types/database"
-import { Building2, Calendar, LayoutDashboard, User, Users } from "lucide-react"
+import { Building2, Calendar, LayoutDashboard, Users } from "lucide-react"
 
 export interface NavItem {
   to: string
@@ -30,15 +30,15 @@ export const workspaceItems: NavItem[] = [
     visible: (role) => can.accessAgentsPage(role),
   },
   {
-    to: "/clients",
-    label: "Clients",
-    icon: User,
-    visible: () => true,
-  },
-  {
     to: "/viewings",
     label: "Viewings",
     icon: Calendar,
+    visible: () => true,
+  },
+  {
+    to: "/clients",
+    label: "Clients",
+    icon: Users,
     visible: () => true,
   },
 ]

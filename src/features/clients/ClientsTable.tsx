@@ -1,4 +1,5 @@
 import ConfirmDelete from "@/components/ConfirmDelete"
+import CreateButton from "@/components/CreateButton"
 import {
   Table,
   TableBody,
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/table"
 import type { Client, ClientStatus } from "@/types/database"
 import { useState } from "react"
-import AddClient from "./AddClient"
+import ClientForm from "./ClientForm"
 import ClientRowSkeleton from "./ClientRowSkeleton"
 import ClientStatusGroup from "./ClientStatusGroup"
 import ClientsEmptyState from "./ClientsEmptyState"
@@ -69,7 +70,15 @@ export default function ClientsTable() {
             )}
           </p>
         </div>
-        <AddClient />
+
+        <CreateButton
+          label="Add new client"
+          size="md"
+          title="Add new client"
+          description="Capture the client's details and preferences to start tracking them in your pipeline."
+        >
+          {(onClose) => <ClientForm onClose={onClose} />}
+        </CreateButton>
       </div>
 
       {/* Content */}
