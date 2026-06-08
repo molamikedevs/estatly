@@ -18,7 +18,7 @@ const Properties = lazy(() => import("@/pages/Properties"))
 const Property = lazy(() => import("@/pages/Property"))
 const Clients = lazy(() => import("@/pages/Clients"))
 const Viewings = lazy(() => import("@/pages/Viewings"))
-const ProfilePage = lazy(() => import("@/pages/ProfilePage"))
+const User = lazy(() => import("@/pages/User"))
 const Agents = lazy(() => import("@/pages/Agents"))
 const Agent = lazy(() => import("@/pages/Agent"))
 const Settings = lazy(() => import("@/pages/Settings"))
@@ -65,7 +65,7 @@ export default function App() {
 
               <Route path="/viewings" element={<Viewings />} />
 
-              <Route path="/profile/:profileId" element={<ProfilePage />} />
+              <Route path="/profile/:profileId" element={<User />} />
 
               <Route
                 path="/agents"
@@ -76,7 +76,7 @@ export default function App() {
                 }
               />
               <Route
-                path="/agents/:agentId"
+                path="/agents/:userId"
                 element={
                   <RoleProtected allowed={["admin", "manager"]}>
                     <Agent />
@@ -101,7 +101,7 @@ export default function App() {
                 }
               />
               <Route
-                path="/managers/:managerId"
+                path="/managers/:userId"
                 element={
                   <RoleProtected allowed={["admin"]}>
                     <Manager />

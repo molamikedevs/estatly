@@ -5,6 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useUpdateSettings } from "./useUpdateSettings"
 
+interface UseSettingsFormParams {
+  settings: Settings
+  onClose: () => void
+}
+
 function settingsToFormValues(s: Settings): SettingsFormValues {
   return {
     name: s.name,
@@ -15,7 +20,7 @@ function settingsToFormValues(s: Settings): SettingsFormValues {
   }
 }
 
-export function useSettingsForm({ settings }: { settings: Settings }) {
+export function useSettingsForm({ settings, onClose }: UseSettingsFormParams) {
   const { updateSettings, isPending } = useUpdateSettings()
 
   const form = useForm<SettingsFormValues>({
@@ -25,7 +30,7 @@ export function useSettingsForm({ settings }: { settings: Settings }) {
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    updateSettings({ id: settings.id, values })
+    updateSettings({ id: settings.id, values }, { onSuccess: () => onClose() })
   })
 
   return { form, isPending, onSubmit }

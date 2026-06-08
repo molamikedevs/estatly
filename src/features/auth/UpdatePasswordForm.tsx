@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Field, FieldGroup } from "@/components/ui/field"
-import { usePassword } from "@/hooks/form/usePassword"
+import { usePassword } from "@/features/auth/usePassword"
 
 export default function UpdatePasswordForm() {
   const { disabled, onSubmit, control, isPending, reset } = usePassword()

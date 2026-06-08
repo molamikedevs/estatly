@@ -6,6 +6,9 @@ export type UserRole = "admin" | "manager" | "agent"
 
 export type ListingType = "rent" | "sale"
 
+/** Roles that can be created in the app. Admin is the actor, never created. */
+export type CreatableRole = "agent" | "manager"
+
 export type PropertyType =
   | "apartment"
   | "villa"
@@ -48,11 +51,11 @@ export interface UserLogin {
 }
 
 // ─── Create Agent ─────────────────────────────────────────
-export interface CreateAgentInput {
+export interface CreateUserInput {
   full_name: string
   email: string
   password: string
-  role: UserRole
+  role: Exclude<UserRole, "admin">
 }
 
 export interface PropertyAgent {

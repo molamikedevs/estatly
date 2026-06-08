@@ -9,8 +9,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useProfileFields } from "@/hooks/form/useProfileFields"
-import type { ProfileFormValues } from "@/types/global"
+import { useProfileFields } from "@/features/auth/useProfileFields"
+import type { UserFormValues } from "@/types/global"
 import {
   Briefcase,
   KeyRound,
@@ -22,9 +22,9 @@ import {
 } from "lucide-react"
 import { type Control, type UseFormSetValue } from "react-hook-form"
 
-interface ProfileFieldsProps {
-  control: Control<ProfileFormValues>
-  setValue: UseFormSetValue<ProfileFormValues>
+interface UserFieldsProps {
+  control: Control<UserFormValues>
+  setValue: UseFormSetValue<UserFormValues>
   email: string
 }
 
@@ -32,7 +32,7 @@ export default function ProfileFields({
   control,
   setValue,
   email,
-}: ProfileFieldsProps) {
+}: UserFieldsProps) {
   const { showPasswordSection, togglePasswordSection, bio } = useProfileFields({
     control,
     setValue,

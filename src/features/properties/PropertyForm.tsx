@@ -20,7 +20,7 @@ import {
   Ruler,
 } from "lucide-react"
 import { Controller } from "react-hook-form"
-import { FormFooter } from "../auth/FormFooter"
+import { FormFooter } from "../../components/form-components/FormFooter"
 
 export default function PropertyForm({ property, onClose }: PropertyFormProps) {
   const { form, isEdit, isPending, onSubmit } = usePropertyForm({

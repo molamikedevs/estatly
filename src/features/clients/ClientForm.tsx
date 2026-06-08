@@ -5,7 +5,7 @@ import { FieldGroup } from "@/components/ui/field"
 import { useClientForm } from "@/features/clients/useClientForm"
 import { propertyTypes } from "@/lib/constants"
 import { DollarSign, Globe, Mail, Phone, User as UserIcon } from "lucide-react"
-import { FormFooter } from "../auth/FormFooter"
+import { FormFooter } from "../../components/form-components/FormFooter"
 
 import { CLIENT_STATUS_OPTIONS } from "@/lib/constants"
 

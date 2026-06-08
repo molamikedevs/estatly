@@ -1,13 +1,13 @@
-import { updateProfileApi } from "@/api/apiAuth"
+import { updateUserApi } from "@/api/apiAuth"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
   const { isPending, mutate: updateProfile } = useMutation({
-    mutationFn: updateProfileApi,
+    mutationFn: updateUserApi,
     onSuccess: () => {
-      toast.success("Profile was successfully updated")
+      toast.success("User profile was successfully updated")
       queryClient.invalidateQueries({ queryKey: ["user"] })
     },
 

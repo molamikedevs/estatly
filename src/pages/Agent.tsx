@@ -1,5 +1,5 @@
-import AgentProfile from "@/features/agents/AgentProfile"
+import UserProfile from "@/features/team/UserProfile"
 
 export default function Agent() {
-  return <AgentProfile />
+  return <UserProfile role="agent" />
 }

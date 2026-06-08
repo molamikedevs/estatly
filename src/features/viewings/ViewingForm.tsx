@@ -4,7 +4,7 @@ import { useClients } from "@/features/clients/useClients"
 import { useProperties } from "@/features/properties/useProperties"
 import { durationOptions } from "@/lib/constants"
 import type { ViewingFormProps } from "@/types/database"
-import { FormFooter } from "../auth/FormFooter"
+import { FormFooter } from "../../components/form-components/FormFooter"
 import { useViewingForm } from "./useViewingForm"
 
 export default function ViewingForm({ onClose }: ViewingFormProps) {

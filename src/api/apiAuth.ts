@@ -43,7 +43,7 @@ export async function getCurrentUserApi(): Promise<AuthUser | null> {
   }
 }
 
-export async function updateProfileApi({
+export async function updateUserApi({
   full_name,
   password,
   avatar,

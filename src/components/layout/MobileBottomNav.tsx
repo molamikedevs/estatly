@@ -2,7 +2,7 @@ import { useUser } from "@/features/auth/useUser"
 import { workspaceItems } from "@/lib/constants"
 import { can } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
-import { Settings } from "lucide-react"
+import { Settings, Users } from "lucide-react"
 import { NavLink } from "react-router-dom"
 
 export default function MobileBottomNav() {
@@ -23,6 +23,12 @@ export default function MobileBottomNav() {
             to: "/settings",
             label: "Settings",
             icon: Settings,
+            visible: () => true,
+          },
+          {
+            to: "/managers",
+            label: "Manager",
+            icon: Users,
             visible: () => true,
           },
         ]

@@ -1,5 +1,5 @@
-import ManagerProfile from "@/features/managers/ManagerProfile"
+import UserProfile from "@/features/team/UserProfile"
 
 export default function Manager() {
-  return <ManagerProfile />
+  return <UserProfile role="manager" />
 }

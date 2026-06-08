@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase"
 import type { Settings } from "@/types/database"
 import type { SettingsFormValues } from "@/types/global"
 
-export async function getSettingsApi(): Promise<Settings> {
+export async function getAgencySettingsApi(): Promise<Settings> {
   const { data, error } = await supabase
     .from("agencies")
     .select("*")
@@ -10,13 +10,13 @@ export async function getSettingsApi(): Promise<Settings> {
     .single()
 
   if (error) {
-    console.error("getAgencyApi error:", error)
-    throw new Error("Agency settings could not be loaded")
+    console.error(error)
+    throw new Error(error.message)
   }
   return data
 }
 
-export async function updateAgencyApi(
+export async function updateAgencySettingsApi(
   id: number,
   values: SettingsFormValues
 ): Promise<Settings> {
@@ -36,7 +36,7 @@ export async function updateAgencyApi(
     .single()
 
   if (error) {
-    console.error("updateSettingsApi error:", error)
+    console.error(error)
     throw new Error(error.message)
   }
   return data

@@ -1,5 +1,5 @@
-import AgentLists from "@/features/agents/AgentLists"
+import UserList from "@/features/team/Userlist"
 
 export default function Agents() {
-  return <AgentLists />
+  return <UserList role="agent" />
 }
