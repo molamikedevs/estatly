@@ -10,6 +10,11 @@ export interface NavItem {
   visible: (role: UserRole) => boolean
 }
 
+export const PAGE_SIZE = 8
+export const DESC_MAX = 2000
+export const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h"]
+export const SEARCH_DEBOUNCE_MS = 400
+
 export const workspaceItems: NavItem[] = [
   {
     to: "/dashboard",
@@ -42,8 +47,6 @@ export const workspaceItems: NavItem[] = [
     visible: () => true,
   },
 ]
-export const PAGE_SIZE = 8
-export const DESC_MAX = 2000
 
 export const propertyTypes = [
   { value: "apartment", label: "Apartment" },

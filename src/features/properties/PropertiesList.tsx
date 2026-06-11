@@ -9,6 +9,7 @@ import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
 import FormSheet from "@/components/form-components/FormSheet"
 import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
+import { SKELETON_KEYS } from "@/lib/constants"
 import type { Property, PropertyStatus } from "@/types/database"
 import PropertyForm from "./PropertyForm"
 import { useUpdatePropertyStatus } from "./useUpdatePropertyStatus"
@@ -16,10 +17,9 @@ import { useUpdatePropertyStatus } from "./useUpdatePropertyStatus"
 export default function PropertiesList() {
   const {
     isFiltered,
-    paginatedProperties,
+    properties,
     total,
     isLoading,
-    visibleProperties,
     editProperty,
     deleteProperty,
     editOpen,
@@ -64,16 +64,16 @@ export default function PropertiesList() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <PropertyCardSkeleton key={i} />
+          {SKELETON_KEYS.map((k) => (
+            <PropertyCardSkeleton key={k} />
           ))}
         </div>
-      ) : visibleProperties.length === 0 ? (
+      ) : total === 0 ? (
         <PropertiesEmptyState filtered={isFiltered} />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {paginatedProperties.map((property) => (
+            {properties.map((property) => (
               <PropertyCard
                 key={property.id}
                 property={property}
@@ -99,7 +99,7 @@ export default function PropertiesList() {
             />
           </FormSheet>
 
-          <Pagination count={visibleProperties.length} label="properties" />
+          <Pagination count={total} label="properties" />
         </>
       )}
 

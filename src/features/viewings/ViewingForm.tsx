@@ -1,7 +1,7 @@
 import DatePickerField from "@/components/DatePickerField"
 import SelectField from "@/components/form-components/SelectField"
 import { useClients } from "@/features/clients/useClients"
-import { useProperties } from "@/features/properties/useProperties"
+import { useAllProperties } from "@/features/properties/useAllProperties"
 import { durationOptions } from "@/lib/constants"
 import type { ViewingFormProps } from "@/types/database"
 import { FormFooter } from "../../components/form-components/FormFooter"
@@ -9,9 +9,9 @@ import { useViewingForm } from "./useViewingForm"
 
 export default function ViewingForm({ onClose }: ViewingFormProps) {
   const { form, isPending, onSubmit } = useViewingForm({ onClose })
-  const { control } = form
+  const { control, formState } = form
 
-  const { properties, isLoading: loadingProperties } = useProperties()
+  const { properties, isLoading: loadingProperties } = useAllProperties()
   const { clients, isLoading: loadingClients } = useClients()
 
   const propertyOptions = (properties ?? []).map((p) => ({
@@ -81,7 +81,7 @@ export default function ViewingForm({ onClose }: ViewingFormProps) {
       </div>
 
       <FormFooter
-        canSave={!isPending}
+        canSave={!isPending && formState.isValid}
         isSubmitting={isPending}
         onCancel={onClose}
         submitLabel="Schedule viewing"

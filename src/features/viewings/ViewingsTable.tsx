@@ -23,8 +23,7 @@ export default function ViewingsTable() {
   const { updateViewing } = useUpdateViewing()
   const { isPending: isDeleting, deleteViewing } = useDeleteViewing()
 
-  const { isLoading, total, filteredViewings, paginatedViewings } =
-    useViewingsOperations()
+  const { isLoading, count, viewings, isFiltered } = useViewingsOperations()
 
   const [deleteTarget, setDeleteTarget] = useState<Viewing | undefined>()
 
@@ -47,8 +46,8 @@ export default function ViewingsTable() {
           <h2 className="text-2xl font-semibold tracking-tight">Viewings</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Track property viewing appointments
-            {!isLoading && total > 0 && (
-              <span className="tabular"> · {total} total</span>
+            {!isLoading && count > 0 && (
+              <span className="tabular"> · {count} total</span>
             )}
           </p>
         </div>
@@ -63,7 +62,7 @@ export default function ViewingsTable() {
       </div>
 
       {/* Filter + sort */}
-      {!isLoading && total > 0 && <ViewingsOperations />}
+      {!isLoading && count > 0 && <ViewingsOperations />}
 
       {/* Content */}
       {isLoading ? (
@@ -76,10 +75,8 @@ export default function ViewingsTable() {
             </TableBody>
           </Table>
         </div>
-      ) : total === 0 ? (
-        <ViewingsEmptyState />
-      ) : filteredViewings.length === 0 ? (
-        <ViewingsEmptyState filtered />
+      ) : count === 0 ? (
+        <ViewingsEmptyState filtered={isFiltered} />
       ) : (
         <>
           <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
@@ -108,7 +105,7 @@ export default function ViewingsTable() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedViewings.map((viewing) => (
+                  {viewings.map((viewing) => (
                     <ViewingRow
                       key={viewing.id}
                       viewing={viewing}
@@ -121,7 +118,7 @@ export default function ViewingsTable() {
             </div>
           </div>
 
-          <Pagination count={filteredViewings.length} label="viewings" />
+          <Pagination count={count} label="viewings" />
         </>
       )}
 

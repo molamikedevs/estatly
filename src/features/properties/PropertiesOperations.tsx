@@ -15,10 +15,11 @@ export default function PropertiesOperations() {
 
       <SortBy
         options={[
-          { value: "newest", label: "Newest first" },
-          { value: "price-asc", label: "Price: low to high" },
-          { value: "price-desc", label: "Price: high to low" },
-          { value: "popular", label: "Most viewed" },
+          { value: "newest", label: "Newest" },
+          { value: "oldest", label: "Oldest" },
+          { value: "price-desc", label: "Highest price" },
+          { value: "price-asc", label: "Lowest price" },
+          { value: "views-desc", label: "Most views" },
         ]}
       />
     </div>

@@ -9,6 +9,13 @@ export type ListingType = "rent" | "sale"
 /** Roles that can be created in the app. Admin is the actor, never created. */
 export type CreatableRole = "agent" | "manager"
 
+export type PropertySort =
+  | "newest"
+  | "oldest"
+  | "price-desc"
+  | "price-asc"
+  | "views-desc"
+
 export type PropertyType =
   | "apartment"
   | "villa"
@@ -188,4 +195,17 @@ export interface Settings {
   default_currency: string
   contact_email: string | null
   contact_phone: string | null
+}
+
+export interface ViewingsQueryParams {
+  filter: ViewingStatus | "all"
+  sortBy: "soonest" | "latest"
+  page: number
+  search: string
+}
+export interface PropertiesQueryParams {
+  filter: ListingType | "all"
+  sortBy: PropertySort | "newest"
+  page: number
+  search: string
 }

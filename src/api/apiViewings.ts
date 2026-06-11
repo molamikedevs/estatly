@@ -1,5 +1,10 @@
+import { PAGE_SIZE } from "@/lib/constants"
 import { supabase } from "@/lib/supabase"
-import type { Viewing, ViewingStatus } from "@/types/database"
+import type {
+  Viewing,
+  ViewingStatus,
+  ViewingsQueryParams,
+} from "@/types/database"
 import type { ViewingFormValues } from "@/types/global"
 
 export async function createViewingApi(
@@ -29,8 +34,7 @@ export async function createViewingApi(
     .single()
 
   if (error) {
-    console.error("createViewingApi error:", error)
-    throw new Error(error.message)
+    throw new Error("Viewings could not be created")
   }
 
   return data
@@ -52,37 +56,55 @@ export async function updateViewingStatusApi(
     .single()
 
   if (error) {
-    console.error("updateViewingStatusApi error:", error)
     throw new Error("Viewing status could not be updated")
   }
 
   return data
 }
 
-export async function getViewingsApi(): Promise<Viewing[]> {
-  const { data, error } = await supabase
-    .from("viewings")
-    .select(
-      `*,
-       property:properties(title, city, neighborhood, main_image),
+export async function getViewingsApi({
+  filter,
+  sortBy,
+  page,
+  search,
+}: ViewingsQueryParams): Promise<{ data: Viewing[]; count: number }> {
+  let query = supabase.from("viewings").select(
+    `*,
+       property:properties!inner(title, city, neighborhood, main_image),
        client:clients(full_name, email, phone),
-       agent:user_profiles!viewings_agent_id_user_profiles_fkey(full_name, avatar, email)`
-    )
-    .order("scheduled_at", { ascending: true })
+       agent:user_profiles!viewings_agent_id_user_profiles_fkey(full_name, avatar, email)`,
+    { count: "exact" }
+  )
 
+  // 1. Filter
+  if (filter !== "all") query = query.eq("status", filter)
+
+  // Search
+  if (search)
+    query = query.or(`title.ilike.%${search}%,city.ilike.%${search}%`, {
+      referencedTable: "properties",
+    })
+
+  // Sort
+  query = query.order("scheduled_at", { ascending: sortBy === "soonest" })
+
+  // Paginate
+  const from = (page - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
+  query = query.range(from, to)
+
+  const { data, error, count } = await query
   if (error) {
-    console.error("getViewingsApi error:", error)
     throw new Error("Viewings could not be loaded")
   }
 
-  return data ?? []
+  return { data: data ?? [], count: count ?? 0 }
 }
 
 export async function deleteViewingApi(id: number): Promise<void> {
   const { error } = await supabase.from("viewings").delete().eq("id", id)
 
   if (error) {
-    console.error("deleteViewingApi error:", error)
     throw new Error("Viewing could not be deleted")
   }
 }

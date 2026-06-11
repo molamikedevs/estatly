@@ -1,5 +1,11 @@
+import { PAGE_SIZE } from "@/lib/constants"
 import { supabase } from "@/lib/supabase"
-import type { GalleryImage, Property, PropertyStatus } from "@/types/database"
+import type {
+  GalleryImage,
+  PropertiesQueryParams,
+  Property,
+  PropertyStatus,
+} from "@/types/database"
 import type { PropertyFormValues } from "@/types/global"
 
 export async function createUpdatePropertyApi(
@@ -81,19 +87,71 @@ export async function createUpdatePropertyApi(
   return data
 }
 
-export async function getPropertiesApi(): Promise<Property[]> {
-  const { data, error } = await supabase
+export async function getPropertiesApi({
+  filter,
+  search,
+  page,
+  sortBy,
+}: PropertiesQueryParams): Promise<{ data: Property[]; count: number }> {
+  let query = supabase
     .from("properties")
     .select(
-      "*, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name, avatar, email)"
+      `*, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name, avatar, email)`,
+      { count: "exact" }
     )
-    .order("created_at", { ascending: false })
 
-  if (error) {
-    console.error("getPropertiesApi error:", error)
-    throw new Error(error.message)
+  //Filter
+  if (filter !== "all") query = query.eq("listing_type", filter)
+
+  // search
+  if (search) query = query.or(`title.ilike.%${search}%,city.ilike.%${search}%`)
+
+  // Sort
+  switch (sortBy) {
+    case "newest":
+      query = query.order("created_at", { ascending: false })
+      break
+    case "oldest":
+      query = query.order("created_at", { ascending: true })
+      break
+    case "price-asc":
+      query = query.order("price", { ascending: true })
+      break
+    case "price-desc":
+      query = query.order("price", { ascending: false })
+      break
+    case "views-desc":
+      query = query.order("views_count", { ascending: false })
+      break
+    default:
+      query = query.order("created_at", { ascending: false })
   }
 
+  // paginate
+  const from = (page - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
+  query = query.range(from, to)
+
+  const { data, error, count } = await query
+  if (error) {
+    throw new Error("Properties could not be loaded")
+  }
+
+  return { data: data ?? [], count: count ?? 0 }
+}
+
+// in apiProperties
+export async function getAllPropertiesApi(): Promise<
+  Pick<Property, "id" | "title">[]
+> {
+  const { data, error } = await supabase
+    .from("properties")
+    .select("id, title")
+    .order("title")
+
+  if (error) {
+    throw new Error("Properties could not be loaded")
+  }
   return data ?? []
 }
 

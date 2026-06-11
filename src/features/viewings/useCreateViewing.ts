@@ -15,7 +15,6 @@ export function useCreateViewing() {
 
     onError: (err) => {
       toast.error(err.message)
-      console.error("createViewingApi error:", err)
     },
   })
 

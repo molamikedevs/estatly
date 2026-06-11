@@ -33,7 +33,7 @@ export async function createClientApi(
 
   if (error) {
     console.error("createClientApi error:", error)
-    throw new Error(error.message)
+    throw new Error("Client could not be created")
   }
 
   return data
@@ -52,7 +52,7 @@ export async function updateClientStatusApi(
 
   if (error) {
     console.error("updateClientStatusApi error:", error)
-    throw new Error(error.message)
+    throw new Error("Client status could not been updated")
   }
 
   return data

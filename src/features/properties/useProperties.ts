@@ -1,15 +1,12 @@
 import { getPropertiesApi } from "@/api/apiProperties"
+import type { PropertiesQueryParams } from "@/types/database"
 import { useQuery } from "@tanstack/react-query"
 
-export function useProperties() {
-  const {
-    data: properties,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["properties"],
-    queryFn: getPropertiesApi,
+export function useProperties(params: PropertiesQueryParams) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["properties", params],
+    queryFn: () => getPropertiesApi(params),
   })
 
-  return { isLoading, properties, error }
+  return { isLoading, data, error }
 }
