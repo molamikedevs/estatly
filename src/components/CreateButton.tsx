@@ -6,18 +6,10 @@ import FormSheet from "./form-components/FormSheet"
 type CreateButtonSize = "sm" | "md" | "lg"
 
 interface CreateButtonProps {
-  /** Text on the trigger button. */
   label: string
-  /** Title shown in the sheet header. */
   title: string
-  /** Description shown in the sheet header. */
   description?: string
-  /** Width preset for the sheet (forwarded to FormSheet). */
   size?: CreateButtonSize
-  /**
-   * The form to render inside the sheet. Receives an onClose callback
-   * the form can call after a successful submit.
-   */
   children: (onClose: () => void) => ReactNode
 }
 

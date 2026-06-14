@@ -18,7 +18,7 @@ export function useLogin() {
       navigate("/dashboard", { replace: true })
     },
 
-    onError: (err) => toast.error(err.message || "Login failed"),
+    onError: (err) => toast.error(err.message),
   })
 
   return { isPending, login }

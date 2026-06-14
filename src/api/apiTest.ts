@@ -1,8 +1,10 @@
 import { PAGE_SIZE } from "@/lib/constants"
 import { supabase } from "@/lib/supabase"
 import type {
+  ClientStatus,
   PropertiesQueryParams,
   Property,
+  PropertyStatus,
   Viewing,
   ViewingsQueryParams,
 } from "@/types/database"
@@ -98,4 +100,63 @@ export async function getPropertiesApi({
   }
 
   return { data: data ?? [], count: count ?? 0 }
+}
+
+export async function getClientsByStageApi(): Promise<
+  { status: ClientStatus; count: number }[]
+> {
+  const statuses: ClientStatus[] = [
+    "active",
+    "closed-lost",
+    "closed-won",
+    "inactive",
+  ]
+
+  const head = { count: "exact" as const, head: true }
+
+  const results = await Promise.all(
+    statuses.map((status) =>
+      supabase.from("clients").select("*", head).eq("status", status)
+    )
+  )
+
+  if (results.some((r) => r.error)) {
+    console.error(
+      "getClientsByStageApi error:",
+      results.find((r) => r.error)?.error
+    )
+    throw new Error("Client pipeline breakdown could not be loaded")
+  }
+
+  return statuses
+    .map((status, i) => ({ status, count: results[i].count ?? 0 }))
+    .filter((row) => row.count > 0)
+}
+
+export async function getPropertiesByStatusApi(): Promise<
+  { status: PropertyStatus; count: number }[]
+> {
+  const statuses: PropertyStatus[] = [
+    "pending-approval",
+    "published",
+    "under-offer",
+    "sold",
+    "rented",
+  ]
+
+  const head = { count: "exact" as const, head: true }
+
+  const results = await Promise.all(
+    statuses.map((status) =>
+      supabase.from("properties").select("*", head).eq("status", status)
+    )
+  )
+
+  if (results.some((r) => r.error)) {
+    throw new Error("Property status breakdown could not be loaded")
+  }
+
+  return statuses
+    .map((status, i) => ({ status, count: results[i].count ?? 0 }))
+    .filter((row) => row.count > 0)
 }

@@ -4,7 +4,6 @@ import { propertySchema } from "@/lib/validation"
 import type { Property } from "@/types/database"
 import type { PropertyFormValues } from "@/types/global"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 
 const EMPTY_VALUES: PropertyFormValues = {
@@ -71,14 +70,7 @@ export function usePropertyForm({ property, onClose }: UsePropertyFormParams) {
     defaultValues: property ? propertyToFormValues(property) : EMPTY_VALUES,
   })
 
-  const { reset, handleSubmit } = form
-
-  useEffect(() => {
-    reset(property ? propertyToFormValues(property) : EMPTY_VALUES)
-  }, [property, reset])
-
-  const onSubmit = handleSubmit((values) => {
-    // values are PropertyFormValues (strings). The API converts to numbers.
+  const onSubmit = form.handleSubmit((values) => {
     if (isEdit && property) {
       updateProperty(
         { newProperty: values, id: String(property.id) },

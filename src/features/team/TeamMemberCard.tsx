@@ -5,7 +5,7 @@ import type { CreatableRole, UserProfile } from "@/types/database"
 import { Mail, Phone } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
-interface UserCardProps {
+interface TeamMemberCardProps {
   member: UserProfile
   role: CreatableRole
 }
@@ -33,7 +33,7 @@ function ContactDetails({ member }: { member: UserProfile }) {
   )
 }
 
-export default function UserCard({ member, role }: UserCardProps) {
+export default function TeamMemberCard({ member, role }: TeamMemberCardProps) {
   const navigate = useNavigate()
   const displayName = member.full_name || member.email || `Unnamed ${role}`
   const to = `/${role}s/${member.user_id}`

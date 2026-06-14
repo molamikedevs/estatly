@@ -4,7 +4,7 @@ import { useAvatar } from "@/features/auth/useAvatar"
 import { getInitials } from "@/lib/helpers"
 import { Upload } from "lucide-react"
 
-export default function AvatarUploader() {
+export default function AvatarInput() {
   const {
     isBusy,
     isProcessing,

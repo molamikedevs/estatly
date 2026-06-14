@@ -9,6 +9,8 @@ export type ListingType = "rent" | "sale"
 /** Roles that can be created in the app. Admin is the actor, never created. */
 export type CreatableRole = "agent" | "manager"
 
+export type ClientStatus = "active" | "closed-won" | "closed-lost" | "inactive"
+
 export type PropertySort =
   | "newest"
   | "oldest"
@@ -26,11 +28,18 @@ export type PropertyType =
   | "land"
 
 export type PropertyStatus =
-  | "published"
-  | "under-offer"
   | "pending-approval"
+  | "published"
   | "rented"
   | "sold"
+  | "under-offer"
+
+export type ViewingStatus =
+  | "scheduled"
+  | "completed"
+  | "cancelled"
+  | "no-show"
+  | "offer-made"
 
 // ─── User / Auth ──────────────────────────────────────
 
@@ -106,13 +115,6 @@ export type GalleryImage = {
   file?: File
 }
 
-export type ViewingStatus =
-  | "scheduled"
-  | "completed"
-  | "cancelled"
-  | "no-show"
-  | "offer-made"
-
 export interface ViewingProperty {
   title: string
   city: string
@@ -147,8 +149,6 @@ export interface Viewing {
   client: ViewingClient | null
   agent: ViewingAgent | null
 }
-
-export type ClientStatus = "active" | "closed-won" | "closed-lost" | "inactive"
 
 export interface ClientAgent {
   full_name: string
@@ -208,4 +208,14 @@ export interface PropertiesQueryParams {
   sortBy: PropertySort | "newest"
   page: number
   search: string
+}
+
+export interface DashboardStats {
+  totalProperties: number
+  totalViewings: number
+  publishedCount: number
+  pendingCount: number
+  underOfferCount: number
+  activeClients: number
+  upcomingViewings: number
 }

@@ -3,13 +3,13 @@ import FormSheet from "@/components/form-components/FormSheet"
 import { useUser } from "@/features/auth/useUser"
 import { Briefcase, Mail, Phone, User as UserIcon } from "lucide-react"
 import { useState } from "react"
-import UpdateUserForm from "../auth/UpdateUserProfileForm"
-import UserActivity from "./UserActivity"
-import ProfileError from "./UserError"
-import UserHeader from "./UserHeader"
-import UserSkeleton from "./UserSkeleton"
+import UserActivity from "../team/UserActivity"
+import ProfileError from "../team/UserError"
+import UserHeader from "../team/UserHeader"
+import UserSkeleton from "../team/UserSkeleton"
+import UpdateUserForm from "./UpdateUserProfileForm"
 
-export default function UserInfo() {
+export default function UserProfile() {
   const { user, isLoading } = useUser()
   const [isEditOpen, setIsEditOpen] = useState(false)
 
@@ -26,7 +26,7 @@ export default function UserInfo() {
         <UserHeader
           profile={profile}
           verified={Boolean(user.email_confirmed_at)}
-          onEdit={() => setIsEditOpen(true)} // ← owner gets the Edit button
+          onEdit={() => setIsEditOpen(true)}
         />
 
         {/* ── About ─────────────────────────────────── */}

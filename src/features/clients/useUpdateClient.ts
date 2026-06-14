@@ -15,10 +15,7 @@ export function useUpdateClient() {
       queryClient.invalidateQueries({ queryKey: ["clients"] })
     },
 
-    onError: (err) => {
-      toast.error("Failed to update status, try again")
-      console.error(err.message)
-    },
+    onError: (err) => toast.error(err.message),
   })
 
   return { isPending, updateClient }

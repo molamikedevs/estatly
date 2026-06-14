@@ -1,14 +1,8 @@
 import { supabase } from "@/lib/supabase"
 import type { CreateUserInput, UserProfile, UserRole } from "@/types/database"
 
-/**
- * Create a new user (agent or manager) WITHOUT signing them in.
- *
- * supabase.auth.signUp() implicitly signs the new user in, which swaps
- * the current admin's session for the new account — making the admin
- * "become" the user they just created. To prevent that, we snapshot the
- * admin's session before sign-up and restore it immediately after.
- */
+//Create a new user (agent or manager) WITHOUT signing them in.
+
 export async function createUserApi({
   full_name,
   email,
@@ -38,7 +32,9 @@ export async function createUserApi({
       access_token: adminSession.access_token,
       refresh_token: adminSession.refresh_token,
     })
-    throw new Error(error.message)
+    throw new Error(
+      `${role === "agent" ? "Agent was successfully created" : "Manager was successfully created"}`
+    )
   }
 
   // 3. Restore the admin's session — this is the line that fixes the swap.
@@ -48,6 +44,7 @@ export async function createUserApi({
   })
 
   if (restoreError) {
+    console.error("createUserApi:", error)
     throw new Error(
       "User created, but your session couldn't be restored. Please sign in again."
     )
@@ -62,7 +59,10 @@ export async function getUsersByRoleApi(role: UserRole) {
     .select("*")
     .eq("role", role)
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    console.error("getUsersByRoleApi:", error)
+    throw new Error("User role could not be loaded")
+  }
   return data
 }
 
@@ -75,7 +75,7 @@ export async function getUserApi(userId: string): Promise<UserProfile> {
 
   if (error) {
     console.error("getUserApi error:", error)
-    throw new Error(error.message)
+    throw new Error("User could not be loaded")
   }
   return data
 }

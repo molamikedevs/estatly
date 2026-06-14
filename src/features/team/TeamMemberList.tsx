@@ -1,13 +1,13 @@
 import FormSheet from "@/components/form-components/FormSheet"
 import { Button } from "@/components/ui/button"
 import { useUser } from "@/features/auth/useUser"
-import UserForm from "@/features/team/UserForm"
+import UserForm from "@/features/team/TeamMemberForm"
 import type { CreatableRole } from "@/types/database"
 import { Plus } from "lucide-react"
 import { useState } from "react"
-import UserCard from "./UserCard"
+import TeamMemberCard from "./TeamMemberCard"
+import TeamMemberEmptyState from "./TeamMemberEmptyState"
 import UserCardSkeleton from "./UserCardSkeleton"
-import UserEmptyState from "./UserEmptyState"
 import { useUsers } from "./useUsers"
 
 interface UserListProps {
@@ -19,7 +19,7 @@ const copy: Record<CreatableRole, { heading: string; noun: string }> = {
   manager: { heading: "Managers", noun: "manager" },
 }
 
-export default function UserList({ role }: UserListProps) {
+export default function TeamMemberList({ role }: UserListProps) {
   const [createOpen, setCreateOpen] = useState(false)
   const { users, isLoading } = useUsers(role)
   const { user } = useUser()
@@ -61,7 +61,7 @@ export default function UserList({ role }: UserListProps) {
           ))}
         </div>
       ) : !hasusers ? (
-        <UserEmptyState
+        <TeamMemberEmptyState
           role={role}
           canCreate={canCreate}
           onCreate={() => setCreateOpen(true)}
@@ -69,7 +69,7 @@ export default function UserList({ role }: UserListProps) {
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {users.map((member) => (
-            <UserCard key={member.user_id} member={member} role={role} />
+            <TeamMemberCard key={member.user_id} member={member} role={role} />
           ))}
         </div>
       )}

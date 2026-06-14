@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import type { CreatableRole } from "@/types/database"
 import { Plus, Users } from "lucide-react"
 
-interface UserEmptyStateProps {
+interface TeamMemberEmptyStateProps {
   role: CreatableRole
   canCreate: boolean
   onCreate: () => void
@@ -13,11 +13,11 @@ const copy: Record<CreatableRole, { noun: string; nounPlural: string }> = {
   manager: { noun: "manager", nounPlural: "managers" },
 }
 
-export default function UserEmptyState({
+export default function TeamMemberEmptyState({
   role,
   canCreate,
   onCreate,
-}: UserEmptyStateProps) {
+}: TeamMemberEmptyStateProps) {
   const { noun, nounPlural } = copy[role]
 
   return (

@@ -1,4 +1,4 @@
-import AvatarUploader from "@/components/AvatarUploader"
+import AvatarInput from "@/components/AvatarInput"
 import { FormFooter } from "@/components/form-components/FormFooter"
 import ProfileFields from "@/features/auth/ProfileFields"
 import { useUserProfileForm } from "@/features/auth/useUserProfileForm"
@@ -9,11 +9,9 @@ interface UpdateUserProfileFormProps {
 }
 
 export default function UpdateUserProfilesForm({
-  open,
   onClose,
 }: UpdateUserProfileFormProps) {
   const { form, onSubmit, email, isPending, canSave } = useUserProfileForm({
-    open,
     onOpenChange: (next) => {
       if (!next) onClose()
     },
@@ -22,7 +20,7 @@ export default function UpdateUserProfilesForm({
   return (
     <form onSubmit={onSubmit} className="flex flex-1 flex-col overflow-hidden">
       <div className="flex-1 scrollbar-thin space-y-6 overflow-y-auto px-6 py-6">
-        <AvatarUploader />
+        <AvatarInput />
         <ProfileFields
           control={form.control}
           setValue={form.setValue}

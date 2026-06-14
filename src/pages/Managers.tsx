@@ -1,5 +1,5 @@
-import UserList from "@/features/team/Userlist"
+import TeamMemberList from "@/features/team/TeamMemberList"
 
 export default function Managers() {
-  return <UserList role="manager" />
+  return <TeamMemberList role="manager" />
 }

@@ -10,8 +10,8 @@ export async function getAgencySettingsApi(): Promise<Settings> {
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error(error.message)
+    console.error("getAgencySettingsApi error", error)
+    throw new Error("Agency info could not be loaded")
   }
   return data
 }
@@ -36,8 +36,8 @@ export async function updateAgencySettingsApi(
     .single()
 
   if (error) {
-    console.error(error)
-    throw new Error(error.message)
+    console.error("updateAgencySettingsApi error", error)
+    throw new Error("Agency info could not be updated")
   }
   return data
 }

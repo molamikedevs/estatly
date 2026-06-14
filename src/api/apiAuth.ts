@@ -1,6 +1,7 @@
-import { supabase, supabaseUrl } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase"
 import type { AuthUser, UserLogin, UserProfile } from "@/types/database"
 import type { UpdateDataProps } from "@/types/global"
+import { avatarUploaderApi } from "./uploader"
 
 export async function loginApi({ email, password }: UserLogin) {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -8,7 +9,7 @@ export async function loginApi({ email, password }: UserLogin) {
     password,
   })
 
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("User could not be logged in")
 
   return data
 }
@@ -20,7 +21,7 @@ export async function getCurrentUserApi(): Promise<AuthUser | null> {
 
   // Step 2: Get the auth user
   const { data, error } = await supabase.auth.getUser()
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("User session could not be loaded")
   if (!data.user) return null
 
   // Step 3: Fetch their profile from user_profiles table
@@ -32,8 +33,7 @@ export async function getCurrentUserApi(): Promise<AuthUser | null> {
 
   if (profileError) {
     console.error("Profile fetch error:", profileError)
-    // Return auth user without profile rather than failing
-    return data.user as AuthUser
+    throw new Error("User profile could not be loaded")
   }
 
   // Step 4: Return user with profile attached
@@ -60,24 +60,18 @@ export async function updateUserApi({
   // ---- 1. Update password (auth concern) ----
   if (password) {
     const { error } = await supabase.auth.updateUser({ password })
-    if (error) throw new Error(error.message)
+    if (error) throw new Error("Password could not be updated")
   }
 
   // ---- 2. Upload avatar to storage if provided ----
   let avatarUrl: string | undefined
 
   if (avatar) {
-    // Sanitize filename to avoid issues with spaces, special chars
-    const fileExt = avatar.name.split(".").pop()
-    const fileName = `avatar-${user.id}-${Date.now()}.${fileExt}`
-
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(fileName, avatar, { upsert: true })
-
-    if (uploadError) throw new Error(uploadError.message)
-
-    avatarUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${fileName}`
+    avatarUrl = await avatarUploaderApi({
+      file: avatar,
+      userId: user.id,
+      bucket: "avatars",
+    })
   }
 
   // ---- 3. Update user_profiles table with everything else ----
@@ -99,11 +93,13 @@ export async function updateUserApi({
       .select()
       .single()
 
-    if (profileError) throw new Error(profileError.message)
+    if (profileError) {
+      console.error("updateProfileApi:", profileError)
+      throw new Error("User profile could not be updated")
+    }
 
     return updatedProfile
   }
-
   // If nothing changed in the profile, just return current profile
   const { data: currentProfile } = await supabase
     .from("user_profiles")
@@ -116,5 +112,5 @@ export async function updateUserApi({
 
 export async function logoutApi() {
   const { error } = await supabase.auth.signOut()
-  if (error) throw new Error(error.message)
+  if (error) throw new Error("User could not be logged out, please try again!")
 }

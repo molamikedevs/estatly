@@ -3,7 +3,6 @@ import { useUser } from "@/features/auth/useUser"
 import { profileSchema } from "@/lib/validation"
 import type { UserFormValues } from "@/types/global"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 
 const EMPTY_VALUES: UserFormValues = {
@@ -16,43 +15,32 @@ const EMPTY_VALUES: UserFormValues = {
 }
 
 interface UseUserProfileFormParams {
-  /** Whether the sheet is open — drives hydration. */
-  open: boolean
-  /** Called to close the sheet (on cancel or successful save). */
   onOpenChange: (open: boolean) => void
 }
 
-export function useUserProfileForm({
-  open,
-  onOpenChange,
-}: UseUserProfileFormParams) {
+export function useUserProfileForm({ onOpenChange }: UseUserProfileFormParams) {
   const { user } = useUser()
   const { updateProfile, isPending } = useUpdateProfile()
   const profile = user?.user_profile
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: EMPTY_VALUES,
     mode: "onBlur",
+    defaultValues: profile
+      ? {
+          ...EMPTY_VALUES,
+          full_name: profile.full_name ?? "",
+          phone: profile.phone ?? "",
+          specialization: profile.specialization ?? "",
+          bio: profile.bio ?? "",
+        }
+      : EMPTY_VALUES,
   })
 
   const {
-    reset,
     handleSubmit,
     formState: { isDirty },
   } = form
-
-  // Hydrate the form with the user's current profile whenever the sheet opens.
-  useEffect(() => {
-    if (!open || !profile) return
-    reset({
-      ...EMPTY_VALUES,
-      full_name: profile.full_name ?? "",
-      phone: profile.phone ?? "",
-      specialization: profile.specialization ?? "",
-      bio: profile.bio ?? "",
-    })
-  }, [open, profile, reset])
 
   const onSubmit = handleSubmit((values) => {
     updateProfile(

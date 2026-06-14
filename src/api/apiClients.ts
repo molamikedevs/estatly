@@ -82,3 +82,14 @@ export async function deleteClientApi(id: number): Promise<void> {
     throw new Error("Client could not be deleted")
   }
 }
+
+export async function getClientsByStageApi(): Promise<
+  { status: ClientStatus; count: number }[]
+> {
+  const { data, error } = await supabase.rpc("clients_by_stage")
+  if (error) {
+    throw new Error("Client pipeline breakdown could not be loaded")
+  }
+
+  return data ?? []
+}

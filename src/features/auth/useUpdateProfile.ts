@@ -12,8 +12,7 @@ export function useUpdateProfile() {
     },
 
     onError: (error) => {
-      console.error("Update profile error:", error)
-      toast.error(error.message || "Failed to update profile")
+      toast.error(error.message)
     },
   })
 

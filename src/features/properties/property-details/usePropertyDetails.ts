@@ -3,11 +3,6 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useConfirmDeleteProperty } from "../useConfirmDeleteProperty"
 
-/**
- * Page-level logic for the property details screen: wraps the data
- * fetch (useProperty) and adds modal state, the delete flow, and a few
- * derived display values.
- */
 export function usePropertyDetails() {
   const { isLoading, property } = useProperty()
   const navigate = useNavigate()

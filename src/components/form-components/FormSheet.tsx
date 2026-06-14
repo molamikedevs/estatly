@@ -16,7 +16,7 @@ type FormSheetSize = "sm" | "md" | "lg"
  * a different width.
  */
 const sizeClasses: Record<FormSheetSize, string> = {
-  sm: "sm:max-w-lg", // ~512px — profile edit
+  sm: "sm:max-w-lg",
   md: "sm:!w-[50vw] sm:!max-w-[680px]", // clients
   lg: "sm:!w-[50vw] sm:!max-w-[720px]", // properties
 }

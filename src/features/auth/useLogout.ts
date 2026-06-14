@@ -1,6 +1,7 @@
 import { logoutApi } from "@/api/apiAuth"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 export function useLogout() {
   const queryClient = useQueryClient()
@@ -13,6 +14,8 @@ export function useLogout() {
       queryClient.removeQueries()
       navigate("/login", { replace: true })
     },
+
+    onError: (err) => toast.error(err.message),
   })
 
   return { isPending, logout }

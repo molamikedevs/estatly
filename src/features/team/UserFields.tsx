@@ -7,11 +7,14 @@ import type { CreatableRole } from "@/types/database"
 import type { AgentFieldsProps } from "@/types/global"
 import { Mail, ShieldCheck, User as UserIcon } from "lucide-react"
 
-interface UserFieldsProps extends AgentFieldsProps {
+interface TeamMemberFieldsProps extends AgentFieldsProps {
   role: CreatableRole
 }
 
-export default function UserFields({ control, role }: UserFieldsProps) {
+export default function TeamMemberFields({
+  control,
+  role,
+}: TeamMemberFieldsProps) {
   // (UI guardrail — the database must still enforce role assignment.)
   const roleOptions = ROLE_OPTIONS.filter((o) => o.value === role)
 

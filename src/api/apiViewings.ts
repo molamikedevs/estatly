@@ -108,3 +108,22 @@ export async function deleteViewingApi(id: number): Promise<void> {
     throw new Error("Viewing could not be deleted")
   }
 }
+
+export async function getRecentViewingsApi(): Promise<Viewing[]> {
+  const { data, error } = await supabase
+    .from("viewings")
+    .select(
+      `*,
+   property:properties(title, city, main_image),
+   client:clients(full_name),
+   agent:user_profiles!viewings_agent_id_user_profiles_fkey(full_name, avatar)`
+    )
+    .order("created_at", { ascending: false })
+    .limit(5)
+
+  if (error) {
+    throw new Error("Recent viewings could not be loaded")
+  }
+
+  return data ?? []
+}

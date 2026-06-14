@@ -8,7 +8,7 @@ const copy: Record<CreatableRole, { noun: string; backLabel: string }> = {
   manager: { noun: "Manager", backLabel: "Back to managers" },
 }
 
-export default function UserNotFound({ role }: { role: CreatableRole }) {
+export default function TeamMemberNotFound({ role }: { role: CreatableRole }) {
   const { noun, backLabel } = copy[role]
 
   return (

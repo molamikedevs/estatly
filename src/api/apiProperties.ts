@@ -1,87 +1,52 @@
 import { PAGE_SIZE } from "@/lib/constants"
+import { buildPropertyPayload } from "@/lib/helpers"
 import { supabase } from "@/lib/supabase"
 import type {
-  GalleryImage,
   PropertiesQueryParams,
   Property,
   PropertyStatus,
 } from "@/types/database"
 import type { PropertyFormValues } from "@/types/global"
 
-export async function createUpdatePropertyApi(
-  newProperty: PropertyFormValues,
-  id?: string
+export async function createPropertyApi(
+  newProperty: PropertyFormValues
 ): Promise<Property> {
-  const galleryImages = newProperty.gallery_images as GalleryImage[]
+  const dbReady = await buildPropertyPayload(newProperty)
 
-  // --- 1. Upload any NEW images first ---
-  // If an upload fails we throw before touching the DB, so there's
-  // nothing to roll back.
-  const resolvedUrls: string[] = []
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error("Not authenticated user")
 
-  for (const image of galleryImages) {
-    // Existing image — already hosted, keep its URL
-    if (!image.file) {
-      resolvedUrls.push(image.url)
-      continue
-    }
-
-    // New image — upload it to storage
-    const fileName = `${crypto.randomUUID()}-${image.file.name.replaceAll("/", "")}`
-
-    const { error: uploadError } = await supabase.storage
-      .from("property-images")
-      .upload(fileName, image.file)
-
-    if (uploadError) {
-      throw new Error(`Image upload failed: ${uploadError.message}`)
-    }
-
-    const { data: urlData } = supabase.storage
-      .from("property-images")
-      .getPublicUrl(fileName)
-
-    resolvedUrls.push(urlData.publicUrl)
-  }
-
-  // --- 2. Build the DB-ready payload ---
-  // The form gives us number fields as strings; convert them here.
-  const dbReady = {
-    ...newProperty,
-    price: Number(newProperty.price),
-    bedrooms: Number(newProperty.bedrooms),
-    bathrooms: Number(newProperty.bathrooms),
-    size_sqm: Number(newProperty.size_sqm),
-    year_built: newProperty.year_built ? Number(newProperty.year_built) : null,
-    gallery_images: resolvedUrls,
-    main_image: resolvedUrls[0] ?? null,
-  }
-
-  // --- 3. Insert or update ---
-  let query
-
-  if (id) {
-    // EDIT — ownership (agent_id) stays as-is, so don't include it
-    query = supabase.from("properties").update(dbReady).eq("id", id)
-  } else {
-    // CREATE — assign the current user as the owning agent
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) throw new Error("Not authenticated")
-
-    query = supabase
-      .from("properties")
-      .insert([{ ...dbReady, agent_id: user.id }])
-  }
-
-  const { data, error } = await query.select().single()
+  const { data, error } = await supabase
+    .from("properties")
+    .insert([{ ...dbReady, agent_id: user.id }])
+    .select()
+    .single()
 
   if (error) {
-    console.error(error)
-    throw new Error(
-      id ? "Property could not be updated" : "Property could not be created"
-    )
+    console.error("createPropertyApi error:", error)
+    throw new Error("Property could not be created")
+  }
+
+  return data
+}
+export async function updatePropertyApi(
+  newProperty: PropertyFormValues,
+  id: string
+) {
+  const dbReady = await buildPropertyPayload(newProperty)
+
+  const { data, error } = await supabase
+    .from("properties")
+    .update(dbReady)
+    .eq("id", id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error("updatePropertyApi error:", error)
+    throw new Error("Property could not be updated")
   }
 
   return data
@@ -168,7 +133,7 @@ export async function updatePropertyStatusApi(
 
   if (error) {
     console.error("updatePropertyStatusApi error:", error)
-    throw new Error(error.message)
+    throw new Error("Property status could not be updated")
   }
   return data
 }
@@ -190,7 +155,7 @@ export async function incrementPropertyViewsApi(id: number): Promise<number> {
   const { error: writeError } = await supabase
     .from("properties")
     .update({ views_count: nextCount })
-    .eq("id", id) // ← the missing filter
+    .eq("id", id)
 
   if (writeError) {
     console.error("incrementPropertyViewsApi write error:", writeError)
@@ -211,7 +176,7 @@ export async function getPropertyApi(id: number): Promise<Property> {
 
   if (error) {
     console.error("getPropertyApi error:", error)
-    throw new Error(error.message)
+    throw new Error("Property id details could not be loaded")
   }
 
   return data
@@ -221,4 +186,15 @@ export async function deletePropertyApi(id: string | number) {
   const { error } = await supabase.from("properties").delete().eq("id", id)
 
   if (error) throw new Error("Property could not be deleted")
+}
+
+export async function getPropertiesByStatusApi(): Promise<
+  { status: PropertyStatus; count: number }[]
+> {
+  const { data, error } = await supabase.rpc("properties_by_status")
+  if (error) {
+    console.error("getPropertiesByStatusApi error:", error)
+    throw new Error("Property status breakdown could not be loaded")
+  }
+  return data ?? []
 }

@@ -13,6 +13,7 @@ export default function UserActivity() {
   const { user } = useUser()
   const verified = Boolean(user?.email_confirmed_at)
   const [copied, setCopied] = useState(false)
+
   function copyId() {
     if (!user?.id) return
     navigator.clipboard.writeText(user.id)

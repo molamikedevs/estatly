@@ -1,3 +1,7 @@
+import { uploadGalleryImagesApi } from "@/api/uploader"
+import type { GalleryImage } from "@/types/database"
+import type { PropertyFormValues } from "@/types/global"
+
 export function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
@@ -72,4 +76,25 @@ export function formatBudgetRange(
     return `AED ${formatBudgetShort(min)} – ${formatBudgetShort(max)}`
   if (min != null) return `From AED ${formatBudgetShort(min)}`
   return `Up to AED ${formatBudgetShort(max!)}`
+}
+
+export async function buildPropertyPayload(newProperty: PropertyFormValues) {
+  // 1. Upload Images
+  const galleryImages = newProperty.gallery_images as GalleryImage[]
+  const resolvedUrls = await uploadGalleryImagesApi({
+    images: galleryImages,
+    bucket: "property-images",
+  })
+
+  // 2. Return payload
+  return {
+    ...newProperty,
+    price: Number(newProperty.price),
+    bedrooms: Number(newProperty.bedrooms),
+    bathrooms: Number(newProperty.bathrooms),
+    size_sqm: Number(newProperty.size_sqm),
+    year_built: newProperty.year_built ? Number(newProperty.year_built) : null,
+    gallery_images: resolvedUrls,
+    main_image: resolvedUrls[0] ?? null,
+  }
 }

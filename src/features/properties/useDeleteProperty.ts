@@ -14,10 +14,7 @@ export function useDeleteProperty() {
       queryClient.invalidateQueries({ queryKey: ["properties"] })
     },
 
-    onError: (err) => {
-      toast.error("Failed to delete property")
-      console.error(err.message)
-    },
+    onError: (err) => toast.error(err.message),
   })
 
   return { isPending, deleteProperty }

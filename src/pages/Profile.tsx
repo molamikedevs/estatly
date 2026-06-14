@@ -1,7 +1,7 @@
 import Heading from "@/components/Heading"
-import UserInfo from "@/features/team/UserInfo"
+import UserProfile from "@/features/auth/UserProfile"
 
-export default function User() {
+export default function Profile() {
   return (
     <div className="space-y-6">
       <div>
@@ -12,7 +12,7 @@ export default function User() {
           Manage your profile information and account settings
         </p>
       </div>
-      <UserInfo />
+      <UserProfile />
     </div>
   )
 }

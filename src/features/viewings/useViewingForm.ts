@@ -26,14 +26,9 @@ export function useViewingForm({ onClose }: UseViewingFormParams) {
     defaultValues: EMPTY_VALUES,
   })
 
-  const onSubmit = form.handleSubmit(
-    (values) => {
-      createViewing(values, { onSuccess: onClose })
-    },
-    (errors) => {
-      console.log("VALIDATION FAILED:", errors)
-    }
-  )
+  const onSubmit = form.handleSubmit((values) => {
+    createViewing(values, { onSuccess: onClose })
+  })
 
   return { form, isPending, onSubmit }
 }

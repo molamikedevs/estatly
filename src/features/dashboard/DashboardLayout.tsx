@@ -1,3 +1,6 @@
+import { useClientsByStage } from "@/features/clients/useClientsByStage"
+import { usePropertiesByStatus } from "@/features/properties/usePropertiesByStatus"
+import { useRecentViewings } from "@/features/viewings/useRecentViewings"
 import { Building2, CalendarClock, Handshake, Users } from "lucide-react"
 import { Link } from "react-router-dom"
 import ChartSkeleton from "./ChartSkeleton"
@@ -10,15 +13,20 @@ import StatCardSkeleton from "./StatCardSkeleton"
 import { useDashboard } from "./useDashboard"
 
 export default function DashboardLayout() {
+  const { recentViewings, isLoading: loadingViewings } = useRecentViewings()
+  const { isLoading: loadingClients, clientsByStage } = useClientsByStage()
+  const { propertiesByStatus, isLoading: loadingProperties } =
+    usePropertiesByStatus()
+
+  const { stats, isLoading: loadingStats } = useDashboard()
   const {
-    loadingProperties,
-    loadingClients,
-    loadingViewings,
-    stats,
-    propertiesByStatus,
-    clientsByStage,
-    recentViewings,
-  } = useDashboard()
+    totalProperties = 0,
+    pendingCount = 0,
+    publishedCount = 0,
+    underOfferCount = 0,
+    activeClients = 0,
+    upcomingViewings = 0,
+  } = stats || {}
 
   return (
     <div className="space-y-6">
@@ -32,49 +40,49 @@ export default function DashboardLayout() {
 
       {/* ── Stat cards — each gated by its own source ────── */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {loadingProperties ? (
+        {loadingStats ? (
           <StatCardSkeleton />
         ) : (
           <StatCard
             icon={Building2}
             label="Properties"
-            value={stats.totalProperties}
-            subtitle={`${stats.publishedCount} published · ${stats.pendingCount} pending`}
+            value={totalProperties}
+            subtitle={`${publishedCount} published · ${pendingCount} pending`}
             tone="primary"
           />
         )}
 
-        {loadingClients ? (
+        {loadingStats ? (
           <StatCardSkeleton />
         ) : (
           <StatCard
             icon={Users}
             label="Active clients"
-            value={stats.activeClients}
+            value={activeClients}
             subtitle="In active pipeline"
             tone="info"
           />
         )}
 
-        {loadingProperties ? (
+        {loadingStats ? (
           <StatCardSkeleton />
         ) : (
           <StatCard
             icon={Handshake}
             label="Under offer"
-            value={stats.underOfferCount}
+            value={underOfferCount}
             subtitle="Awaiting decision"
             tone="warning"
           />
         )}
 
-        {loadingViewings ? (
+        {loadingStats ? (
           <StatCardSkeleton />
         ) : (
           <StatCard
             icon={CalendarClock}
             label="Upcoming viewings"
-            value={stats.upcomingViewings}
+            value={upcomingViewings}
             subtitle="Scheduled ahead"
             tone="success"
           />
@@ -93,7 +101,12 @@ export default function DashboardLayout() {
           {loadingProperties ? (
             <ChartSkeleton />
           ) : (
-            <PropertiesStatusChart data={propertiesByStatus} />
+            <PropertiesStatusChart
+              data={propertiesByStatus.map((item) => ({
+                ...item,
+                label: item.status,
+              }))}
+            />
           )}
         </section>
 
@@ -107,7 +120,12 @@ export default function DashboardLayout() {
           {loadingClients ? (
             <ChartSkeleton />
           ) : (
-            <ClientsPipelineChart data={clientsByStage} />
+            <ClientsPipelineChart
+              data={clientsByStage.map((item) => ({
+                ...item,
+                label: item.status,
+              }))}
+            />
           )}
         </section>
       </div>

@@ -3,7 +3,7 @@ import { FormFooter } from "../../components/form-components/FormFooter"
 import UserFields from "./UserFields"
 import { useUserForm } from "./useUserForm"
 
-interface UserFormProps {
+interface TeamMemberFormProps {
   role: CreatableRole
   onClose: () => void
 }
@@ -13,7 +13,7 @@ const submitLabel: Record<CreatableRole, string> = {
   manager: "Create Manager",
 }
 
-export default function UserForm({ role, onClose }: UserFormProps) {
+export default function TeamMemberForm({ role, onClose }: TeamMemberFormProps) {
   const { form, canSave, isPending, onSubmit, handleCancel } = useUserForm({
     role,
     onClose,

@@ -4,7 +4,7 @@ import ProfileHeader from "@/features/team/UserHeader"
 import ProfileSkeleton from "@/features/team/UserSkeleton"
 import type { CreatableRole } from "@/types/database"
 import { Briefcase, Mail, Phone, User as UserIcon } from "lucide-react"
-import UserNotFound from "./UserNotFound"
+import TeamMemberNotFound from "./TeamMemberNotFound"
 import { useTeamMember } from "./useTeamMember"
 
 const copy: Record<CreatableRole, { backLabel: string }> = {
@@ -12,11 +12,11 @@ const copy: Record<CreatableRole, { backLabel: string }> = {
   manager: { backLabel: "Go back to managers" },
 }
 
-export default function UserProfile({ role }: { role: CreatableRole }) {
+export default function TeamMemberProfile({ role }: { role: CreatableRole }) {
   const { member, isLoading, error } = useTeamMember(role)
 
   if (isLoading) return <ProfileSkeleton />
-  if (error || !member) return <UserNotFound role={role} />
+  if (error || !member) return <TeamMemberNotFound role={role} />
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
