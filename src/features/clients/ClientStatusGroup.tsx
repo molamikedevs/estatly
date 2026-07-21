@@ -10,6 +10,7 @@ interface ClientStatusGroupProps {
   status: ClientStatus
   clients: Client[]
   budgetCeiling: number
+  onEdit?: (client: Client) => void
   onDelete?: (client: Client) => void
   onStatusChange: (client: Client, status: ClientStatus) => void
 }
@@ -18,6 +19,7 @@ export default function ClientStatusGroup({
   status,
   clients,
   budgetCeiling,
+  onEdit,
   onDelete,
   onStatusChange,
 }: ClientStatusGroupProps) {
@@ -55,6 +57,7 @@ export default function ClientStatusGroup({
             key={client.id}
             client={client}
             budgetCeiling={budgetCeiling}
+            onEdit={onEdit}
             onDelete={onDelete}
             onStatusChange={onStatusChange}
           />

@@ -1,5 +1,6 @@
 import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
+import FormSheet from "@/components/form-components/FormSheet"
 import {
   Table,
   TableBody,
@@ -29,6 +30,8 @@ export default function ClientsTable() {
   const { isLoading, clients } = useClients()
   const { isPending: isDeleting, deleteClient } = useDeleteClient()
   const [deleteTarget, setDeleteTarget] = useState<Client | undefined>()
+  const [editClient, setEditClient] = useState<Client | undefined>()
+  const [editOpen, setEditOpen] = useState(false)
   const { updateStatus } = useUpdateClientStatus()
 
   const total = clients?.length ?? 0
@@ -42,6 +45,11 @@ export default function ClientsTable() {
 
   function handleStatusChange(client: Client, status: ClientStatus) {
     updateStatus({ id: client.id, status })
+  }
+
+  function handleEdit(client: Client) {
+    setEditClient(client)
+    setEditOpen(true)
   }
 
   // Highest budget_max across all clients — scales every budget bar
@@ -118,6 +126,7 @@ export default function ClientsTable() {
                         status={status}
                         clients={grouped[status] ?? []}
                         budgetCeiling={budgetCeiling}
+                        onEdit={handleEdit}
                         onStatusChange={handleStatusChange}
                         onDelete={setDeleteTarget}
                       />
@@ -127,6 +136,16 @@ export default function ClientsTable() {
           </div>
         </div>
       )}
+
+      <FormSheet
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        size="md"
+        title="Edit client"
+        description="Update this client's details below."
+      >
+        <ClientForm client={editClient} onClose={() => setEditOpen(false)} />
+      </FormSheet>
 
       <ConfirmDelete
         open={Boolean(deleteTarget)}
