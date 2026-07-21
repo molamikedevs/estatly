@@ -5,6 +5,7 @@
 `App.tsx` routes `/clients/:clientId` to the `Agent` page (`TeamMemberProfile role="agent"`) instead of a client detail view. A `ClientDetailView.tsx` file exists but is an empty stub — nothing imports or routes to it, and `ClientRow` has no navigation into it. Opening a client's detail page currently shows a team-member profile, not the client.
 
 Separately, while building the fix it became clear that:
+
 - Clients only support status updates today (`useUpdateClient` → `updateClientStatusApi`). There is no full-field edit path, unlike properties (`usePropertyForm`/`updatePropertyApi`).
 - Client edit/delete actions have no permission gating anywhere (`ClientRow.tsx`, `ClientsTable.tsx`), unlike properties, which gate via `can.editAnyProperty`/`can.deleteProperty` plus an ownership check in `PropertyCard.tsx`.
 
@@ -40,13 +41,16 @@ Applied in both `ClientRow.tsx` (table actions dropdown) and `ClientDetailView.t
 ### 2. Data layer
 
 **`src/api/apiClients.ts`** — add:
+
 - `getClientApi(id: number): Promise<Client>` — single client + agent join (`user_profiles!clients_assigned_agent_id_user_profiles_fkey`), mirrors `getPropertyApi`.
 - `updateClientApi(values: ClientFormValues, id: string): Promise<Client>` — full-field update, mirrors `updatePropertyApi` (no image-upload step; clients have no gallery).
 
 **`src/api/apiViewings.ts`** — add:
+
 - `getClientViewingsApi(clientId: number): Promise<Viewing[]>` — viewings for one client, with `property` (title, city, neighborhood, main_image) and `agent` (full_name, avatar) joins, ordered by `scheduled_at` descending. No pagination — this is a sidebar/section list, not the main viewings table.
 
 **New hooks:**
+
 - `src/features/clients/useClient.ts` — mirrors `useProperty.ts`: reads `clientId` from `useParams`, `useQuery(["client", id], () => getClientApi(id))`.
 - `src/features/viewings/useClientViewings.ts` — `useQuery(["client-viewings", clientId], () => getClientViewingsApi(clientId))`, enabled only when `clientId` is defined.
 
@@ -61,6 +65,7 @@ Applied in both `ClientRow.tsx` (table actions dropdown) and `ClientDetailView.t
 ### 4. Detail page
 
 **`src/features/clients/ClientDetailView.tsx`** (replaces the empty stub): structured like `PropertyDetails.tsx`.
+
 - `BackLink route="clients" label="Back to clients"`.
 - Header: client name, `ClientStatusBadge`, and an actions area (edit → opens `FormSheet` with `ClientForm`; delete → opens `ConfirmDelete`) rendered only when `canEdit`/`canDelete` are true per the permission rules above.
 - Contact block: email, phone, nationality.
@@ -85,7 +90,7 @@ Applied in both `ClientRow.tsx` (table actions dropdown) and `ClientDetailView.t
 
 ## Files touched
 
-```
+```text
 src/lib/permissions.ts                  (+2 permission checks)
 src/api/apiClients.ts                   (+getClientApi, +updateClientApi)
 src/api/apiViewings.ts                  (+getClientViewingsApi)
