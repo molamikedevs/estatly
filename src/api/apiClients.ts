@@ -2,6 +2,23 @@ import { supabase } from "@/lib/supabase"
 import type { Client, ClientStatus } from "@/types/database"
 import type { ClientFormValues } from "@/types/global"
 
+export async function getClientApi(id: number): Promise<Client> {
+  const { data, error } = await supabase
+    .from("clients")
+    .select(
+      "*, agent:user_profiles!clients_assigned_agent_id_user_profiles_fkey(full_name, avatar, email)"
+    )
+    .eq("id", id)
+    .single()
+
+  if (error) {
+    console.error("getClientApi error:", error)
+    throw new Error("Client details could not be loaded")
+  }
+
+  return data
+}
+
 export async function createClientApi(
   newClient: ClientFormValues
 ): Promise<Client> {
