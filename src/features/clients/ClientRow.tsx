@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { TableCell, TableRow } from "@/components/ui/table"
 import UserAvatar from "@/components/UserAvatar"
+import { useUser } from "@/features/auth/useUser"
+import { can } from "@/lib/permissions"
 import type { Client, ClientStatus } from "@/types/database"
 import {
   CheckCircle,
@@ -16,15 +18,18 @@ import {
   Mail,
   MinusCircle,
   MoreHorizontal,
+  Pencil,
   Phone,
   Trash2,
   XCircle,
 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import BudgetRange from "./BudgetRange"
 
 interface ClientRowProps {
   client: Client
   budgetCeiling: number
+  onEdit?: (client: Client) => void
   onStatusChange?: (client: Client, status: ClientStatus) => void
   onDelete?: (client: Client) => void
 }
@@ -32,24 +37,46 @@ interface ClientRowProps {
 export default function ClientRow({
   client,
   budgetCeiling,
+  onEdit,
   onDelete,
   onStatusChange,
 }: ClientRowProps) {
   const { agent } = client
+  const navigate = useNavigate()
+  const { user } = useUser()
+  const role = user?.user_profile?.role
+
+  // Agent can edit/delete only their own; managers/admins can any
+  const isOwner = client.assigned_agent_id === user?.id
+  const canEdit = role
+    ? can.editAnyClient(role) || (role === "agent" && isOwner)
+    : false
+  const canDelete = role
+    ? can.deleteClient(role) || (role === "agent" && isOwner)
+    : false
+
+  function goToDetail() {
+    navigate(`/clients/${client.id}`)
+  }
 
   return (
     <TableRow className="group">
       {/* Client */}
       <TableCell>
-        <div className="flex items-center gap-3">
+        <button
+          onClick={goToDetail}
+          className="flex items-center gap-3 text-left"
+        >
           <UserAvatar name={client.full_name} size="sm" />
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{client.full_name}</p>
+            <p className="truncate text-sm font-medium hover:underline">
+              {client.full_name}
+            </p>
             <p className="truncate text-xs text-muted-foreground">
               {client.nationality ?? "—"}
             </p>
           </div>
-        </div>
+        </button>
       </TableCell>
 
       {/* Contact */}
@@ -87,7 +114,7 @@ export default function ClientRow({
 
       {/* Actions */}
       <TableCell className="pr-4 text-right">
-        {(onStatusChange || onDelete) && (
+        {(onEdit || onStatusChange || onDelete) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -100,6 +127,19 @@ export default function ClientRow({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
+              {canEdit && onEdit && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => onEdit(client)}
+                    className="gap-2 text-sm"
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                    Edit details
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+
               {onStatusChange && (
                 <>
                   <DropdownMenuLabel className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
@@ -137,7 +177,7 @@ export default function ClientRow({
                 </>
               )}
 
-              {onDelete && (
+              {canDelete && onDelete && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
