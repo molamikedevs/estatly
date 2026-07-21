@@ -13,6 +13,8 @@ export const can = {
 
   // Clients
   viewAllClients: (role: UserRole) => ["admin", "manager"].includes(role),
+  editAnyClient: (role: UserRole) => ["admin", "manager"].includes(role),
+  deleteClient: (role: UserRole) => ["admin", "manager"].includes(role),
 
   // Viewings
   viewAllViewings: (role: UserRole) => ["admin", "manager"].includes(role),
