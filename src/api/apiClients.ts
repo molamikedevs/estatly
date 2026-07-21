@@ -56,6 +56,38 @@ export async function createClientApi(
   return data
 }
 
+export async function updateClientApi(
+  newClient: ClientFormValues,
+  id: string
+): Promise<Client> {
+  const dbReady = {
+    full_name: newClient.full_name,
+    email: newClient.email,
+    phone: newClient.phone || null,
+    nationality: newClient.nationality || null,
+    budget_min: newClient.budget_min ? Number(newClient.budget_min) : null,
+    budget_max: newClient.budget_max ? Number(newClient.budget_max) : null,
+    preferred_type: newClient.preferred_type || null,
+    preferred_locations: newClient.preferred_locations,
+    notes: newClient.notes || null,
+    status: newClient.status,
+  }
+
+  const { data, error } = await supabase
+    .from("clients")
+    .update(dbReady)
+    .eq("id", id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error("updateClientApi error:", error)
+    throw new Error("Client could not be updated")
+  }
+
+  return data
+}
+
 export async function updateClientStatusApi(
   id: number,
   status: ClientStatus

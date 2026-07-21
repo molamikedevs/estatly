@@ -15,7 +15,7 @@ import ClientStatusGroup from "./ClientStatusGroup"
 import ClientsEmptyState from "./ClientsEmptyState"
 import { useClients } from "./useClients"
 import { useDeleteClient } from "./useDeleteClient"
-import { useUpdateClient } from "./useUpdateClient"
+import { useUpdateClientStatus } from "./useUpdateClientStatus"
 
 // Pipeline order — active first, dead last
 const STATUS_ORDER: ClientStatus[] = [
@@ -29,7 +29,7 @@ export default function ClientsTable() {
   const { isLoading, clients } = useClients()
   const { isPending: isDeleting, deleteClient } = useDeleteClient()
   const [deleteTarget, setDeleteTarget] = useState<Client | undefined>()
-  const { updateClient } = useUpdateClient()
+  const { updateStatus } = useUpdateClientStatus()
 
   const total = clients?.length ?? 0
 
@@ -41,7 +41,7 @@ export default function ClientsTable() {
   }
 
   function handleStatusChange(client: Client, status: ClientStatus) {
-    updateClient({ id: client.id, status })
+    updateStatus({ id: client.id, status })
   }
 
   // Highest budget_max across all clients — scales every budget bar
