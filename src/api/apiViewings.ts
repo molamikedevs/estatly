@@ -127,3 +127,25 @@ export async function getRecentViewingsApi(): Promise<Viewing[]> {
 
   return data ?? []
 }
+
+export async function getClientViewingsApi(
+  clientId: number
+): Promise<Viewing[]> {
+  const { data, error } = await supabase
+    .from("viewings")
+    .select(
+      `*,
+       property:properties(title, city, neighborhood, main_image),
+       client:clients(full_name, email, phone),
+       agent:user_profiles!viewings_agent_id_user_profiles_fkey(full_name, avatar, email)`
+    )
+    .eq("client_id", clientId)
+    .order("scheduled_at", { ascending: false })
+
+  if (error) {
+    console.error("getClientViewingsApi error:", error)
+    throw new Error("Client viewings could not be loaded")
+  }
+
+  return data ?? []
+}
