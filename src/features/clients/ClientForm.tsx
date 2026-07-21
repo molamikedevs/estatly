@@ -8,13 +8,13 @@ import { DollarSign, Globe, Mail, Phone, User as UserIcon } from "lucide-react"
 import { FormFooter } from "../../components/form-components/FormFooter"
 
 import { CLIENT_STATUS_OPTIONS } from "@/lib/constants"
+import type { ClientFormProps } from "@/types/database"
 
-interface ClientFormProps {
-  onClose: () => void
-}
-
-export default function ClientForm({ onClose }: ClientFormProps) {
-  const { form, isPending, onSubmit } = useClientForm({ onClose })
+export default function ClientForm({ client, onClose }: ClientFormProps) {
+  const { form, isEdit, isPending, onSubmit } = useClientForm({
+    client,
+    onClose,
+  })
   const { control } = form
 
   return (
@@ -124,8 +124,8 @@ export default function ClientForm({ onClose }: ClientFormProps) {
         canSave={!isPending}
         isSubmitting={isPending}
         onCancel={onClose}
-        submitLabel="Add client"
-        submittingLabel="Adding…"
+        submitLabel={isEdit ? "Save changes" : "Add client"}
+        submittingLabel={isEdit ? "Saving…" : "Adding…"}
       />
     </form>
   )
