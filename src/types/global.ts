@@ -144,3 +144,16 @@ export interface SwitchFieldProps<T extends FieldValues> {
   label: string
   description?: string
 }
+
+export type ActionResponse<T = null> = {
+  success: boolean
+  data?: T
+  error?: {
+    message: string
+    details?: Record<string, string[]>
+  }
+  status?: number
+}
+
+export type SuccessResponse<T = null> = ActionResponse<T> & { success: true }
+export type ErrorResponse<T = null> = ActionResponse<T> & { success: false }
