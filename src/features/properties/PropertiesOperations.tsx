@@ -15,7 +15,7 @@ export default function PropertiesOperations() {
 
       <SortBy
         options={[
-          { value: "newest", label: "Newest" },
+          { value: "recent", label: "Recent" },
           { value: "oldest", label: "Oldest" },
           { value: "price-desc", label: "Highest price" },
           { value: "price-asc", label: "Lowest price" },

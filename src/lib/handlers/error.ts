@@ -1,8 +1,9 @@
 import type { ErrorResponse } from "@/types/global"
+
 import { ZodError } from "zod"
 import { RequestError, ValidationError } from "../http-errors"
 
-type ResponseType = "api" | "server"
+export type ResponseType = "api" | "server"
 
 function formatResponse(
   responseType: ResponseType,
@@ -18,12 +19,17 @@ function formatResponse(
     },
   }
 
+  // Returns a NextResponse for API routes, or a plain object for server actions
   return responseType === "api"
     ? Response.json(responseContent, { status })
     : { status, ...responseContent }
 }
 
-export function handleError(error: unknown, responseType: ResponseType) {
+export default function handleError(
+  error: unknown,
+  responseType: ResponseType = "server"
+) {
+  // Typed errors already carry their own statusCode and field-level errors
   if (error instanceof RequestError) {
     return formatResponse(
       responseType,
@@ -33,6 +39,7 @@ export function handleError(error: unknown, responseType: ResponseType) {
     )
   }
 
+  // Converts a raw ZodError into a ValidationError shape before formatting
   if (error instanceof ZodError) {
     const validationError = new ValidationError(
       error.flatten().fieldErrors as Record<string, string[]>
@@ -46,9 +53,11 @@ export function handleError(error: unknown, responseType: ResponseType) {
     )
   }
 
+  // Plain Error instances are reported as 500
   if (error instanceof Error) {
     return formatResponse(responseType, 500, error.message)
   }
 
+  // Non-Error throws (strings, objects, etc.) are reported as 500
   return formatResponse(responseType, 500, "An unexpected error occurred")
 }

@@ -1,11 +1,18 @@
-import { PAGE_SIZE } from "@/lib/constants"
+import action from "@/lib/handlers/action"
+import handleError from "@/lib/handlers/error"
 import { supabase } from "@/lib/supabase"
 import type {
   Viewing,
   ViewingStatus,
   ViewingsQueryParams,
 } from "@/types/database"
-import type { ViewingFormValues } from "@/types/global"
+import type {
+  ActionResponse,
+  ErrorResponse,
+  ViewingFormValues,
+} from "@/types/global"
+
+import { ViewingsQuerySchema } from "@/lib/validation"
 
 export async function createViewingApi(
   newViewing: ViewingFormValues
@@ -62,43 +69,69 @@ export async function updateViewingStatusApi(
   return data
 }
 
-export async function getViewingsApi({
-  filter,
-  sortBy,
-  page,
-  search,
-}: ViewingsQueryParams): Promise<{ data: Viewing[]; count: number }> {
-  let query = supabase.from("viewings").select(
-    `*,
+export async function getViewingsApi(
+  params: ViewingsQueryParams
+): Promise<ActionResponse<{ viewings: Viewing[]; count: number }>> {
+  const validationResult = await action({ params, schema: ViewingsQuerySchema })
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
+  }
+
+  const {
+    page = 1,
+    page_size = 10,
+    query,
+    filter,
+    sort_by,
+  } = validationResult.params!
+
+  const from = (page - 1) * page_size
+  const to = from + page_size - 1
+
+  try {
+    let supabaseQuery = supabase.from("viewings").select(
+      `*,
        property:properties!inner(title, city, neighborhood, main_image),
        client:clients(full_name, email, phone),
        agent:user_profiles!viewings_agent_id_user_profiles_fkey(full_name, avatar, email)`,
-    { count: "exact" }
-  )
+      { count: "exact" }
+    )
 
-  // 1. Filter
-  if (filter !== "all") query = query.eq("status", filter)
+    // 1. Filter
+    if (filter !== "all") supabaseQuery = supabaseQuery.eq("status", filter)
 
-  // Search
-  if (search)
-    query = query.or(`title.ilike.%${search}%,city.ilike.%${search}%`, {
-      referencedTable: "properties",
+    // Search
+    if (query)
+      supabaseQuery = supabaseQuery.or(
+        `title.ilike.%${query}%,city.ilike.%${query}%`,
+        {
+          referencedTable: "properties",
+        }
+      )
+
+    // Sort
+    supabaseQuery = supabaseQuery.order("scheduled_at", {
+      ascending: sort_by === "soonest",
     })
 
-  // Sort
-  query = query.order("scheduled_at", { ascending: sortBy === "soonest" })
+    // Paginate
+    supabaseQuery = supabaseQuery.range(from, to)
 
-  // Paginate
-  const from = (page - 1) * PAGE_SIZE
-  const to = from + PAGE_SIZE - 1
-  query = query.range(from, to)
+    const { data, error, count } = await supabaseQuery
+    if (error) {
+      throw new Error("Viewings could not be loaded")
+    }
 
-  const { data, error, count } = await query
-  if (error) {
-    throw new Error("Viewings could not be loaded")
+    const viewings = data ?? []
+    const total = count ?? 0
+
+    return {
+      success: true,
+      data: { viewings: viewings as Viewing[], count: total },
+    }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
   }
-
-  return { data: data ?? [], count: count ?? 0 }
 }
 
 export async function deleteViewingApi(id: number): Promise<void> {

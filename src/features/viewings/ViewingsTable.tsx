@@ -1,5 +1,6 @@
 import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
+import DataRenderer from "@/components/data-renderer"
 import Pagination from "@/components/Pagination"
 import {
   Table,
@@ -8,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { EMPTY_VIEWINGS, EMPTY_VIEWINGS_FILTERED } from "@/lib/constants"
 import type { Viewing, ViewingStatus } from "@/types/database"
 import { useState } from "react"
 import { useDeleteViewing } from "./useDeleteViewing"
@@ -16,14 +18,14 @@ import { useViewingsOperations } from "./useViewingsOperations"
 import ViewingForm from "./ViewingForm"
 import ViewingRow from "./ViewingRow"
 import ViewingRowSkeleton from "./ViewingRowSkeleton"
-import ViewingsEmptyState from "./ViewingsEmptyState"
 import ViewingsOperations from "./ViewingsOperations"
 
 export default function ViewingsTable() {
   const { updateViewing } = useUpdateViewing()
   const { isPending: isDeleting, deleteViewing } = useDeleteViewing()
 
-  const { isLoading, count, viewings, isFiltered } = useViewingsOperations()
+  const { isLoading, success, error, count, viewings, isFiltered } =
+    useViewingsOperations()
 
   const [deleteTarget, setDeleteTarget] = useState<Viewing | undefined>()
 
@@ -64,7 +66,7 @@ export default function ViewingsTable() {
       {/* Filter + sort */}
       {!isLoading && count > 0 && <ViewingsOperations />}
 
-      {/* Content */}
+      {/* Loading stays OUTSIDE DataRenderer */}
       {isLoading ? (
         <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
           <Table className="w-full table-fixed">
@@ -75,54 +77,60 @@ export default function ViewingsTable() {
             </TableBody>
           </Table>
         </div>
-      ) : count === 0 ? (
-        <ViewingsEmptyState filtered={isFiltered} />
       ) : (
-        <>
-          <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
-            <div className="scrollbar-thin overflow-x-auto md:overflow-x-visible">
-              <Table className="w-full min-w-[760px] md:min-w-0 md:table-fixed">
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="min-w-[200px] md:w-[26%] md:min-w-0">
-                      Property
-                    </TableHead>
-                    <TableHead className="min-w-[160px] md:w-[22%] md:min-w-0">
-                      Client
-                    </TableHead>
-                    <TableHead className="min-w-[140px] md:w-[18%] md:min-w-0">
-                      Agent
-                    </TableHead>
-                    <TableHead className="min-w-[120px] md:w-[15%] md:min-w-0">
-                      Schedule
-                    </TableHead>
-                    <TableHead className="min-w-[100px] md:w-[11%] md:min-w-0">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-[56px] pr-4 text-right md:w-[8%]">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {viewings.map((viewing) => (
-                    <ViewingRow
-                      key={viewing.id}
-                      viewing={viewing}
-                      onStatusChange={handleStatusChange}
-                      onDelete={setDeleteTarget}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
+        <DataRenderer
+          success={success}
+          error={error}
+          data={viewings}
+          empty={isFiltered ? EMPTY_VIEWINGS_FILTERED : EMPTY_VIEWINGS}
+          render={(viewings) => (
+            <>
+              <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
+                <div className="scrollbar-thin overflow-x-auto md:overflow-x-visible">
+                  <Table className="w-full min-w-[760px] md:min-w-0 md:table-fixed">
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="min-w-[200px] md:w-[26%] md:min-w-0">
+                          Property
+                        </TableHead>
+                        <TableHead className="min-w-[160px] md:w-[22%] md:min-w-0">
+                          Client
+                        </TableHead>
+                        <TableHead className="min-w-[140px] md:w-[18%] md:min-w-0">
+                          Agent
+                        </TableHead>
+                        <TableHead className="min-w-[120px] md:w-[15%] md:min-w-0">
+                          Schedule
+                        </TableHead>
+                        <TableHead className="min-w-[100px] md:w-[11%] md:min-w-0">
+                          Status
+                        </TableHead>
+                        <TableHead className="w-[56px] pr-4 text-right md:w-[8%]">
+                          Actions
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {viewings.map((viewing) => (
+                        <ViewingRow
+                          key={viewing.id}
+                          viewing={viewing}
+                          onStatusChange={handleStatusChange}
+                          onDelete={setDeleteTarget}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
 
-          <Pagination count={count} label="viewings" />
-        </>
+              <Pagination count={count} label="viewings" />
+            </>
+          )}
+        />
       )}
 
-      {/* Delete confirmation */}
+      {/* Delete confirmation — outside all states */}
       <ConfirmDelete
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(undefined)}

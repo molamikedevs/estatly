@@ -1,12 +1,19 @@
-import { PAGE_SIZE } from "@/lib/constants"
+import action from "@/lib/handlers/action"
+import handleError from "@/lib/handlers/error"
 import { buildPropertyPayload } from "@/lib/helpers"
+import { NotFoundError } from "@/lib/http-errors"
 import { supabase } from "@/lib/supabase"
+import { PropertyQuerySchema } from "@/lib/validation"
 import type {
   PropertiesQueryParams,
   Property,
   PropertyStatus,
 } from "@/types/database"
-import type { PropertyFormValues } from "@/types/global"
+import type {
+  ActionResponse,
+  ErrorResponse,
+  PropertyFormValues,
+} from "@/types/global"
 
 export async function createPropertyApi(
   newProperty: PropertyFormValues
@@ -52,57 +59,76 @@ export async function updatePropertyApi(
   return data
 }
 
-export async function getPropertiesApi({
-  filter,
-  search,
-  page,
-  sortBy,
-}: PropertiesQueryParams): Promise<{ data: Property[]; count: number }> {
-  let query = supabase
-    .from("properties")
-    .select(
-      `*, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name, avatar, email)`,
-      { count: "exact" }
-    )
-
-  //Filter
-  if (filter !== "all") query = query.eq("listing_type", filter)
-
-  // search
-  if (search) query = query.or(`title.ilike.%${search}%,city.ilike.%${search}%`)
-
-  // Sort
-  switch (sortBy) {
-    case "newest":
-      query = query.order("created_at", { ascending: false })
-      break
-    case "oldest":
-      query = query.order("created_at", { ascending: true })
-      break
-    case "price-asc":
-      query = query.order("price", { ascending: true })
-      break
-    case "price-desc":
-      query = query.order("price", { ascending: false })
-      break
-    case "views-desc":
-      query = query.order("views_count", { ascending: false })
-      break
-    default:
-      query = query.order("created_at", { ascending: false })
+export async function getPropertiesApi(
+  params: PropertiesQueryParams
+): Promise<ActionResponse<{ properties: Property[]; count: number }>> {
+  const validationResult = await action({ params, schema: PropertyQuerySchema })
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse
   }
 
-  // paginate
-  const from = (page - 1) * PAGE_SIZE
-  const to = from + PAGE_SIZE - 1
-  query = query.range(from, to)
+  const {
+    page = 1,
+    page_size = 10,
+    filter,
+    sort_by,
+    query,
+  } = validationResult.params!
 
-  const { data, error, count } = await query
-  if (error) {
-    throw new Error("Properties could not be loaded")
+  const from = (page - 1) * page_size
+  const to = from + page_size - 1
+
+  try {
+    let supabaseQuery = supabase
+      .from("properties")
+      .select(
+        `*, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name, avatar, email)`,
+        { count: "exact" }
+      )
+    // filter
+    if (filter !== "all")
+      supabaseQuery = supabaseQuery.eq("listing_type", filter)
+
+    // search
+    if (query)
+      supabaseQuery = supabaseQuery.or(
+        `title.ilike.%${query}%,city.ilike.%${query}%`
+      )
+
+    // Sort
+    switch (sort_by) {
+      case "oldest":
+        supabaseQuery = supabaseQuery.order("created_at", { ascending: true })
+        break
+      case "price-asc":
+        supabaseQuery = supabaseQuery.order("price", { ascending: true })
+        break
+      case "price-desc":
+        supabaseQuery = supabaseQuery.order("price", { ascending: false })
+        break
+      case "views-desc":
+        supabaseQuery = supabaseQuery.order("views_count", { ascending: false })
+        break
+      default: // "recent" / newest
+        supabaseQuery = supabaseQuery.order("created_at", { ascending: false })
+    }
+
+    // paginate
+    supabaseQuery = supabaseQuery.range(from, to)
+
+    const { data, error, count } = await supabaseQuery
+    if (error) throw new NotFoundError("Properties could not be loaded")
+
+    const properties = data ?? []
+    const total = count ?? 0
+
+    return {
+      success: true,
+      data: { properties: properties as Property[], count: total },
+    }
+  } catch (error) {
+    return handleError(error) as ErrorResponse
   }
-
-  return { data: data ?? [], count: count ?? 0 }
 }
 
 // in apiProperties

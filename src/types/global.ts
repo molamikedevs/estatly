@@ -156,4 +156,4 @@ export type ActionResponse<T = null> = {
 }
 
 export type SuccessResponse<T = null> = ActionResponse<T> & { success: true }
-export type ErrorResponse<T = null> = ActionResponse<T> & { success: false }
+export type ErrorResponse = ActionResponse<undefined> & { success: false }

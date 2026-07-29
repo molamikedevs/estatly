@@ -13,10 +13,11 @@ export function usePropertiesOperations() {
   const params: PropertiesQueryParams = {
     filter: (searchParams.get("listing_type") ??
       "all") as PropertiesQueryParams["filter"],
-    sortBy: (searchParams.get("sortBy") ??
-      "newest") as PropertiesQueryParams["sortBy"],
+    sort_by: (searchParams.get("sort_by") ??
+      "recent") as PropertiesQueryParams["sort_by"],
     page: Number(searchParams.get("page")) || 1,
-    search: searchParams.get("q")?.trim() || "",
+    page_size: Number(searchParams.get("page_size")) || 10,
+    query: searchParams.get("query")?.trim() || "",
   }
 
   const { isLoading, data } = useProperties(params)
@@ -38,9 +39,11 @@ export function usePropertiesOperations() {
 
   return {
     isLoading,
-    properties: data?.data ?? [],
-    total: data?.count ?? 0,
-    isFiltered: params.filter !== "all" || params.search !== "",
+    error: data?.error,
+    success: data?.success ?? false,
+    properties: data?.data?.properties ?? [],
+    total: data?.data?.count ?? 0,
+    isFiltered: params.filter !== "all" || params.query !== "",
     editProperty,
     deleteProperty,
     editOpen,

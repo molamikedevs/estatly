@@ -8,18 +8,21 @@ export function useViewingsOperations() {
   const params: ViewingsQueryParams = {
     filter: (searchParams.get("status") ??
       "all") as ViewingsQueryParams["filter"],
-    sortBy: (searchParams.get("sortBy") ??
-      "soonest") as ViewingsQueryParams["sortBy"],
+    sort_by: (searchParams.get("sort_by") ??
+      "soonest") as ViewingsQueryParams["sort_by"],
     page: Number(searchParams.get("page")) || 1,
-    search: searchParams.get("q")?.trim() ?? "",
+    page_size: Number(searchParams.get("page_size")) || 10,
+    query: searchParams.get("query")?.trim() ?? "",
   }
 
   const { data, isLoading } = useViewings(params)
 
   return {
     isLoading,
-    viewings: data?.data ?? [],
-    count: data?.count ?? 0,
-    isFiltered: params.filter !== "all" || params.search !== "",
+    success: data?.success ?? false,
+    error: data?.error,
+    count: data?.data?.count ?? 0,
+    viewings: data?.data?.viewings ?? [],
+    isFiltered: params.filter !== "all" || params.query !== "",
   }
 }

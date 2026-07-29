@@ -229,3 +229,32 @@ export const settingsSchema = z.object({
     .optional()
     .or(z.literal("")),
 })
+
+export const PaginatedSearchParams = z.object({
+  filter: z.string().optional(),
+  query: z.string().optional(),
+  sort_by: z.string().optional(),
+  page: z.number().min(1, "Number must be at least 1").default(1),
+  page_size: z.number().min(1, "Number must be at least 10").default(10),
+})
+
+export const PropertyQuerySchema = PaginatedSearchParams.extend({
+  filter: z.enum(["all", "rent", "sale"]).default("all"),
+  sort_by: z
+    .enum(["recent", "oldest", "price-desc", "price-asc", "views-desc"])
+    .default("recent"),
+})
+
+export const ViewingsQuerySchema = PaginatedSearchParams.extend({
+  filter: z
+    .enum([
+      "all",
+      "scheduled",
+      "completed",
+      "cancelled",
+      "no-show",
+      "offer-made",
+    ])
+    .default("all"),
+  sort_by: z.enum(["soonest", "latest"]).default("soonest"),
+})

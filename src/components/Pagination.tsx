@@ -1,4 +1,3 @@
-import { PAGE_SIZE } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useSearchParams } from "react-router-dom"
@@ -7,21 +6,44 @@ import { Button } from "./ui/button"
 interface PaginationProps {
   count: number
   label?: string
+  pageSizes?: number[]
 }
 
 export default function Pagination({
   count,
   label = "items",
+  pageSizes = [10, 20, 50],
 }: PaginationProps) {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const currentPage = Number(searchParams.get("page")) || 1
-  const pageCount = Math.ceil(count / PAGE_SIZE)
+  const page = Number(searchParams.get("page") ?? "1")
+  const size = Number(searchParams.get("page_size") ?? "10")
+
+  const pageSize = Number.isNaN(size) || size < 1 ? 10 : size
+  const pageCount = Math.ceil(count / pageSize)
+
+  const currentPage =
+    Number.isNaN(page) || page < 1 ? 1 : Math.min(page, pageCount)
+
+  function updateParams(updates: Record<string, string>) {
+    const next = new URLSearchParams(searchParams)
+
+    Object.entries(updates).forEach(([key, value]) => {
+      next.set(key, value)
+    })
+
+    setSearchParams(next)
+  }
 
   function goToPage(page: number) {
-    const next = new URLSearchParams(searchParams)
-    next.set("page", String(page))
-    setSearchParams(next)
+    updateParams({ page: String(page) })
+  }
+
+  function changePageSize(size: number) {
+    updateParams({
+      page_size: String(size),
+      page: "1",
+    })
   }
 
   function nextPage() {
@@ -32,23 +54,35 @@ export default function Pagination({
     if (currentPage > 1) goToPage(currentPage - 1)
   }
 
-  if (pageCount <= 1) return null
+  if (count === 0) return null
 
-  const from = (currentPage - 1) * PAGE_SIZE + 1
-  const to = Math.min(currentPage * PAGE_SIZE, count)
+  const from = (currentPage - 1) * pageSize + 1
+  const to = Math.min(currentPage * pageSize, count)
 
   return (
-    <div className="flex flex-col items-center justify-between gap-3 border-t border-border/60 pt-4 sm:flex-row">
-      {/* Result range */}
-      <p className="text-xs text-muted-foreground">
-        Showing{" "}
-        <span className="tabular font-medium text-foreground">{from}</span>–
-        <span className="tabular font-medium text-foreground">{to}</span> of{" "}
-        <span className="tabular font-medium text-foreground">{count}</span>{" "}
-        {label}
-      </p>
+    <div className="flex flex-col gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-3">
+        <p className="text-xs text-muted-foreground">
+          Showing{" "}
+          <span className="tabular font-medium text-foreground">{from}</span>–
+          <span className="tabular font-medium text-foreground">{to}</span> of{" "}
+          <span className="tabular font-medium text-foreground">{count}</span>{" "}
+          {label}
+        </p>
 
-      {/* Controls */}
+        <select
+          value={pageSize}
+          onChange={(e) => changePageSize(Number(e.target.value))}
+          className="h-8 rounded-md border bg-background px-2 text-xs"
+        >
+          {pageSizes.map((size) => (
+            <option key={size} value={size}>
+              {size} / page
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex items-center gap-1.5">
         <Button
           variant="outline"
@@ -61,7 +95,6 @@ export default function Pagination({
           <span className="hidden sm:inline">Previous</span>
         </Button>
 
-        {/* Page numbers */}
         <div className="flex items-center gap-1">
           {Array.from({ length: pageCount }, (_, i) => i + 1).map((page) => (
             <Button

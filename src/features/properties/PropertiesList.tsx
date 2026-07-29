@@ -1,15 +1,19 @@
 import Pagination from "@/components/Pagination"
 
-import PropertiesEmptyState from "./PropertiesEmptyState"
 import PropertiesOperations from "./PropertiesOperations"
 import PropertyCard from "./PropertyCard"
 import PropertyCardSkeleton from "./PropertyCardSkeleton"
 
 import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
+import DataRenderer from "@/components/data-renderer"
 import FormSheet from "@/components/form-components/FormSheet"
 import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
-import { SKELETON_KEYS } from "@/lib/constants"
+import {
+  EMPTY_PROPERTIES,
+  EMPTY_PROPERTIES_FILTERED,
+  SKELETON_KEYS,
+} from "@/lib/constants"
 import type { Property, PropertyStatus } from "@/types/database"
 import PropertyForm from "./PropertyForm"
 import { useUpdatePropertyStatus } from "./useUpdatePropertyStatus"
@@ -20,10 +24,12 @@ export default function PropertiesList() {
     properties,
     total,
     isLoading,
+    success,
     editProperty,
     deleteProperty,
     editOpen,
     isDeleting,
+    error,
     handleEdit,
     setDeleteProperty,
     setEditOpen,
@@ -35,9 +41,10 @@ export default function PropertiesList() {
   function handleStatusChange(property: Property, status: PropertyStatus) {
     updateStatus({ id: property.id, status })
   }
+
   return (
     <div className="space-y-6">
-      {/* Page header */}
+      {/* Header — unchanged */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Properties</h2>
@@ -48,8 +55,6 @@ export default function PropertiesList() {
             )}
           </p>
         </div>
-
-        {/* Create flow — CreateButton owns its own open/close state */}
         <CreateButton
           label="Add property"
           size="lg"
@@ -62,46 +67,51 @@ export default function PropertiesList() {
 
       {!isLoading && total > 0 && <PropertiesOperations />}
 
+      {/* Loading stays OUTSIDE DataRenderer — it's a separate concern */}
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {SKELETON_KEYS.map((k) => (
             <PropertyCardSkeleton key={k} />
           ))}
         </div>
-      ) : total === 0 ? (
-        <PropertiesEmptyState filtered={isFiltered} />
       ) : (
-        <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {properties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onEdit={handleEdit}
-                onDelete={setDeleteProperty}
-                onStatusChange={handleStatusChange}
-              />
-            ))}
-          </div>
-
-          {/* Edit flow — open state owned by usePropertiesOperations */}
-
-          <FormSheet
-            open={editOpen}
-            onOpenChange={setEditOpen}
-            size="lg"
-            title="Edit property"
-            description="Update the listing details below."
-          >
-            <PropertyForm
-              property={editProperty}
-              onClose={() => setEditOpen(false)}
-            />
-          </FormSheet>
-
-          <Pagination count={total} label="properties" />
-        </>
+        <DataRenderer
+          success={success}
+          error={error}
+          data={properties}
+          empty={isFiltered ? EMPTY_PROPERTIES_FILTERED : EMPTY_PROPERTIES}
+          render={(properties) => (
+            <>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {properties.map((property) => (
+                  <PropertyCard
+                    key={property.id}
+                    property={property}
+                    onEdit={handleEdit}
+                    onDelete={setDeleteProperty}
+                    onStatusChange={handleStatusChange}
+                  />
+                ))}
+              </div>
+              <Pagination count={total} label="properties" />
+            </>
+          )}
+        />
       )}
+
+      {/* Modals — always rendered, outside all states */}
+      <FormSheet
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        size="lg"
+        title="Edit property"
+        description="Update the listing details below."
+      >
+        <PropertyForm
+          property={editProperty}
+          onClose={() => setEditOpen(false)}
+        />
+      </FormSheet>
 
       <ConfirmDelete
         open={Boolean(deleteProperty)}

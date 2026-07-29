@@ -12,7 +12,7 @@ export type CreatableRole = "agent" | "manager"
 export type ClientStatus = "active" | "closed-won" | "closed-lost" | "inactive"
 
 export type PropertySort =
-  | "newest"
+  | "recent"
   | "oldest"
   | "price-desc"
   | "price-asc"
@@ -197,18 +197,23 @@ export interface Settings {
   contact_phone: string | null
 }
 
-export interface ViewingsQueryParams {
-  filter: ViewingStatus | "all"
-  sortBy: "soonest" | "latest"
-  page: number
-  search: string
+export interface QueryParams<TFilter, TSort> {
+  filter?: TFilter
+  sort_by?: TSort
+  page?: number
+  page_size?: number
+  query?: string
 }
-export interface PropertiesQueryParams {
-  filter: ListingType | "all"
-  sortBy: PropertySort | "newest"
-  page: number
-  search: string
-}
+
+export type ViewingsQueryParams = QueryParams<
+  ViewingStatus | "all",
+  "soonest" | "latest"
+>
+
+export type PropertiesQueryParams = QueryParams<
+  ListingType | "all",
+  PropertySort | "recent"
+>
 
 export interface DashboardStats {
   totalProperties: number

@@ -102,3 +102,34 @@ export const currencyOptions = [
   { value: "GBP", label: "GBP — British Pound" },
   { value: "AED", label: "AED — UAE Dirham" },
 ]
+
+export const DEFAULT_ERROR = {
+  title: "Something went wrong",
+  message: "Even our code has bad days. Give it another shot.",
+}
+
+export const EMPTY_PROPERTIES = {
+  title: "No properties yet",
+  message: "Add your first property to start building your portfolio.",
+  button: { text: "Add property", href: "/properties/new" },
+}
+
+export const EMPTY_PROPERTIES_FILTERED = {
+  title: "No matching properties",
+  message: "Try adjusting your filters to see more listings.",
+}
+
+// lib/states.ts
+export const EMPTY_VIEWINGS = {
+  title: "No viewings scheduled",
+  message: "Schedule your first property viewing to get started.",
+  button: { text: "Schedule viewing", href: "/viewings/new" },
+}
+
+export const EMPTY_VIEWINGS_FILTERED = {
+  title: "No matching viewings",
+  message: "Try adjusting your filters to see more appointments.",
+}
+
+export const EMPTY_CLIENTS = { title: "No clients yet", message: "..." }
+// etc. — one per route
