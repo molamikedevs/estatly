@@ -8,6 +8,7 @@ import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
 import DataRenderer from "@/components/data-renderer"
 import FormSheet from "@/components/form-components/FormSheet"
+import PageHeader from "@/components/page-header"
 import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
 import {
   EMPTY_PROPERTIES,
@@ -46,15 +47,12 @@ export default function PropertiesList() {
     <div className="space-y-6">
       {/* Header — unchanged */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Properties</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Browse and manage your property listings
-            {!isLoading && total > 0 && (
-              <span className="tabular-nums"> · {total} total</span>
-            )}
-          </p>
-        </div>
+        <PageHeader
+          count={total}
+          isLoading={isLoading}
+          heading="Properties"
+          subText="Browse and manage your property listings"
+        />
         <CreateButton
           label="Add property"
           size="lg"

@@ -1,6 +1,7 @@
 import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
 import DataRenderer from "@/components/data-renderer"
+import PageHeader from "@/components/page-header"
 import Pagination from "@/components/Pagination"
 import {
   Table,
@@ -44,15 +45,12 @@ export default function ViewingsTable() {
     <div className="space-y-6">
       {/* Page header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Viewings</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Track property viewing appointments
-            {!isLoading && count > 0 && (
-              <span className="tabular"> · {count} total</span>
-            )}
-          </p>
-        </div>
+        <PageHeader
+          count={count}
+          isLoading={isLoading}
+          heading="Viewings"
+          subText="Track property viewing appointments"
+        />
 
         <CreateButton
           label="Schedule viewing"

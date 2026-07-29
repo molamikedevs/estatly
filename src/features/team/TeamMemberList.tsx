@@ -1,4 +1,5 @@
 import FormSheet from "@/components/form-components/FormSheet"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { useUser } from "@/features/auth/useUser"
 import UserForm from "@/features/team/TeamMemberForm"
@@ -33,15 +34,12 @@ export default function TeamMemberList({ role }: UserListProps) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">{heading}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage your agency team and their access
-            {hasusers && (
-              <span className="tabular-nums"> · {users.length} total</span>
-            )}
-          </p>
-        </div>
+        <PageHeader
+          count={users?.length}
+          isLoading={isLoading}
+          heading={heading}
+          subText="Manage your agency team and their access"
+        />
 
         {canCreate && hasusers && (
           <Button
