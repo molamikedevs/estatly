@@ -4,8 +4,6 @@ import type { User as SupabaseUser } from "@supabase/supabase-js"
 
 export type UserRole = "admin" | "manager" | "agent"
 
-export type ListingType = "rent" | "sale"
-
 /** Roles that can be created in the app. Admin is the actor, never created. */
 export type CreatableRole = "agent" | "manager"
 
@@ -17,22 +15,6 @@ export type PropertySort =
   | "price-desc"
   | "price-asc"
   | "views-desc"
-
-export type PropertyType =
-  | "apartment"
-  | "villa"
-  | "townhouse"
-  | "penthouse"
-  | "studio"
-  | "office"
-  | "land"
-
-export type PropertyStatus =
-  | "pending-approval"
-  | "published"
-  | "rented"
-  | "sold"
-  | "under-offer"
 
 export type ViewingStatus =
   | "scheduled"
@@ -80,7 +62,25 @@ export interface PropertyAgent {
   avatar: string | null
 }
 
-export interface Property {
+export type PropertyType =
+  | "apartment"
+  | "villa"
+  | "townhouse"
+  | "penthouse"
+  | "studio"
+  | "office"
+  | "land"
+
+export type PropertyStatus =
+  | "pending-approval"
+  | "published"
+  | "rented"
+  | "sold"
+  | "under-offer"
+
+export type ListingType = "rent" | "sale"
+
+export interface PropertyParams {
   id: number
   created_at: string
   title: string
@@ -175,7 +175,7 @@ export interface Client {
 }
 
 export interface PropertyFormProps {
-  property?: Property
+  property?: PropertyParams
   onClose: () => void
 }
 export interface ViewingFormProps {

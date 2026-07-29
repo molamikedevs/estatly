@@ -90,7 +90,7 @@ const numberText = (message: string) =>
     .min(1, message)
     .refine((v) => !Number.isNaN(Number(v)) && Number(v) > 0, message)
 
-export const propertySchema = z.object({
+export const CreatePropertySchema = z.object({
   title: z
     .string()
     .min(10, "Title must be at least 10 characters")
@@ -130,6 +130,23 @@ export const propertySchema = z.object({
   bedrooms: numberText("Enter the number of bedrooms"),
   bathrooms: numberText("Enter the number of bathrooms"),
   size_sqm: numberText("Enter a valid size"),
+  latitude: z
+    .string()
+    .refine((v) => {
+      if (v === "") return true
+      const n = Number(v)
+      return !Number.isNaN(n) && n >= -90 && n <= 90
+    }, "Enter a valid latitude")
+    .optional(),
+
+  longitude: z
+    .string()
+    .refine((v) => {
+      if (v === "") return true
+      const n = Number(v)
+      return !Number.isNaN(n) && n >= -180 && n <= 180
+    }, "Enter a valid longitude")
+    .optional(),
 
   year_built: z.string().refine((v) => {
     if (v === "") return true // optional — empty is fine
@@ -159,6 +176,10 @@ export const propertySchema = z.object({
       z.object({ id: z.string(), url: z.string(), file: z.any().optional() })
     )
     .max(10, "Up to 10 images allowed"),
+})
+
+export const EditPropertySchema = CreatePropertySchema.extend({
+  id: z.string(),
 })
 
 export const viewingSchema = z.object({

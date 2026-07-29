@@ -11,8 +11,9 @@ import { z } from "zod"
 
 import {
   clientSchema,
+  CreatePropertySchema,
+  EditPropertySchema,
   profileSchema,
-  propertySchema,
   settingsSchema,
   viewingSchema,
 } from "@/lib/validation"
@@ -20,7 +21,8 @@ import type { UserRole } from "./database"
 
 // ─── Form Value Types (inferred from Zod) ─────────────
 
-export type PropertyFormValues = z.infer<typeof propertySchema>
+export type PropertyFormValues = z.infer<typeof CreatePropertySchema>
+export type EditPropertyFormValues = z.infer<typeof EditPropertySchema>
 export type ViewingFormValues = z.infer<typeof viewingSchema>
 export type UserFormValues = z.infer<typeof profileSchema>
 export type ClientFormValues = z.infer<typeof clientSchema>
@@ -145,15 +147,18 @@ export interface SwitchFieldProps<T extends FieldValues> {
   description?: string
 }
 
-export type ActionResponse<T = null> = {
-  success: boolean
-  data?: T
-  error?: {
+type SuccessResponse<T = null> = {
+  success: true
+  data: T
+  status?: number
+}
+
+type ErrorResponse = {
+  success: false
+  error: {
     message: string
     details?: Record<string, string[]>
   }
   status?: number
 }
-
-export type SuccessResponse<T = null> = ActionResponse<T> & { success: true }
-export type ErrorResponse = ActionResponse<undefined> & { success: false }
+export type ActionResponse<T = null> = SuccessResponse<T> | ErrorResponse

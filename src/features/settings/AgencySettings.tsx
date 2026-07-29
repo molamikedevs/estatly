@@ -1,4 +1,5 @@
 import FormSheet from "@/components/form-components/FormSheet"
+import PageHeader from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Pencil } from "lucide-react"
 import { useState } from "react"
@@ -17,12 +18,10 @@ export default function AgencySettings() {
   return (
     <div className="mx-auto w-full max-w-3xl">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Settings</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage your agency profile and operational defaults.
-          </p>
-        </div>
+        <PageHeader
+          heading="Settings"
+          subText="Manage your agency profile and operational defaults."
+        />
 
         {settings && (
           <Button onClick={() => setEditOpen(true)} className="gap-2 shadow-sm">

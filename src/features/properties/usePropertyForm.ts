@@ -1,7 +1,6 @@
-import { useCreateProperty } from "@/features/properties/useCreateProperty"
-import { useUpdateProperty } from "@/features/properties/useUpdateProperty"
-import { propertySchema } from "@/lib/validation"
-import type { Property } from "@/types/database"
+import { useSaveProperty } from "@/features/properties/useSaveProperty"
+import { CreatePropertySchema } from "@/lib/validation"
+import type { PropertyParams } from "@/types/database"
 import type { PropertyFormValues } from "@/types/global"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -27,7 +26,7 @@ const EMPTY_VALUES: PropertyFormValues = {
 }
 
 // Existing property (numbers) -> form values (strings) for editing
-function propertyToFormValues(p: Property): PropertyFormValues {
+function propertyToFormValues(p: PropertyParams): PropertyFormValues {
   return {
     title: p.title,
     description: p.description,
@@ -53,32 +52,24 @@ function propertyToFormValues(p: Property): PropertyFormValues {
 }
 
 interface UsePropertyFormParams {
-  property?: Property
+  property?: PropertyParams
   onClose: () => void
 }
 
 export function usePropertyForm({ property, onClose }: UsePropertyFormParams) {
   const isEdit = Boolean(property)
-
-  const { updateProperty, isPending: isUpdating } = useUpdateProperty()
-  const { createProperty, isPending: isCreating } = useCreateProperty()
-  const isPending = isEdit ? isUpdating : isCreating
+  const { saveProperty, isPending } = useSaveProperty(isEdit)
 
   const form = useForm<PropertyFormValues>({
-    resolver: zodResolver(propertySchema),
+    resolver: zodResolver(CreatePropertySchema),
     mode: "onBlur",
     defaultValues: property ? propertyToFormValues(property) : EMPTY_VALUES,
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    if (isEdit && property) {
-      updateProperty(
-        { newProperty: values, id: String(property.id) },
-        { onSuccess: onClose }
-      )
-    } else {
-      createProperty(values, { onSuccess: onClose })
-    }
+    const payload =
+      isEdit && property ? { ...values, id: String(property.id) } : values
+    saveProperty(payload, { onSuccess: onClose })
   })
 
   return { form, isEdit, isPending, onSubmit }

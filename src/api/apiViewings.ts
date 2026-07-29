@@ -1,18 +1,13 @@
 import action from "@/lib/handlers/action"
 import handleError from "@/lib/handlers/error"
 import { supabase } from "@/lib/supabase"
+import { ViewingsQuerySchema } from "@/lib/validation"
 import type {
   Viewing,
   ViewingStatus,
   ViewingsQueryParams,
 } from "@/types/database"
-import type {
-  ActionResponse,
-  ErrorResponse,
-  ViewingFormValues,
-} from "@/types/global"
-
-import { ViewingsQuerySchema } from "@/lib/validation"
+import type { ActionResponse, ViewingFormValues } from "@/types/global"
 
 export async function createViewingApi(
   newViewing: ViewingFormValues
@@ -74,7 +69,7 @@ export async function getViewingsApi(
 ): Promise<ActionResponse<{ viewings: Viewing[]; count: number }>> {
   const validationResult = await action({ params, schema: ViewingsQuerySchema })
   if (validationResult instanceof Error) {
-    return handleError(validationResult) as ErrorResponse
+    return handleError(validationResult)
   }
 
   const {
@@ -130,7 +125,7 @@ export async function getViewingsApi(
       data: { viewings: viewings as Viewing[], count: total },
     }
   } catch (error) {
-    return handleError(error) as ErrorResponse
+    return handleError(error)
   }
 }
 

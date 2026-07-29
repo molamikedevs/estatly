@@ -1,70 +1,144 @@
 import action from "@/lib/handlers/action"
 import handleError from "@/lib/handlers/error"
-import { buildPropertyPayload } from "@/lib/helpers"
-import { NotFoundError } from "@/lib/http-errors"
+import {
+  NotFoundError,
+  RequestError,
+  UnauthorizedError,
+} from "@/lib/http-errors"
 import { supabase } from "@/lib/supabase"
-import { PropertyQuerySchema } from "@/lib/validation"
+import {
+  CreatePropertySchema,
+  EditPropertySchema,
+  PropertyQuerySchema,
+} from "@/lib/validation"
 import type {
   PropertiesQueryParams,
-  Property,
+  PropertyParams,
   PropertyStatus,
 } from "@/types/database"
 import type {
   ActionResponse,
-  ErrorResponse,
+  EditPropertyFormValues,
   PropertyFormValues,
 } from "@/types/global"
+import { uploadGalleryImagesApi } from "./uploader"
 
 export async function createPropertyApi(
-  newProperty: PropertyFormValues
-): Promise<Property> {
-  const dbReady = await buildPropertyPayload(newProperty)
+  params: PropertyFormValues
+): Promise<ActionResponse<{ property: PropertyParams }>> {
+  const validationResult = await action({
+    params,
+    schema: CreatePropertySchema,
+    authorize: true,
+  })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated user")
-
-  const { data, error } = await supabase
-    .from("properties")
-    .insert([{ ...dbReady, agent_id: user.id }])
-    .select()
-    .single()
-
-  if (error) {
-    console.error("createPropertyApi error:", error)
-    throw new Error("Property could not be created")
+  if (validationResult instanceof Error) {
+    return handleError(validationResult)
   }
 
-  return data
+  const validated = validationResult.params!
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) throw new UnauthorizedError("Not authenticated user")
+
+    // upload images first → get URLs
+    const resolvedUrls = await uploadGalleryImagesApi({
+      images: validated.gallery_images,
+      bucket: "property-images",
+    })
+
+    const { data, error } = await supabase
+      .from("properties")
+      .insert([
+        {
+          ...validated,
+          // convert string inputs to numbers
+          price: Number(validated.price),
+          bedrooms: Number(validated.bedrooms),
+          bathrooms: Number(validated.bathrooms),
+          size_sqm: Number(validated.size_sqm),
+          year_built: validated.year_built
+            ? Number(validated.year_built)
+            : null,
+          latitude: validated.latitude ? Number(validated.latitude) : null,
+          longitude: validated.longitude ? Number(validated.longitude) : null,
+          gallery_images: resolvedUrls,
+          main_image: resolvedUrls[0] ?? null,
+          // server-set fields
+          agent_id: user.id,
+        },
+      ])
+      .select()
+      .single()
+
+    if (error) {
+      throw new RequestError(500, "Property could not be created")
+    }
+
+    return { success: true, data: { property: data } }
+  } catch (error) {
+    return handleError(error)
+  }
 }
+
 export async function updatePropertyApi(
-  newProperty: PropertyFormValues,
-  id: string
-) {
-  const dbReady = await buildPropertyPayload(newProperty)
-
-  const { data, error } = await supabase
-    .from("properties")
-    .update(dbReady)
-    .eq("id", id)
-    .select()
-    .single()
-
-  if (error) {
-    console.error("updatePropertyApi error:", error)
-    throw new Error("Property could not be updated")
+  params: EditPropertyFormValues
+): Promise<ActionResponse<{ property: PropertyParams }>> {
+  const validationResult = await action({
+    params,
+    schema: EditPropertySchema,
+    authorize: true,
+  })
+  if (validationResult instanceof Error) {
+    return handleError(validationResult)
   }
 
-  return data
+  const { id, ...updates } = validationResult.params!
+
+  const resolvedUrls = await uploadGalleryImagesApi({
+    images: updates.gallery_images,
+    bucket: "property-images",
+  })
+
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .update({
+        ...updates,
+        price: Number(updates.price),
+        bedrooms: Number(updates.bedrooms),
+        bathrooms: Number(updates.bathrooms),
+        size_sqm: Number(updates.size_sqm),
+        year_built: updates.year_built ? Number(updates.year_built) : null,
+        latitude: updates.latitude ? Number(updates.latitude) : null,
+        longitude: updates.longitude ? Number(updates.longitude) : null,
+        gallery_images: resolvedUrls,
+        main_image: resolvedUrls[0] ?? null,
+      })
+      .eq("id", Number(id))
+      .select()
+      .single()
+
+    if (error) {
+      console.error("updatePropertyApi error:", error)
+      throw new RequestError(500, "Property could not be updated")
+    }
+
+    return { success: true, data: { property: data } }
+  } catch (error) {
+    return handleError(error)
+  }
 }
 
 export async function getPropertiesApi(
   params: PropertiesQueryParams
-): Promise<ActionResponse<{ properties: Property[]; count: number }>> {
+): Promise<ActionResponse<{ properties: PropertyParams[]; count: number }>> {
   const validationResult = await action({ params, schema: PropertyQuerySchema })
   if (validationResult instanceof Error) {
-    return handleError(validationResult) as ErrorResponse
+    return handleError(validationResult)
   }
 
   const {
@@ -124,16 +198,16 @@ export async function getPropertiesApi(
 
     return {
       success: true,
-      data: { properties: properties as Property[], count: total },
+      data: { properties: properties as PropertyParams[], count: total },
     }
   } catch (error) {
-    return handleError(error) as ErrorResponse
+    return handleError(error)
   }
 }
 
 // in apiProperties
 export async function getAllPropertiesApi(): Promise<
-  Pick<Property, "id" | "title">[]
+  Pick<PropertyParams, "id" | "title">[]
 > {
   const { data, error } = await supabase
     .from("properties")
@@ -191,7 +265,7 @@ export async function incrementPropertyViewsApi(id: number): Promise<number> {
   return nextCount
 }
 
-export async function getPropertyApi(id: number): Promise<Property> {
+export async function getPropertyApi(id: number): Promise<PropertyParams> {
   const { data, error } = await supabase
     .from("properties")
     .select(
