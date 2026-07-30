@@ -1,14 +1,16 @@
 import { useProperties } from "@/features/properties/useProperties"
-import type { PropertiesQueryParams, Property } from "@/types/database"
+import type { PropertiesQueryParams, PropertyParams } from "@/types/database"
 import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useConfirmDeleteProperty } from "./useConfirmDeleteProperty"
 
 export function usePropertiesOperations() {
   const [searchParams] = useSearchParams()
-  const [editProperty, setEditProperty] = useState<Property | undefined>()
+  const [editProperty, setEditProperty] = useState<PropertyParams | undefined>()
   const [editOpen, setEditOpen] = useState(false)
-  const [deleteProperty, setDeleteProperty] = useState<Property | undefined>()
+  const [deleteProperty, setDeleteProperty] = useState<
+    PropertyParams | undefined
+  >()
 
   const params: PropertiesQueryParams = {
     filter: (searchParams.get("listing_type") ??
@@ -22,13 +24,17 @@ export function usePropertiesOperations() {
 
   const { isLoading, data } = useProperties(params)
 
+  const properties = data?.success ? data.data.properties : []
+  const count = data?.success ? data.data.count : 0
+  const error = data && !data.success ? data.error : undefined
+
   // On the list screen, a successful delete just clears the selection,
   // which closes the confirmation dialog. No navigation.
   const { confirmDelete, isDeleting } = useConfirmDeleteProperty(() =>
     setDeleteProperty(undefined)
   )
 
-  function handleEdit(property: Property) {
+  function handleEdit(property: PropertyParams) {
     setEditProperty(property)
     setEditOpen(true)
   }
@@ -39,10 +45,10 @@ export function usePropertiesOperations() {
 
   return {
     isLoading,
-    error: data?.error,
     success: data?.success ?? false,
-    properties: data?.data?.properties ?? [],
-    total: data?.data?.count ?? 0,
+    error,
+    properties,
+    count,
     isFiltered: params.filter !== "all" || params.query !== "",
     editProperty,
     deleteProperty,

@@ -1,4 +1,3 @@
-// new hook file
 import { getAllPropertiesApi } from "@/api/apiProperties"
 import { useQuery } from "@tanstack/react-query"
 

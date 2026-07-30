@@ -8,5 +8,5 @@ export function useProperties(params: PropertiesQueryParams) {
     queryFn: () => getPropertiesApi(params),
   })
 
-  return { isLoading, data, error, success: data?.success ?? false }
+  return { isLoading, data, error }
 }

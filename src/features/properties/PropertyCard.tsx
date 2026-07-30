@@ -10,7 +10,7 @@ import {
 import { useUser } from "@/features/auth/useUser"
 import { formatPrice, formatSize } from "@/lib/helpers"
 import { can } from "@/lib/permissions"
-import type { Property, PropertyStatus } from "@/types/database"
+import type { PropertyParams, PropertyStatus } from "@/types/database"
 import {
   BadgeCheck,
   Bath,
@@ -32,10 +32,10 @@ import { useNavigate } from "react-router-dom"
 import PropertyStatusBadge from "./PropertyStatusBadge"
 
 interface PropertyCardProps {
-  property: Property
-  onEdit?: (property: Property) => void
-  onDelete?: (property: Property) => void
-  onStatusChange?: (property: Property, status: PropertyStatus) => void
+  property: PropertyParams
+  onEdit?: (property: PropertyParams) => void
+  onDelete?: (property: PropertyParams) => void
+  onStatusChange?: (property: PropertyParams, status: PropertyStatus) => void
 }
 
 export default function PropertyCard({

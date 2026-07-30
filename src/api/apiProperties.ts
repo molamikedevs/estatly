@@ -98,12 +98,12 @@ export async function updatePropertyApi(
 
   const { id, ...updates } = validationResult.params!
 
-  const resolvedUrls = await uploadGalleryImagesApi({
-    images: updates.gallery_images,
-    bucket: "property-images",
-  })
-
   try {
+    const resolvedUrls = await uploadGalleryImagesApi({
+      images: updates.gallery_images,
+      bucket: "property-images",
+    })
+
     const { data, error } = await supabase
       .from("properties")
       .update({
@@ -191,14 +191,15 @@ export async function getPropertiesApi(
     supabaseQuery = supabaseQuery.range(from, to)
 
     const { data, error, count } = await supabaseQuery
-    if (error) throw new NotFoundError("Properties could not be loaded")
+    if (error) {
+      console.error("getPropertiesApi supabase error:", error)
+      throw new NotFoundError("Properties could not be loaded")
+    }
 
     const properties = data ?? []
-    const total = count ?? 0
-
     return {
       success: true,
-      data: { properties: properties as PropertyParams[], count: total },
+      data: { properties, count: count ?? 0 },
     }
   } catch (error) {
     return handleError(error)

@@ -15,7 +15,7 @@ import {
   EMPTY_PROPERTIES_FILTERED,
   SKELETON_KEYS,
 } from "@/lib/constants"
-import type { Property, PropertyStatus } from "@/types/database"
+import type { PropertyParams, PropertyStatus } from "@/types/database"
 import PropertyForm from "./PropertyForm"
 import { useUpdatePropertyStatus } from "./useUpdatePropertyStatus"
 
@@ -23,14 +23,15 @@ export default function PropertiesList() {
   const {
     isFiltered,
     properties,
-    total,
+    count,
     isLoading,
+    error,
     success,
     editProperty,
     deleteProperty,
     editOpen,
     isDeleting,
-    error,
+
     handleEdit,
     setDeleteProperty,
     setEditOpen,
@@ -39,7 +40,10 @@ export default function PropertiesList() {
 
   const { updateStatus } = useUpdatePropertyStatus()
 
-  function handleStatusChange(property: Property, status: PropertyStatus) {
+  function handleStatusChange(
+    property: PropertyParams,
+    status: PropertyStatus
+  ) {
     updateStatus({ id: property.id, status })
   }
 
@@ -48,7 +52,7 @@ export default function PropertiesList() {
       {/* Header — unchanged */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PageHeader
-          count={total}
+          count={count}
           isLoading={isLoading}
           heading="Properties"
           subText="Browse and manage your property listings"
@@ -63,7 +67,7 @@ export default function PropertiesList() {
         </CreateButton>
       </div>
 
-      {!isLoading && total > 0 && <PropertiesOperations />}
+      {!isLoading && count > 0 && <PropertiesOperations />}
 
       {/* Loading stays OUTSIDE DataRenderer — it's a separate concern */}
       {isLoading ? (
@@ -91,7 +95,7 @@ export default function PropertiesList() {
                   />
                 ))}
               </div>
-              <Pagination count={total} label="properties" />
+              <Pagination count={count} label="properties" />
             </>
           )}
         />

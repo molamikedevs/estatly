@@ -1,7 +1,8 @@
 import action from "@/lib/handlers/action"
 import handleError from "@/lib/handlers/error"
+import { UnauthorizedError } from "@/lib/http-errors"
 import { supabase } from "@/lib/supabase"
-import { ViewingsQuerySchema } from "@/lib/validation"
+import { ViewingsQuerySchema, viewingSchema } from "@/lib/validation"
 import type {
   Viewing,
   ViewingStatus,
@@ -10,36 +11,46 @@ import type {
 import type { ActionResponse, ViewingFormValues } from "@/types/global"
 
 export async function createViewingApi(
-  newViewing: ViewingFormValues
-): Promise<Viewing> {
-  // agent_id comes from the session, not the form
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated")
+  params: ViewingFormValues
+): Promise<ActionResponse<{ viewings: Viewing }>> {
+  const validationResult = await action({
+    params,
+    schema: viewingSchema,
+    authorize: true,
+  })
 
-  // Convert form strings to the numbers/types the DB expects
-  const dbReady = {
-    property_id: Number(newViewing.property_id),
-    client_id: Number(newViewing.client_id),
-    agent_id: user.id,
-    scheduled_at: newViewing.scheduled_at,
-    duration_minutes: Number(newViewing.duration_minutes),
-    status: newViewing.status,
-    notes: newViewing.notes || null,
+  if (validationResult instanceof Error) return handleError(validationResult)
+
+  const validatedData = validationResult.params!
+
+  try {
+    // agent_id comes from the session, not the form
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) throw new UnauthorizedError("Not authenticated")
+
+    const { data, error } = await supabase
+      .from("viewings")
+      .insert([
+        {
+          ...validatedData,
+          property_id: Number(validatedData.property_id),
+          client_id: Number(validatedData.client_id),
+          duration_minutes: Number(validatedData.duration_minutes),
+        },
+      ])
+      .select()
+      .single()
+
+    if (error) {
+      throw new Error("Viewings could not be created")
+    }
+
+    return { success: true, data: { viewings: data } }
+  } catch (error) {
+    return handleError(error)
   }
-
-  const { data, error } = await supabase
-    .from("viewings")
-    .insert([dbReady])
-    .select()
-    .single()
-
-  if (error) {
-    throw new Error("Viewings could not be created")
-  }
-
-  return data
 }
 
 export async function updateViewingStatusApi(
@@ -67,7 +78,11 @@ export async function updateViewingStatusApi(
 export async function getViewingsApi(
   params: ViewingsQueryParams
 ): Promise<ActionResponse<{ viewings: Viewing[]; count: number }>> {
-  const validationResult = await action({ params, schema: ViewingsQuerySchema })
+  const validationResult = await action({
+    params,
+    schema: ViewingsQuerySchema,
+    authorize: true,
+  })
   if (validationResult instanceof Error) {
     return handleError(validationResult)
   }
@@ -84,6 +99,11 @@ export async function getViewingsApi(
   const to = from + page_size - 1
 
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) throw new UnauthorizedError("Not authenticated")
+
     let supabaseQuery = supabase.from("viewings").select(
       `*,
        property:properties!inner(title, city, neighborhood, main_image),
@@ -103,6 +123,10 @@ export async function getViewingsApi(
           referencedTable: "properties",
         }
       )
+
+    supabaseQuery.or(`title.ilike.%${query}%,city.ilike.%${query}%`, {
+      referencedTable: "properties",
+    })
 
     // Sort
     supabaseQuery = supabaseQuery.order("scheduled_at", {
