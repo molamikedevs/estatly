@@ -15,7 +15,7 @@ export default function SearchInput() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { pathname } = useLocation()
 
-  const [value, setValue] = useState(searchParams.get("q") ?? "")
+  const [value, setValue] = useState(searchParams.get("search") ?? "")
   const debounce = useDebounce(value, SEARCH_DEBOUNCE_MS)
 
   const placeholder = PLACEHOLDERS[pathname] ?? "Search..."
@@ -27,10 +27,10 @@ export default function SearchInput() {
         const params = new URLSearchParams(prev)
 
         if (debounce) {
-          params.set("q", debounce)
+          params.set("search", debounce)
           params.set("page", "1")
         } else {
-          params.delete("q")
+          params.delete("search")
         }
 
         return params

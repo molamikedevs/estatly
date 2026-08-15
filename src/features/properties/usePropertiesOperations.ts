@@ -16,7 +16,8 @@ export function usePropertiesOperations() {
     sortBy: (searchParams.get("sortBy") ??
       "newest") as PropertiesQueryParams["sortBy"],
     page: Number(searchParams.get("page")) || 1,
-    search: searchParams.get("q")?.trim() || "",
+    search: searchParams.get("search")?.trim() || "",
+    pageSize: Number(searchParams.get("pageSize")) || 10,
   }
 
   const { isLoading, data } = useProperties(params)

@@ -1,4 +1,3 @@
-import { PAGE_SIZE } from "@/lib/constants"
 import { buildPropertyPayload } from "@/lib/helpers"
 import { supabase } from "@/lib/supabase"
 import type {
@@ -57,6 +56,7 @@ export async function getPropertiesApi({
   search,
   page,
   sortBy,
+  pageSize,
 }: PropertiesQueryParams): Promise<{ data: Property[]; count: number }> {
   let query = supabase
     .from("properties")
@@ -93,8 +93,8 @@ export async function getPropertiesApi({
   }
 
   // paginate
-  const from = (page - 1) * PAGE_SIZE
-  const to = from + PAGE_SIZE - 1
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
   query = query.range(from, to)
 
   const { data, error, count } = await query
