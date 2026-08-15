@@ -1,3 +1,4 @@
+import PageHeader from "@/components/PageHeader"
 import { useClientsByStage } from "@/features/clients/useClientsByStage"
 import { usePropertiesByStatus } from "@/features/properties/usePropertiesByStatus"
 import { useRecentViewings } from "@/features/viewings/useRecentViewings"
@@ -31,12 +32,10 @@ export default function DashboardLayout() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Dashboard</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Overview of your agency at a glance
-        </p>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        subText="Overview of your agency at a glance."
+      />
 
       {/* ── Stat cards — each gated by its own source ────── */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
