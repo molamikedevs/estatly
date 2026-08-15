@@ -8,6 +8,7 @@ import PropertyCardSkeleton from "./PropertyCardSkeleton"
 import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
 import FormSheet from "@/components/form-components/FormSheet"
+import PageHeader from "@/components/PageHeader"
 import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
 import { SKELETON_KEYS } from "@/lib/constants"
 import type { Property, PropertyStatus } from "@/types/database"
@@ -39,15 +40,12 @@ export default function PropertiesList() {
     <div className="space-y-6">
       {/* Page header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Properties</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Browse and manage your property listings
-            {!isLoading && total > 0 && (
-              <span className="tabular-nums"> · {total} total</span>
-            )}
-          </p>
-        </div>
+        <PageHeader
+          title="Properties"
+          subText="Browse and manage your property listings"
+          count={total}
+          isLoading={isLoading}
+        />
 
         {/* Create flow — CreateButton owns its own open/close state */}
         <CreateButton

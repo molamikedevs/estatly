@@ -1,5 +1,6 @@
 import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
+import PageHeader from "@/components/PageHeader"
 import {
   Table,
   TableBody,
@@ -61,15 +62,12 @@ export default function ClientsTable() {
     <div className="space-y-6">
       {/* Page header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Clients</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage your client pipeline
-            {!isLoading && total > 0 && (
-              <span className="tabular"> · {total} total</span>
-            )}
-          </p>
-        </div>
+        <PageHeader
+          title="Clients"
+          subText="Manage your pipeline."
+          count={total}
+          isLoading={isLoading}
+        />
 
         <CreateButton
           label="Add new client"
