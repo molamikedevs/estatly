@@ -11,7 +11,8 @@ export function useViewingsOperations() {
     sortBy: (searchParams.get("sortBy") ??
       "soonest") as ViewingsQueryParams["sortBy"],
     page: Number(searchParams.get("page")) || 1,
-    search: searchParams.get("q")?.trim() ?? "",
+    search: searchParams.get("search")?.trim() ?? "",
+    pageSize: Number(searchParams.get("pageSize")),
   }
 
   const { data, isLoading } = useViewings(params)

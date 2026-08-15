@@ -1,4 +1,3 @@
-import { PAGE_SIZE } from "@/lib/constants"
 import { supabase } from "@/lib/supabase"
 import type {
   Viewing,
@@ -67,6 +66,7 @@ export async function getViewingsApi({
   sortBy,
   page,
   search,
+  pageSize,
 }: ViewingsQueryParams): Promise<{ data: Viewing[]; count: number }> {
   let query = supabase.from("viewings").select(
     `*,
@@ -89,8 +89,8 @@ export async function getViewingsApi({
   query = query.order("scheduled_at", { ascending: sortBy === "soonest" })
 
   // Paginate
-  const from = (page - 1) * PAGE_SIZE
-  const to = from + PAGE_SIZE - 1
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
   query = query.range(from, to)
 
   const { data, error, count } = await query

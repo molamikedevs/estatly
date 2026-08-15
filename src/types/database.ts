@@ -197,18 +197,23 @@ export interface Settings {
   contact_phone: string | null
 }
 
-export interface ViewingsQueryParams {
-  filter: ViewingStatus | "all"
-  sortBy: "soonest" | "latest"
+export interface QueryParams<TFilter, TSort> {
+  filter: TFilter
+  sortBy: TSort
   page: number
+  pageSize: number
   search: string
 }
-export interface PropertiesQueryParams {
-  filter: ListingType | "all"
-  sortBy: PropertySort | "newest"
-  page: number
-  search: string
-}
+
+export type ViewingsQueryParams = QueryParams<
+  ViewingStatus | "all",
+  "soonest" | "latest"
+>
+
+export type PropertiesQueryParams = QueryParams<
+  ListingType | "all",
+  PropertySort | "newest"
+>
 
 export interface DashboardStats {
   totalProperties: number
