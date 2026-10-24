@@ -1,52 +1,13 @@
-import { can } from "@/lib/permissions"
-import type { UserRole } from "@/types/database"
-import { Building2, Calendar, LayoutDashboard, Users } from "lucide-react"
-
-export interface NavItem {
-  to: string
-  label: string
-  icon: React.ComponentType<{ className?: string }>
-  badge?: number
-  visible: (role: UserRole) => boolean
-}
-
 export const PAGE_SIZE = 8
 export const DESC_MAX = 2000
 export const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h"]
 export const SEARCH_DEBOUNCE_MS = 400
 
-export const workspaceItems: NavItem[] = [
-  {
-    to: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    visible: () => true,
-  },
-  {
-    to: "/properties",
-    label: "Properties",
-    icon: Building2,
-    visible: () => true,
-  },
-  {
-    to: "/agents",
-    label: "Agents",
-    icon: Users,
-    visible: (role) => can.accessAgentsPage(role),
-  },
-  {
-    to: "/viewings",
-    label: "Viewings",
-    icon: Calendar,
-    visible: () => true,
-  },
-  {
-    to: "/clients",
-    label: "Clients",
-    icon: Users,
-    visible: () => true,
-  },
-]
+// Pages that show the search box in the header
+export const SEARCH_PLACEHOLDERS: Record<string, string> = {
+  "/properties": "Search by property title or city",
+  "/viewings": "Search by property title or city",
+}
 
 export const propertyTypes = [
   { value: "apartment", label: "Apartment" },
@@ -97,8 +58,8 @@ export const CLIENT_STATUS_OPTIONS = [
 ]
 
 export const currencyOptions = [
-  { value: "USD", label: "USD — US Dollar" },
-  { value: "EUR", label: "EUR — Euro" },
-  { value: "GBP", label: "GBP — British Pound" },
-  { value: "AED", label: "AED — UAE Dirham" },
+  { value: "USD", label: "USD, US Dollar" },
+  { value: "EUR", label: "EUR, Euro" },
+  { value: "GBP", label: "GBP, British Pound" },
+  { value: "AED", label: "AED, UAE Dirham" },
 ]

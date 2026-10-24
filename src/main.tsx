@@ -4,6 +4,7 @@ import { ErrorBoundary } from "react-error-boundary"
 
 import { ThemeProvider } from "@/components/theme/theme-provider.tsx"
 import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import "@/styles/index.css"
 import App from "./App.tsx"
 import ErrorFallback from "./components/layout/ErrorFallback.tsx"
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")!).render(
       onReset={() => window.location.replace("/")}
     >
       <ThemeProvider>
-        <App />
+        <TooltipProvider>
+          <App />
+        </TooltipProvider>
         <Toaster />
       </ThemeProvider>
     </ErrorBoundary>
