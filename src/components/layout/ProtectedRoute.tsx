@@ -1,4 +1,4 @@
-import Spinner from "@/components/Spinner"
+import Loader from "@/components/Loader"
 import { useUser } from "@/features/auth/useUser"
 import { useEffect, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
@@ -17,14 +17,8 @@ export default function ProtectedRoute({ children }: Props) {
     }
   }, [isAuthenticated, isLoading, navigate])
 
-  // Show spinner while checking authentication
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner />
-      </div>
-    )
-  }
+  // Show the brand loader while checking authentication
+  if (isLoading) return <Loader />
 
   // Only render children if authenticated
   if (isAuthenticated) {

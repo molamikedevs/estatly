@@ -1,14 +1,15 @@
 import ProtectedRoute from "@/components/layout/ProtectedRoute"
 import RoleProtected from "@/components/layout/RoleProtected"
+import { shouldRetry } from "@/lib/errors"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { lazy, Suspense } from "react"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
+import Loader from "@/components/Loader"
 import AppLayout from "@/components/layout/AppLayout"
-import Spinner from "@/components/Spinner"
 
-// ── Lazy-loaded pages — each becomes its own chunk ──
+// ── Lazy-loaded pages: each becomes its own chunk ──
 const Login = lazy(() => import("@/pages/Login"))
 const UpdatePasswordForm = lazy(
   () => import("@/features/auth/UpdatePasswordForm")
@@ -30,6 +31,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 0,
+      retry: shouldRetry,
     },
   },
 })
@@ -39,7 +41,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools />
       <BrowserRouter>
-        <Suspense fallback={<Spinner />}>
+        <Suspense fallback={<Loader />}>
           <Routes>
             {/* PUBLIC ROUTES */}
             <Route path="/login" element={<Login />} />

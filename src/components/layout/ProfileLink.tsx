@@ -3,6 +3,7 @@ import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { useUser } from "@/features/auth/useUser"
 import { ChevronRight } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
+import { collapsedButton, hideWhenCollapsed } from "./AppSidebar"
 
 export default function ProfileLink({
   inSidebar = false,
@@ -35,24 +36,28 @@ export default function ProfileLink({
     )
   }
 
-  // Sidebar footer: avatar, name and role
+  // Sidebar footer: avatar, name and role. Collapsed: avatar only.
   return (
     <SidebarMenuButton
       asChild
       size="lg"
       isActive={pathname.startsWith("/profile")}
       tooltip={name}
-      className="h-12 gap-3"
+      className={`h-12 gap-3 ${collapsedButton}`}
     >
       <Link to={to}>
         {avatar}
-        <span className="grid flex-1 text-left leading-tight">
+        <span
+          className={`grid flex-1 text-left leading-tight ${hideWhenCollapsed}`}
+        >
           <span className="truncate text-sm font-medium">{name}</span>
           <span className="truncate text-xs text-sidebar-foreground/60 capitalize">
             {role}
           </span>
         </span>
-        <ChevronRight className="ml-auto size-4 text-sidebar-foreground/40" />
+        <ChevronRight
+          className={`ml-auto size-4 text-sidebar-foreground/40 ${hideWhenCollapsed}`}
+        />
       </Link>
     </SidebarMenuButton>
   )
