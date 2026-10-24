@@ -1,5 +1,4 @@
-import { viewingSchema } from "@/lib/validation"
-import type { ViewingFormValues } from "@/types/global"
+import { viewingFormSchema, type ViewingFormValues } from "@/lib/validation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useCreateViewing } from "./useCreateViewing"
@@ -9,8 +8,6 @@ const EMPTY_VALUES: ViewingFormValues = {
   client_id: "",
   scheduled_at: "",
   duration_minutes: "30",
-  status: "scheduled",
-  notes: "",
 }
 
 interface UseViewingFormParams {
@@ -21,8 +18,10 @@ export function useViewingForm({ onClose }: UseViewingFormParams) {
   const { createViewing, isPending } = useCreateViewing()
 
   const form = useForm<ViewingFormValues>({
-    resolver: zodResolver(viewingSchema),
-    mode: "onBlur",
+    // Form checks the rules on strings; the API converts them with viewingSchema
+    resolver: zodResolver(viewingFormSchema),
+    // Errors after a field is first left, then live while fixing it
+    mode: "onTouched",
     defaultValues: EMPTY_VALUES,
   })
 

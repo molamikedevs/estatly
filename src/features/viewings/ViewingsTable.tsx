@@ -1,36 +1,36 @@
 import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
+import DataRenderer from "@/components/DataRenderer"
+import FormSheet from "@/components/form-components/FormSheet"
 import PageHeader from "@/components/PageHeader"
 import Pagination from "@/components/Pagination"
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import type { Viewing, ViewingStatus } from "@/types/database"
+import { useUser } from "@/features/auth/useUser"
+import { EMPTY_VIEWINGS, EMPTY_VIEWINGS_FILTERED } from "@/lib/states"
+import { cn } from "@/lib/utils"
+import type { Viewing } from "@/types/database"
 import { useState } from "react"
+import { gridColumns } from "./constant"
+import RescheduleForm from "./RescheduleForm"
 import { useDeleteViewing } from "./useDeleteViewing"
 import { useUpdateViewing } from "./useUpdateViewing"
-import { useViewingsOperations } from "./useViewingsOperations"
+import { useViewings } from "./useViewings"
 import ViewingForm from "./ViewingForm"
-import ViewingRow from "./ViewingRow"
-import ViewingRowSkeleton from "./ViewingRowSkeleton"
-import ViewingsEmptyState from "./ViewingsEmptyState"
+import ViewingItem from "./ViewingItem"
 import ViewingsOperations from "./ViewingsOperations"
+import ViewingsSkeleton from "./ViewingsSkeleton"
 
 export default function ViewingsTable() {
+  const { user } = useUser()
+  // Agents only see their own viewings, so an Agent column tells them nothing
+  const showAgent = user?.user_profile?.role !== "agent"
+
+  const { viewings, count, isLoading, error, refetch, isFiltered } =
+    useViewings()
   const { updateViewing } = useUpdateViewing()
   const { isPending: isDeleting, deleteViewing } = useDeleteViewing()
 
-  const { isLoading, count, viewings, isFiltered } = useViewingsOperations()
-
-  const [deleteTarget, setDeleteTarget] = useState<Viewing | undefined>()
-
-  function handleStatusChange(viewing: Viewing, status: ViewingStatus) {
-    updateViewing({ id: viewing.id, status })
-  }
+  const [deleteTarget, setDeleteTarget] = useState<Viewing>()
+  const [rescheduleTarget, setRescheduleTarget] = useState<Viewing>()
 
   function handleConfirmDelete() {
     if (!deleteTarget) return
@@ -40,87 +40,88 @@ export default function ViewingsTable() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
+    <div className="min-w-0 space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PageHeader
           title="Viewings"
-          subText="Track property viewing appointments."
+          subText="Track property viewing appointments"
           count={count}
           isLoading={isLoading}
         />
 
         <CreateButton
           label="Schedule viewing"
-          title="Schedule new viewing"
-          description="Book a property viewing by filling in the details below."
+          title="Schedule a viewing"
+          description="Pick the property, the client and a time."
         >
           {(onClose) => <ViewingForm onClose={onClose} />}
         </CreateButton>
       </div>
 
-      {/* Filter + sort */}
-      {!isLoading && count > 0 && <ViewingsOperations />}
+      {/* Always visible, so a filter with no results can be cleared */}
+      <ViewingsOperations />
 
-      {/* Content */}
-      {isLoading ? (
-        <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
-          <Table className="w-full table-fixed">
-            <TableBody>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <ViewingRowSkeleton key={i} />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      ) : count === 0 ? (
-        <ViewingsEmptyState filtered={isFiltered} />
-      ) : (
-        <>
-          <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
-            <div className="scrollbar-thin overflow-x-auto md:overflow-x-visible">
-              <Table className="w-full min-w-[760px] md:min-w-0 md:table-fixed">
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="min-w-[200px] md:w-[26%] md:min-w-0">
-                      Property
-                    </TableHead>
-                    <TableHead className="min-w-[160px] md:w-[22%] md:min-w-0">
-                      Client
-                    </TableHead>
-                    <TableHead className="min-w-[140px] md:w-[18%] md:min-w-0">
-                      Agent
-                    </TableHead>
-                    <TableHead className="min-w-[120px] md:w-[15%] md:min-w-0">
-                      Schedule
-                    </TableHead>
-                    <TableHead className="min-w-[100px] md:w-[11%] md:min-w-0">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-[56px] pr-4 text-right md:w-[8%]">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {viewings.map((viewing) => (
-                    <ViewingRow
-                      key={viewing.id}
-                      viewing={viewing}
-                      onStatusChange={handleStatusChange}
-                      onDelete={setDeleteTarget}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+      <DataRenderer
+        data={viewings}
+        isLoading={isLoading}
+        error={error}
+        onRetry={() => refetch()}
+        loading={<ViewingsSkeleton />}
+        empty={isFiltered ? EMPTY_VIEWINGS_FILTERED : EMPTY_VIEWINGS}
+        render={(items) => (
+          <>
+            <div className="overflow-hidden rounded-xl border bg-card">
+              {/* Column labels, desktop only */}
+              <div
+                aria-hidden="true"
+                className={cn(
+                  "hidden gap-4 border-b px-4 py-2.5 text-xs font-medium text-muted-foreground md:grid",
+                  gridColumns(showAgent)
+                )}
+              >
+                <span>When</span>
+                <span>Property</span>
+                <span>Client</span>
+                {showAgent && <span>Agent</span>}
+                <span>Status</span>
+                <span />
+              </div>
+
+              <ul className="divide-y">
+                {items.map((viewing) => (
+                  <ViewingItem
+                    key={viewing.id}
+                    viewing={viewing}
+                    showAgent={showAgent}
+                    onStatusChange={(status) =>
+                      updateViewing({ id: viewing.id, status })
+                    }
+                    onReschedule={() => setRescheduleTarget(viewing)}
+                    onDelete={() => setDeleteTarget(viewing)}
+                  />
+                ))}
+              </ul>
             </div>
-          </div>
 
-          <Pagination count={count} label="viewings" />
-        </>
-      )}
+            <Pagination count={count} label="viewings" />
+          </>
+        )}
+      />
 
-      {/* Delete confirmation */}
+      <FormSheet
+        open={Boolean(rescheduleTarget)}
+        onOpenChange={(open) => !open && setRescheduleTarget(undefined)}
+        title="Reschedule viewing"
+        description="Pick a new date, time or duration."
+      >
+        {rescheduleTarget && (
+          <RescheduleForm
+            viewing={rescheduleTarget}
+            onClose={() => setRescheduleTarget(undefined)}
+          />
+        )}
+      </FormSheet>
+
       <ConfirmDelete
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(undefined)}

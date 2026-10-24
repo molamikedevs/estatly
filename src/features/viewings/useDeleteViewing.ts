@@ -9,8 +9,9 @@ export function useDeleteViewing() {
     mutationFn: deleteViewingApi,
 
     onSuccess: () => {
-      toast.success("Viewing successfully deleted")
+      toast.success("Viewing deleted")
       queryClient.invalidateQueries({ queryKey: ["viewings"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
 
     onError: (err) => toast.error(err.message),
