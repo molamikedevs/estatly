@@ -1,8 +1,9 @@
-import { clientSchema } from "@/lib/validation"
-import type { ClientFormValues } from "@/types/global"
+import { clientFormSchema, type ClientFormValues } from "@/lib/validation"
+import type { Client } from "@/types/database"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useCreateClient } from "./useCreateClient"
+import { useEditClient } from "./useEditClient"
 
 const EMPTY_VALUES: ClientFormValues = {
   full_name: "",
@@ -13,22 +14,49 @@ const EMPTY_VALUES: ClientFormValues = {
   budget_max: "",
   preferred_type: "",
   preferred_locations: [],
-  notes: "",
-  status: "active",
 }
 
-export function useClientForm({ onClose }: { onClose: () => void }) {
-  const { createClient, isPending } = useCreateClient()
+// Database values (numbers, nulls) → form values (strings)
+function toFormValues(client: Client): ClientFormValues {
+  return {
+    full_name: client.full_name,
+    email: client.email,
+    phone: client.phone ?? "",
+    nationality: client.nationality ?? "",
+    budget_min: client.budget_min?.toString() ?? "",
+    budget_max: client.budget_max?.toString() ?? "",
+    preferred_type: client.preferred_type ?? "",
+    preferred_locations: client.preferred_locations ?? [],
+  }
+}
+
+interface UseClientFormParams {
+  client?: Client
+  onClose: () => void
+}
+
+export function useClientForm({ client, onClose }: UseClientFormParams) {
+  const { createClient, isPending: isCreating } = useCreateClient()
+  const { editClient, isPending: isEditing } = useEditClient()
 
   const form = useForm<ClientFormValues>({
-    resolver: zodResolver(clientSchema),
-    mode: "onBlur",
-    defaultValues: EMPTY_VALUES,
+    resolver: zodResolver(clientFormSchema),
+    mode: "onTouched",
+    defaultValues: client ? toFormValues(client) : EMPTY_VALUES,
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    createClient(values, { onSuccess: onClose })
+    if (client) {
+      editClient({ id: client.id, values }, { onSuccess: onClose })
+    } else {
+      createClient(values, { onSuccess: onClose })
+    }
   })
 
-  return { form, isPending, onSubmit }
+  return {
+    form,
+    isEdit: Boolean(client),
+    isPending: isCreating || isEditing,
+    onSubmit,
+  }
 }

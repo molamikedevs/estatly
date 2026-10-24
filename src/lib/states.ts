@@ -51,16 +51,23 @@ export const EMPTY_VIEWINGS_FILTERED: EmptyState = {
   message: "Try another status or search, or choose All to clear the filter.",
 }
 
+// ─── Clients ──────────────────────────────────────────
+
+export const EMPTY_CLIENTS: EmptyState = {
+  title: "No clients yet",
+  message: "Add your first client to start your pipeline.",
+}
+
+export const EMPTY_STAGE: EmptyState = {
+  title: "No clients here",
+  message: "Move a client here from its menu.",
+}
+
 // ─── Other routes ─────────────────────────────────────
 
 export const EMPTY_PROPERTIES: EmptyState = {
   title: "No properties found",
   message: "Try another search or filter, or add a new listing.",
-}
-
-export const EMPTY_CLIENTS: EmptyState = {
-  title: "No clients found",
-  message: "Add your first client to start tracking their search.",
 }
 
 export const EMPTY_AGENTS: EmptyState = {

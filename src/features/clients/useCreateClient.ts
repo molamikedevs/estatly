@@ -9,8 +9,9 @@ export function useCreateClient() {
     mutationFn: createClientApi,
 
     onSuccess: () => {
-      toast.success("Client successfully added")
+      toast.success("Client added")
       queryClient.invalidateQueries({ queryKey: ["clients"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
 
     onError: (err) => toast.error(err.message),

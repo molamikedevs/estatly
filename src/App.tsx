@@ -63,7 +63,6 @@ export default function App() {
               <Route path="/properties/:propertyId" element={<Property />} />
 
               <Route path="/clients" element={<Clients />} />
-              <Route path="/clients/:clientId" element={<Agent />} />
 
               <Route path="/viewings" element={<Viewings />} />
 

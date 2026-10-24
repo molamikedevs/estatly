@@ -170,8 +170,8 @@ export interface Client {
   notes: string | null
   assigned_agent_id: string | null
   status: ClientStatus
-  // Joined
   agent: ClientAgent | null
+  viewing_count: number
 }
 
 export interface PropertyFormProps {

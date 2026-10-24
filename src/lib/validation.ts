@@ -220,37 +220,77 @@ export const updateViewingStatusSchema = z.object({
   status: z.enum(VIEWING_STATUSES, { message: "Choose a valid status" }),
 })
 
-export const clientSchema = z.object({
-  full_name: z
-    .string()
-    .min(2, "Full name is required")
-    .max(80, "Name is too long"),
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
-  phone: z
-    .string()
-    .max(20, "Phone number is too long")
-    .optional()
-    .or(z.literal("")),
-  nationality: z.string().max(60, "Too long").optional().or(z.literal("")),
-  budget_min: z
-    .string()
-    .refine((v) => v === "" || Number(v) >= 0, "Enter a valid amount")
-    .optional()
-    .or(z.literal("")),
-  budget_max: z
-    .string()
-    .refine((v) => v === "" || Number(v) >= 0, "Enter a valid amount")
-    .optional()
-    .or(z.literal("")),
-  preferred_type: z.string().optional().or(z.literal("")),
-  preferred_locations: z.array(z.string()).max(10, "Too many locations"),
-  notes: z
-    .string()
-    .max(1000, "Notes are too long")
-    .optional()
-    .or(z.literal("")),
-  status: z.enum(["active", "closed-won", "closed-lost", "inactive"]),
+/* ─────────────────────────────────────────────
+  Clients
+   ───────────────────────────────────────────── */
+
+const CLIENT_STATUSES = [
+  "active",
+  "closed-won",
+  "closed-lost",
+  "inactive",
+] as const
+
+const budgetText = z
+  .string()
+  .refine((v) => v === "" || Number(v) >= 0, "Enter a valid amount")
+
+export const clientFormSchema = z
+  .object({
+    full_name: z
+      .string()
+      .trim()
+      .min(2, "Full name is required")
+      .max(80, "Name is too long"),
+    email: z
+      .string()
+      .trim()
+      .min(1, "Email is required")
+      .email("Enter a valid email"),
+    phone: z
+      .string()
+      .trim()
+      .max(20, "Phone number is too long")
+      .regex(/^[+\d\s()-]*$/, "Use digits, spaces, +, -, or ()"),
+    nationality: z.string().trim().max(60, "Too long"),
+    budget_min: budgetText,
+    budget_max: budgetText,
+    preferred_type: z.string(),
+    preferred_locations: z.array(z.string()).max(10, "Too many locations"),
+  })
+  .refine(
+    (v) =>
+      v.budget_min === "" ||
+      v.budget_max === "" ||
+      Number(v.budget_max) >= Number(v.budget_min),
+    { message: "Max budget must be at least the min", path: ["budget_max"] }
+  )
+
+// Empty text becomes null, so the database never stores ""
+const textOrNull = (value: string) => value || null
+const numberOrNull = (value: string) => (value === "" ? null : Number(value))
+
+export const clientSchema = clientFormSchema.transform((values) => ({
+  full_name: values.full_name,
+  email: values.email.toLowerCase(),
+  phone: textOrNull(values.phone),
+  nationality: textOrNull(values.nationality),
+  budget_min: numberOrNull(values.budget_min),
+  budget_max: numberOrNull(values.budget_max),
+  preferred_type: textOrNull(values.preferred_type),
+  preferred_locations: values.preferred_locations,
+}))
+
+export type ClientFormValues = z.infer<typeof clientFormSchema>
+
+export const updateClientStatusSchema = z.object({
+  id: z.number().int().positive(),
+  status: z.enum(CLIENT_STATUSES, { message: "Choose a valid stage" }),
 })
+
+/* ─────────────────────────────────────────────
+  Settings
+   ───────────────────────────────────────────── */
 
 export const settingsSchema = z.object({
   name: z.string().min(2, "Agency name is required").max(100, "Too long"),

@@ -54,14 +54,8 @@ export const viewingStatusOptions: { value: ViewingStatus; label: string }[] = [
   { value: "cancelled", label: "Cancelled" },
 ]
 
+// A viewing can be moved if it has not happened yet, or the client did not come
 export const RESCHEDULABLE_STATUSES: ViewingStatus[] = ["scheduled", "no-show"]
-
-export const CLIENT_STATUS_OPTIONS = [
-  { value: "active", label: "Active" },
-  { value: "closed-won", label: "Closed (won)" },
-  { value: "closed-lost", label: "Closed (lost)" },
-  { value: "inactive", label: "Inactive" },
-]
 
 export const currencyOptions = [
   { value: "USD", label: "USD, US Dollar" },
