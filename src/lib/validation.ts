@@ -57,14 +57,51 @@ export const profileSchema = z
     }
   )
 
+/* ─────────────────────────────────────────────
+  Team
+   ───────────────────────────────────────────── */
+
+// Create: the role comes from the page, not from a field
 export const createAgentSchema = z.object({
-  full_name: z.string().min(1, "Full name is required"),
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(8, "At least 8 characters"),
-  role: z.enum(["manager", "agent"], {
-    message: "Select a role",
-  }),
+  full_name: z
+    .string()
+    .trim()
+    .min(2, "Full name is required")
+    .max(80, "Name is too long"),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Enter a valid email"),
+  password: z
+    .string()
+    .min(8, "At least 8 characters")
+    .max(72, "Password is too long"),
+  role: z.enum(["manager", "agent"], { message: "Choose a role" }),
 })
+
+// Edit: the details an admin may change (email and role are locked)
+export const teamMemberFormSchema = z.object({
+  full_name: z
+    .string()
+    .trim()
+    .min(2, "Full name is required")
+    .max(80, "Name is too long"),
+  phone: z
+    .string()
+    .trim()
+    .max(20, "Phone number is too long")
+    .regex(/^[+\d\s()-]*$/, "Use digits, spaces, +, -, or ()"),
+  specialization: z.string().trim().max(80, "Specialization is too long"),
+})
+
+export const teamMemberSchema = teamMemberFormSchema.transform((values) => ({
+  full_name: values.full_name,
+  phone: values.phone || null,
+  specialization: values.specialization || null,
+}))
+
+export type TeamMemberFormValues = z.infer<typeof teamMemberFormSchema>
 
 export const passwordSchema = z
   .object({
@@ -83,6 +120,10 @@ export const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
 })
+
+/* ─────────────────────────────────────────────
+  Properties
+   ───────────────────────────────────────────── */
 
 const numberText = (message: string) =>
   z

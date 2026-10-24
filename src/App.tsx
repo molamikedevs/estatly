@@ -21,11 +21,9 @@ const Clients = lazy(() => import("@/pages/Clients"))
 const Viewings = lazy(() => import("@/pages/Viewings"))
 const Profile = lazy(() => import("@/pages/Profile"))
 const Agents = lazy(() => import("@/pages/Agents"))
-const Agent = lazy(() => import("@/pages/Agent"))
 const Settings = lazy(() => import("@/pages/Settings"))
 const PageNotFound = lazy(() => import("@/pages/PageNotFound"))
 const Managers = lazy(() => import("./pages/Managers"))
-const Manager = lazy(() => import("./pages/Manager"))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,14 +74,6 @@ export default function App() {
                   </RoleProtected>
                 }
               />
-              <Route
-                path="/agents/:userId"
-                element={
-                  <RoleProtected allowed={["admin", "manager"]}>
-                    <Agent />
-                  </RoleProtected>
-                }
-              />
 
               <Route
                 path="/settings"
@@ -98,14 +88,6 @@ export default function App() {
                 element={
                   <RoleProtected allowed={["admin"]}>
                     <Managers />
-                  </RoleProtected>
-                }
-              />
-              <Route
-                path="/managers/:userId"
-                element={
-                  <RoleProtected allowed={["admin"]}>
-                    <Manager />
                   </RoleProtected>
                 }
               />

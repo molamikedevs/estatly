@@ -1,36 +1,32 @@
+import { FormFooter } from "@/components/form-components/FormFooter"
 import type { CreatableRole } from "@/types/database"
-import { FormFooter } from "../../components/form-components/FormFooter"
-import UserFields from "./UserFields"
-import { useUserForm } from "./useUserForm"
+import UserFields from "./TeamMemberFields"
+import { useTeamForm } from "./useTeamForm"
 
 interface TeamMemberFormProps {
   role: CreatableRole
   onClose: () => void
 }
 
-const submitLabel: Record<CreatableRole, string> = {
-  agent: "Create Agent",
-  manager: "Create Manager",
-}
-
 export default function TeamMemberForm({ role, onClose }: TeamMemberFormProps) {
-  const { form, canSave, isPending, onSubmit, handleCancel } = useUserForm({
-    role,
-    onClose,
-  })
+  const { form, isPending, onSubmit } = useTeamForm({ role, onClose })
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex-1 scrollbar-thin overflow-y-auto px-6 py-6">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="flex flex-1 flex-col overflow-hidden"
+    >
+      <div className="flex-1 overflow-y-auto px-6 py-6">
         <UserFields control={form.control} role={role} />
       </div>
 
       <FormFooter
-        canSave={canSave}
+        canSave={!isPending}
         isSubmitting={isPending}
-        onCancel={handleCancel}
-        submitLabel={submitLabel[role]}
-        submittingLabel="Creating…"
+        onCancel={onClose}
+        submitLabel={`Add ${role}`}
+        submittingLabel="Adding..."
       />
     </form>
   )
