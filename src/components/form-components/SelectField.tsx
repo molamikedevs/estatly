@@ -30,12 +30,17 @@ export default function SelectField<T extends FieldValues>({
       optional={optional}
     >
       {(field, fieldState) => (
-        <div className="relative">
+        <div className="relative min-w-0">
           {Icon && <Icon className="icon-class z-10" />}
-          <Select value={field.value} onValueChange={field.onChange}>
+          <Select
+            value={field.value}
+            onValueChange={field.onChange}
+            // Closing the list counts as leaving the field, so errors can show
+            onOpenChange={(open) => !open && field.onBlur()}
+          >
             <SelectTrigger
               id={id}
-              className={Icon ? "pl-9" : undefined}
+              className={Icon ? "w-full pl-9" : "w-full"}
               aria-invalid={fieldState.invalid}
             >
               <SelectValue placeholder={placeholder} />

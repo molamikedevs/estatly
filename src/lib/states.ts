@@ -39,7 +39,19 @@ export const EMPTY_CLIENTS_BY_STAGE: EmptyState = {
   button: { text: "Go to clients", href: "/clients" },
 }
 
-// ─── Routes ───────────────────────────────────────────
+// ─── Viewings ─────────────────────────────────────────
+
+export const EMPTY_VIEWINGS: EmptyState = {
+  title: "No viewings yet",
+  message: "Schedule a viewing to see it here.",
+}
+
+export const EMPTY_VIEWINGS_FILTERED: EmptyState = {
+  title: "No viewings match",
+  message: "Try another status or search, or choose All to clear the filter.",
+}
+
+// ─── Other routes ─────────────────────────────────────
 
 export const EMPTY_PROPERTIES: EmptyState = {
   title: "No properties found",
@@ -49,11 +61,6 @@ export const EMPTY_PROPERTIES: EmptyState = {
 export const EMPTY_CLIENTS: EmptyState = {
   title: "No clients found",
   message: "Add your first client to start tracking their search.",
-}
-
-export const EMPTY_VIEWINGS: EmptyState = {
-  title: "No viewings found",
-  message: "Try another filter, or schedule a viewing.",
 }
 
 export const EMPTY_AGENTS: EmptyState = {

@@ -57,6 +57,16 @@ export function formatViewingTime(iso: string) {
   })
 }
 
+// RLS hides clients assigned to another agent, so say so instead of "Unknown"
+export function getClientLabel(viewing: {
+  client: { full_name: string } | null
+  client_id: number | null
+}) {
+  if (viewing.client) return viewing.client.full_name
+  if (viewing.client_id) return "Client assigned to another agent"
+  return "No client"
+}
+
 export function formatBudgetShort(amount: number) {
   if (amount >= 1_000_000) {
     return `${(amount / 1_000_000).toFixed(amount % 1_000_000 === 0 ? 0 : 1)}M`
@@ -73,7 +83,7 @@ export function formatBudgetRange(
 ): string {
   if (min == null && max == null) return "Not specified"
   if (min != null && max != null)
-    return `AED ${formatBudgetShort(min)} – ${formatBudgetShort(max)}`
+    return `AED ${formatBudgetShort(min)} to ${formatBudgetShort(max)}`
   if (min != null) return `From AED ${formatBudgetShort(min)}`
   return `Up to AED ${formatBudgetShort(max!)}`
 }

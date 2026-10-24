@@ -132,7 +132,7 @@ export const propertySchema = z.object({
   size_sqm: numberText("Enter a valid size"),
 
   year_built: z.string().refine((v) => {
-    if (v === "") return true // optional — empty is fine
+    if (v === "") return true // optional, empty is fine
     const year = new Date(v).getFullYear()
     return !Number.isNaN(year) && year >= 1800 && year <= CURRENT_YEAR
   }, `Enter a year between 1800 and ${CURRENT_YEAR}`),
@@ -161,19 +161,63 @@ export const propertySchema = z.object({
     .max(10, "Up to 10 images allowed"),
 })
 
-export const viewingSchema = z.object({
+/* ─────────────────────────────────────────────
+  Viewings
+  *FormSchema: the rules, as strings (used by forms)
+  *Schema without "Form": same rules plus conversion (used by action)
+   ───────────────────────────────────────────── */
+
+const VIEWING_STATUSES = [
+  "scheduled",
+  "completed",
+  "cancelled",
+  "no-show",
+  "offer-made",
+] as const
+
+export const viewingFormSchema = z.object({
   property_id: z.string().min(1, "Select a property"),
   client_id: z.string().min(1, "Select a client"),
-  scheduled_at: z.string().min(1, "Pick a date and time"),
-  duration_minutes: z.string().min(1, "Select a duration"),
-  status: z.enum([
-    "scheduled",
-    "completed",
-    "cancelled",
-    "no-show",
-    "offer-made",
-  ]),
-  notes: z.string().max(500, "Notes are too long").optional().or(z.literal("")),
+  scheduled_at: z
+    .string()
+    .min(1, "Pick a date and time")
+    .refine(
+      (v) => new Date(v).getTime() > Date.now(),
+      "Pick a time in the future"
+    ),
+  duration_minutes: z.enum(["15", "30", "45", "60", "90"], {
+    message: "Select a duration",
+  }),
+})
+
+export const viewingSchema = viewingFormSchema.transform((values) => ({
+  property_id: Number(values.property_id),
+  client_id: Number(values.client_id),
+  scheduled_at: values.scheduled_at,
+  duration_minutes: Number(values.duration_minutes),
+}))
+
+export type ViewingFormValues = z.infer<typeof viewingFormSchema>
+
+// Reschedule: same date and duration rules, picked from the create form
+export const rescheduleFormSchema = viewingFormSchema.pick({
+  scheduled_at: true,
+  duration_minutes: true,
+})
+
+export const rescheduleViewingSchema = rescheduleFormSchema
+  .extend({ id: z.number().int().positive() })
+  .transform((values) => ({
+    id: values.id,
+    scheduled_at: values.scheduled_at,
+    duration_minutes: Number(values.duration_minutes),
+  }))
+
+export type RescheduleFormValues = z.infer<typeof rescheduleFormSchema>
+
+export const updateViewingStatusSchema = z.object({
+  id: z.number().int().positive(),
+  status: z.enum(VIEWING_STATUSES, { message: "Choose a valid status" }),
 })
 
 export const clientSchema = z.object({
