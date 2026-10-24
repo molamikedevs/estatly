@@ -5,7 +5,6 @@ import type { ClientFormValues } from "@/types/global"
 export async function createClientApi(
   newClient: ClientFormValues
 ): Promise<Client> {
-  // assigned_agent_id comes from the session — the creator owns this lead
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -81,15 +80,4 @@ export async function deleteClientApi(id: number): Promise<void> {
     console.error("deleteClientApi error:", error)
     throw new Error("Client could not be deleted")
   }
-}
-
-export async function getClientsByStageApi(): Promise<
-  { status: ClientStatus; count: number }[]
-> {
-  const { data, error } = await supabase.rpc("clients_by_stage")
-  if (error) {
-    throw new Error("Client pipeline breakdown could not be loaded")
-  }
-
-  return data ?? []
 }

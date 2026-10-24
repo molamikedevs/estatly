@@ -1,159 +1,103 @@
+import ErrorMessage from "@/components/common/ErrorMessage"
 import PageHeader from "@/components/PageHeader"
-import { useClientsByStage } from "@/features/clients/useClientsByStage"
-import { usePropertiesByStatus } from "@/features/properties/usePropertiesByStatus"
-import { useRecentViewings } from "@/features/viewings/useRecentViewings"
-import { Building2, CalendarClock, Handshake, Users } from "lucide-react"
+import { EMPTY_CLIENTS_BY_STAGE, EMPTY_LISTINGS_BY_STATUS } from "@/lib/states"
 import { Link } from "react-router-dom"
-import ChartSkeleton from "./ChartSkeleton"
-import ClientsPipelineChart from "./ClientsPipelineChart"
-import PropertiesStatusChart from "./PropertiesStatusChart"
-import RecentViewings from "./RecentViewings"
-import RecentViewingsSkeleton from "./RecentViewingsSkeleton"
-import StatCard from "./StatCard"
-import StatCardSkeleton from "./StatCardSkeleton"
+import { CLIENT_STAGES, PROPERTY_STATUSES } from "./constant"
+import DashboardSkeleton from "./DashboardSkeleton"
+import Panel from "./Panel"
+import PendingList from "./PendingList"
+import StatStrip from "./StatStrip"
+import StatusBars from "./StatusBars"
 import { useDashboard } from "./useDashboard"
+import ViewingList from "./ViewingList"
+
+const viewAllLink = (
+  <Link
+    to="/viewings"
+    className="shrink-0 text-sm font-medium text-primary hover:underline"
+  >
+    View all
+  </Link>
+)
 
 export default function DashboardLayout() {
-  const { recentViewings, isLoading: loadingViewings } = useRecentViewings()
-  const { isLoading: loadingClients, clientsByStage } = useClientsByStage()
-  const { propertiesByStatus, isLoading: loadingProperties } =
-    usePropertiesByStatus()
-
-  const { stats, isLoading: loadingStats } = useDashboard()
-  const {
-    totalProperties = 0,
-    pendingCount = 0,
-    publishedCount = 0,
-    underOfferCount = 0,
-    activeClients = 0,
-    upcomingViewings = 0,
-  } = stats || {}
+  const { dashboard, isLoading, error, refetch, role } = useDashboard()
+  const isAgent = role === "agent"
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
+    <div className="min-w-0 space-y-6">
       <PageHeader
         title="Dashboard"
-        subText="Overview of your agency at a glance."
+        subText={
+          isAgent ? "Your listings, clients and viewings" : "Agency overview"
+        }
       />
 
-      {/* ── Stat cards — each gated by its own source ────── */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {loadingStats ? (
-          <StatCardSkeleton />
-        ) : (
-          <StatCard
-            icon={Building2}
-            label="Properties"
-            value={totalProperties}
-            subtitle={`${publishedCount} published · ${pendingCount} pending`}
-            tone="primary"
-          />
-        )}
+      {isLoading && <DashboardSkeleton />}
 
-        {loadingStats ? (
-          <StatCardSkeleton />
-        ) : (
-          <StatCard
-            icon={Users}
-            label="Active clients"
-            value={activeClients}
-            subtitle="In active pipeline"
-            tone="info"
-          />
-        )}
+      {error && <ErrorMessage error={error} onRetry={() => refetch()} />}
 
-        {loadingStats ? (
-          <StatCardSkeleton />
-        ) : (
-          <StatCard
-            icon={Handshake}
-            label="Under offer"
-            value={underOfferCount}
-            subtitle="Awaiting decision"
-            tone="warning"
-          />
-        )}
-
-        {loadingStats ? (
-          <StatCardSkeleton />
-        ) : (
-          <StatCard
-            icon={CalendarClock}
-            label="Upcoming viewings"
-            value={upcomingViewings}
-            subtitle="Scheduled ahead"
-            tone="success"
-          />
-        )}
-      </div>
-
-      {/* ── Charts ──────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <section className="rounded-2xl border bg-card p-5 shadow-card sm:p-6">
-          <div className="mb-5">
-            <h3 className="text-sm font-semibold">Properties by status</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Distribution across the listing lifecycle
-            </p>
-          </div>
-          {loadingProperties ? (
-            <ChartSkeleton />
+      {dashboard && (
+        <>
+          {/* 1. What needs action first */}
+          {isAgent ? (
+            <Panel title="Your viewings" action={viewAllLink}>
+              <ViewingList viewings={dashboard.upcoming} />
+            </Panel>
           ) : (
-            <PropertiesStatusChart
-              data={propertiesByStatus.map((item) => ({
-                ...item,
-                label: item.status,
-              }))}
-            />
+            // minmax(0, …): columns may shrink below their longest text
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+              <Panel
+                title="Waiting for approval"
+                count={dashboard.pending.length}
+              >
+                <PendingList properties={dashboard.pending} />
+              </Panel>
+              <Panel title="Next viewings" action={viewAllLink}>
+                <ViewingList viewings={dashboard.upcoming} />
+              </Panel>
+            </div>
           )}
-        </section>
 
-        <section className="rounded-2xl border bg-card p-5 shadow-card sm:p-6">
-          <div className="mb-5">
-            <h3 className="text-sm font-semibold">Client pipeline</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Breakdown by stage
-            </p>
-          </div>
-          {loadingClients ? (
-            <ChartSkeleton />
-          ) : (
-            <ClientsPipelineChart
-              data={clientsByStage.map((item) => ({
-                ...item,
-                label: item.status,
-              }))}
-            />
-          )}
-        </section>
-      </div>
+          {/* 2. Context numbers, kept small */}
+          <StatStrip
+            items={[
+              isAgent
+                ? { label: "Your listings", value: dashboard.stats.listings }
+                : { label: "Published", value: dashboard.stats.published },
+              { label: "Under offer", value: dashboard.stats.underOffer },
+              { label: "Active clients", value: dashboard.stats.activeClients },
+              {
+                label: "Viewings, next 7 days",
+                value: dashboard.stats.viewingsNextWeek,
+              },
+            ]}
+          />
 
-      {/* ── Recent viewings ─────────────────────────────── */}
-      <section className="rounded-2xl border bg-card p-5 shadow-card sm:p-6">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-semibold">Recent viewings</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Latest scheduled appointments
-            </p>
-          </div>
-          {!loadingViewings && recentViewings.length > 0 && (
-            <Link
-              to="/viewings"
-              className="shrink-0 text-xs font-medium text-primary hover:underline"
+          {/* 3. Breakdown */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Panel
+              title={isAgent ? "Your listings by status" : "Listings by status"}
+              count={dashboard.stats.listings}
             >
-              View all →
-            </Link>
-          )}
-        </div>
-
-        {loadingViewings ? (
-          <RecentViewingsSkeleton />
-        ) : (
-          <RecentViewings viewings={recentViewings} />
-        )}
-      </section>
+              <StatusBars
+                config={PROPERTY_STATUSES}
+                counts={dashboard.propertyCounts}
+                empty={EMPTY_LISTINGS_BY_STATUS}
+              />
+            </Panel>
+            <Panel
+              title={isAgent ? "Your clients by stage" : "Clients by stage"}
+            >
+              <StatusBars
+                config={CLIENT_STAGES}
+                counts={dashboard.clientCounts}
+                empty={EMPTY_CLIENTS_BY_STAGE}
+              />
+            </Panel>
+          </div>
+        </>
+      )}
     </div>
   )
 }
