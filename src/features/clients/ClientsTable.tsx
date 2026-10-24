@@ -1,38 +1,35 @@
+import EmptyMessage from "@/components/common/EmptyMessage"
 import ConfirmDelete from "@/components/ConfirmDelete"
 import CreateButton from "@/components/CreateButton"
+import DataRenderer from "@/components/DataRenderer"
+import FormSheet from "@/components/form-components/FormSheet"
 import PageHeader from "@/components/PageHeader"
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { useUser } from "@/features/auth/useUser"
+import { CLIENT_STAGES } from "@/lib/constants"
+import { EMPTY_CLIENTS, EMPTY_STAGE } from "@/lib/states"
+import { cn } from "@/lib/utils"
 import type { Client, ClientStatus } from "@/types/database"
 import { useState } from "react"
+import ClientCard from "./ClientCard"
 import ClientForm from "./ClientForm"
-import ClientRowSkeleton from "./ClientRowSkeleton"
-import ClientStatusGroup from "./ClientStatusGroup"
-import ClientsEmptyState from "./ClientsEmptyState"
+import ClientsSkeleton from "./ClientsSkeleton"
 import { useClients } from "./useClients"
 import { useDeleteClient } from "./useDeleteClient"
 import { useUpdateClient } from "./useUpdateClient"
 
-// Pipeline order — active first, dead last
-const STATUS_ORDER: ClientStatus[] = [
-  "active",
-  "closed-won",
-  "closed-lost",
-  "inactive",
-]
-
 export default function ClientsTable() {
-  const { isLoading, clients } = useClients()
-  const { isPending: isDeleting, deleteClient } = useDeleteClient()
-  const [deleteTarget, setDeleteTarget] = useState<Client | undefined>()
-  const { updateClient } = useUpdateClient()
+  const { user } = useUser()
+  // Agents only see their own clients, so the agent line tells them nothing
+  const showAgent = user?.user_profile?.role !== "agent"
 
-  const total = clients?.length ?? 0
+  const { clients, isLoading, error, refetch } = useClients()
+  const { updateClient } = useUpdateClient()
+  const { isPending: isDeleting, deleteClient } = useDeleteClient()
+
+  const [editTarget, setEditTarget] = useState<Client>()
+  const [deleteTarget, setDeleteTarget] = useState<Client>()
+  // Phones show one stage at a time
+  const [phoneStage, setPhoneStage] = useState<ClientStatus>("active")
 
   function handleConfirmDelete() {
     if (!deleteTarget) return
@@ -41,90 +38,132 @@ export default function ClientsTable() {
     })
   }
 
-  function handleStatusChange(client: Client, status: ClientStatus) {
-    updateClient({ id: client.id, status })
-  }
-
-  // Highest budget_max across all clients — scales every budget bar
-  const budgetCeiling =
-    clients?.reduce((max, c) => Math.max(max, c.budget_max ?? 0), 0) ?? 0
-
-  // Group clients by status
-  const grouped = (clients ?? []).reduce(
-    (acc, client) => {
-      ;(acc[client.status] ??= []).push(client)
-      return acc
-    },
-    {} as Record<ClientStatus, typeof clients>
-  )
-
   return (
-    <div className="space-y-6">
-      {/* Page header */}
+    <div className="min-w-0 space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PageHeader
           title="Clients"
-          subText="Manage your pipeline."
-          count={total}
+          subText="Your pipeline, from first contact to closed"
+          count={clients?.length ?? 0}
           isLoading={isLoading}
         />
 
         <CreateButton
-          label="Add new client"
+          label="Add client"
           size="md"
-          title="Add new client"
-          description="Capture the client's details and preferences to start tracking them in your pipeline."
+          title="Add a client"
+          description="Contact details and what they are looking for."
         >
           {(onClose) => <ClientForm onClose={onClose} />}
         </CreateButton>
       </div>
 
-      {/* Content */}
-      {!isLoading && total === 0 ? (
-        <ClientsEmptyState />
-      ) : (
-        <div className="overflow-hidden rounded-2xl border bg-card shadow-card">
-          <div className="scrollbar-thin overflow-x-auto md:overflow-x-visible">
-            <Table className="w-full min-w-[760px] md:min-w-0 md:table-fixed">
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="min-w-[180px] md:w-[24%] md:min-w-0">
-                    Client
-                  </TableHead>
-                  <TableHead className="min-w-[200px] md:w-[28%] md:min-w-0">
-                    Contact
-                  </TableHead>
-                  <TableHead className="min-w-[160px] md:w-[22%] md:min-w-0">
-                    Budget
-                  </TableHead>
-                  <TableHead className="min-w-[160px] md:w-[20%] md:min-w-0">
-                    Assigned agent
-                  </TableHead>
-                  <TableHead className="w-[56px] pr-4 text-right md:w-[8%]">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading
-                  ? Array.from({ length: 6 }).map((_, i) => (
-                      <ClientRowSkeleton key={i} />
-                    ))
-                  : STATUS_ORDER.map((status) => (
-                      <ClientStatusGroup
-                        key={status}
-                        status={status}
-                        clients={grouped[status] ?? []}
-                        budgetCeiling={budgetCeiling}
-                        onStatusChange={handleStatusChange}
-                        onDelete={setDeleteTarget}
+      <DataRenderer
+        data={clients}
+        isLoading={isLoading}
+        error={error}
+        onRetry={() => refetch()}
+        loading={<ClientsSkeleton />}
+        empty={EMPTY_CLIENTS}
+        render={(items) => (
+          <>
+            {/* Phone: pick a stage */}
+            <div className="scrollbar-hidden -mx-4 flex gap-2 overflow-x-auto px-4 md:hidden">
+              {CLIENT_STAGES.map((stage) => {
+                const count = items.filter(
+                  (c) => c.status === stage.status
+                ).length
+                const selected = stage.status === phoneStage
+                return (
+                  <button
+                    key={stage.status}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setPhoneStage(stage.status)}
+                    className={cn(
+                      "flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors active:scale-[0.97]",
+                      selected
+                        ? "border-transparent bg-primary text-primary-foreground"
+                        : "bg-card text-muted-foreground"
+                    )}
+                  >
+                    {stage.label}
+                    <span className="tabular-nums">{count}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Board: 1 column on phones, 2 on tablets, 4 on wide screens.
+                items-start: each column ends where its cards end */}
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {CLIENT_STAGES.map((stage) => {
+                const stageClients = items.filter(
+                  (c) => c.status === stage.status
+                )
+
+                return (
+                  <section
+                    key={stage.status}
+                    aria-label={stage.label}
+                    className={cn(
+                      "min-w-0 rounded-xl bg-muted/50 p-3",
+                      stage.status !== phoneStage && "hidden md:block"
+                    )}
+                  >
+                    <h2 className="mb-3 flex items-center gap-2 px-1 text-sm font-medium">
+                      <span
+                        aria-hidden="true"
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: stage.color }}
                       />
-                    ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      )}
+                      {stage.label}
+                      <span className="ml-auto text-muted-foreground tabular-nums">
+                        {stageClients.length}
+                      </span>
+                    </h2>
+
+                    {stageClients.length === 0 ? (
+                      <EmptyMessage empty={EMPTY_STAGE} compact />
+                    ) : (
+                      <ul className="space-y-3">
+                        {stageClients.map((client) => (
+                          <li key={client.id}>
+                            <ClientCard
+                              client={client}
+                              showAgent={showAgent}
+                              onEdit={() => setEditTarget(client)}
+                              onMove={(status) =>
+                                updateClient({ id: client.id, status })
+                              }
+                              onDelete={() => setDeleteTarget(client)}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                )
+              })}
+            </div>
+          </>
+        )}
+      />
+
+      <FormSheet
+        open={Boolean(editTarget)}
+        onOpenChange={(open) => !open && setEditTarget(undefined)}
+        title="Edit client"
+        description="Update contact details and what they are looking for."
+        size="md"
+      >
+        {editTarget && (
+          <ClientForm
+            client={editTarget}
+            onClose={() => setEditTarget(undefined)}
+          />
+        )}
+      </FormSheet>
 
       <ConfirmDelete
         open={Boolean(deleteTarget)}
@@ -132,7 +171,7 @@ export default function ClientsTable() {
         onConfirm={handleConfirmDelete}
         isPending={isDeleting}
         title="Delete this client?"
-        description="This will also delete all viewings scheduled for this client. This action can't be undone."
+        description="Only for clients added by mistake. This can't be undone."
       />
     </div>
   )

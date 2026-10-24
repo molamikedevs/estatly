@@ -11,6 +11,7 @@ export function useDeleteClient() {
     onSuccess: () => {
       toast.success("Client deleted")
       queryClient.invalidateQueries({ queryKey: ["clients"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
 
     onError: (err) => toast.error(err.message),

@@ -1,83 +1,107 @@
+import { ForbiddenError, toRequestError } from "@/lib/errors"
+import action from "@/lib/handler/action"
 import { supabase } from "@/lib/supabase"
+import {
+  clientSchema,
+  updateClientStatusSchema,
+  type ClientFormValues,
+} from "@/lib/validation"
 import type { Client, ClientStatus } from "@/types/database"
-import type { ClientFormValues } from "@/types/global"
-
-export async function createClientApi(
-  newClient: ClientFormValues
-): Promise<Client> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated")
-
-  const dbReady = {
-    full_name: newClient.full_name,
-    email: newClient.email,
-    phone: newClient.phone || null,
-    nationality: newClient.nationality || null,
-    budget_min: newClient.budget_min ? Number(newClient.budget_min) : null,
-    budget_max: newClient.budget_max ? Number(newClient.budget_max) : null,
-    preferred_type: newClient.preferred_type || null,
-    preferred_locations: newClient.preferred_locations,
-    notes: newClient.notes || null,
-    status: newClient.status,
-    assigned_agent_id: user.id,
-  }
-
-  const { data, error } = await supabase
-    .from("clients")
-    .insert([dbReady])
-    .select()
-    .single()
-
-  if (error) {
-    console.error("createClientApi error:", error)
-    throw new Error("Client could not be created")
-  }
-
-  return data
-}
-
-export async function updateClientStatusApi(
-  id: number,
-  status: ClientStatus
-): Promise<Client> {
-  const { data, error } = await supabase
-    .from("clients")
-    .update({ status })
-    .eq("id", id)
-    .select()
-    .single()
-
-  if (error) {
-    console.error("updateClientStatusApi error:", error)
-    throw new Error("Client status could not been updated")
-  }
-
-  return data
-}
 
 export async function getClientsApi(): Promise<Client[]> {
   const { data, error } = await supabase
     .from("clients")
     .select(
-      "*, agent:user_profiles!clients_assigned_agent_id_user_profiles_fkey(full_name, avatar, email)"
+      "*, agent:user_profiles!clients_assigned_agent_id_user_profiles_fkey(full_name, avatar, email), viewings(count)"
     )
     .order("created_at", { ascending: false })
 
-  if (error) {
-    console.error("getClientsApi error:", error)
-    throw new Error("Clients could not be loaded")
-  }
+  if (error) throw toRequestError(error, "Clients")
 
-  return data ?? []
+  // Without database types, Supabase guesses joins are arrays.
+  // agent is many-to-one (one object); viewings(count) comes back as [{ count }].
+  const rows = (data ?? []) as unknown as (Omit<Client, "viewing_count"> & {
+    viewings: { count: number }[]
+  })[]
+
+  return rows.map(({ viewings, ...client }) => ({
+    ...client,
+    viewing_count: viewings[0]?.count ?? 0,
+  }))
 }
 
-export async function deleteClientApi(id: number): Promise<void> {
-  const { error } = await supabase.from("clients").delete().eq("id", id)
+export async function createClientApi(values: ClientFormValues) {
+  // The creator owns the lead; new clients always start as active
+  const { params, user } = await action({
+    params: values,
+    schema: clientSchema,
+    authorize: true,
+  })
 
-  if (error) {
-    console.error("deleteClientApi error:", error)
-    throw new Error("Client could not be deleted")
+  const { error } = await supabase
+    .from("clients")
+    .insert({ ...params, status: "active", assigned_agent_id: user!.id })
+
+  if (error) throw toRequestError(error, "Client")
+}
+
+export async function updateClientApi({
+  id,
+  values,
+}: {
+  id: number
+  values: ClientFormValues
+}) {
+  const { params } = await action({ params: values, schema: clientSchema })
+
+  const { data, error } = await supabase
+    .from("clients")
+    .update(params)
+    .eq("id", id)
+    .select("id")
+
+  if (error) throw toRequestError(error, "Client")
+
+  // RLS blocks updates silently: no error, zero rows changed
+  if (data.length === 0) {
+    throw new ForbiddenError("You can only edit your own clients")
+  }
+}
+
+export async function updateClientStatusApi(values: {
+  id: number
+  status: ClientStatus
+}) {
+  const { params } = await action({
+    params: values,
+    schema: updateClientStatusSchema,
+  })
+
+  const { data, error } = await supabase
+    .from("clients")
+    .update({ status: params.status })
+    .eq("id", params.id)
+    .select("id")
+
+  if (error) throw toRequestError(error, "Client")
+
+  if (data.length === 0) {
+    throw new ForbiddenError("You can only move your own clients")
+  }
+}
+
+export async function deleteClientApi(id: number) {
+  // With ON DELETE RESTRICT, a client with viewings fails here (23503),
+  // and toRequestError turns that into "This client is linked to other records"
+  const { data, error } = await supabase
+    .from("clients")
+    .delete()
+    .eq("id", id)
+    .select("id")
+
+  if (error) throw toRequestError(error, "Client")
+
+  if (data.length === 0) {
+    throw new ForbiddenError("You can only delete your own clients")
   }
 }
