@@ -1,9 +1,28 @@
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { useUser } from "@/features/auth/useUser"
-import { workspaceItems } from "@/lib/constants"
-import { can } from "@/lib/permissions"
+import type { NavItem } from "@/lib/nav-items"
+import { getTabs, isActivePath } from "@/lib/nav-items"
 import { cn } from "@/lib/utils"
-import { Settings, Users } from "lucide-react"
-import { NavLink } from "react-router-dom"
+import { Ellipsis } from "lucide-react"
+import { useState } from "react"
+import { NavLink, useLocation } from "react-router-dom"
+
+// Shared by the tabs and the More button so they look identical
+function tabClass(active: boolean) {
+  return cn(
+    "flex h-full w-full flex-col items-center justify-center gap-1 text-[11px] font-medium select-none",
+    "transition-[color,transform] duration-150 ease-out active:scale-95",
+    "[-webkit-tap-highlight-color:transparent]",
+    active ? "text-primary" : "text-muted-foreground"
+  )
+}
 
 export default function MobileBottomNav() {
   const { user } = useUser()
@@ -11,66 +30,81 @@ export default function MobileBottomNav() {
 
   if (!role) return null
 
-  // Workspace items the user can see…
-  const workspace = workspaceItems.filter((item) => item.visible(role))
-
-  // …plus Settings if admin, so it isn't stranded
-  const items = [
-    ...workspace,
-    ...(can.accessSettings(role)
-      ? [
-          {
-            to: "/settings",
-            label: "Settings",
-            icon: Settings,
-            visible: () => true,
-          },
-          {
-            to: "/managers",
-            label: "Manager",
-            icon: Users,
-            visible: () => true,
-          },
-        ]
-      : []),
-  ]
+  const { tabs, more } = getTabs(role)
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur-lg lg:hidden"
-      aria-label="Primary"
-      // iOS safe-area
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      aria-label="Main"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
-      <ul className="mx-auto flex max-w-md items-stretch justify-around px-2">
-        {items.map(({ to, label, icon: Icon }) => (
-          <li key={to} className="flex-1">
-            <NavLink
-              to={to}
-              className={({ isActive }) =>
-                cn(
-                  "flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[10px] font-medium transition-colors",
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon
-                    className={cn(
-                      "h-5 w-5 transition-transform",
-                      isActive && "scale-110"
-                    )}
-                  />
-                  <span className="truncate">{label}</span>
-                </>
-              )}
+      <ul className="mx-auto flex h-16 max-w-md">
+        {tabs.map(({ label, path, icon: Icon }) => (
+          <li key={path} className="flex-1">
+            <NavLink to={path} className={({ isActive }) => tabClass(isActive)}>
+              <Icon className="size-5" />
+              <span className="max-w-full truncate px-1">{label}</span>
             </NavLink>
           </li>
         ))}
+
+        {more.length > 0 && (
+          <li className="flex-1">
+            <MoreSheet items={more} />
+          </li>
+        )}
       </ul>
     </nav>
+  )
+}
+
+function MoreSheet({ items }: { items: NavItem[] }) {
+  const [open, setOpen] = useState(false)
+  const { pathname } = useLocation()
+
+  const active = items.some((item) => isActivePath(pathname, item.path))
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button type="button" className={tabClass(active)}>
+          <Ellipsis className="size-5" />
+          <span>More</span>
+        </button>
+      </SheetTrigger>
+
+      <SheetContent
+        side="bottom"
+        className="rounded-t-2xl pb-[calc(1rem+env(safe-area-inset-bottom))]"
+      >
+        <SheetHeader>
+          <SheetTitle>More</SheetTitle>
+          <SheetDescription className="sr-only">
+            Other pages in Estatly
+          </SheetDescription>
+        </SheetHeader>
+
+        <ul className="flex flex-col gap-1 px-2">
+          {items.map(({ label, path, icon: Icon }) => (
+            <li key={path}>
+              <NavLink
+                to={path}
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    "flex h-12 items-center gap-3 rounded-lg px-3 text-base font-medium transition-colors active:bg-accent",
+                    isActive
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground"
+                  )
+                }
+              >
+                <Icon className="size-5 text-muted-foreground" />
+                {label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </SheetContent>
+    </Sheet>
   )
 }
