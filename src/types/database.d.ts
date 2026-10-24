@@ -215,12 +215,41 @@ export type PropertiesQueryParams = QueryParams<
   PropertySort | "newest"
 >
 
-export interface DashboardStats {
-  totalProperties: number
-  totalViewings: number
-  publishedCount: number
-  pendingCount: number
-  underOfferCount: number
-  activeClients: number
-  upcomingViewings: number
+// ─── Dashboard ────────────────────────────────────────
+
+export interface StatusCount {
+  status: string
+  count: number
+}
+
+export interface DashboardProperty {
+  id: number
+  title: string
+  price: number
+  listing_type: ListingType
+  status: PropertyStatus
+  main_image: string | null
+  agent: { full_name: string } | null
+}
+
+export interface DashboardViewing {
+  id: number
+  scheduled_at: string
+  client_id: number | null
+  property: { id: number; title: string; main_image: string | null } | null
+  client: { full_name: string } | null
+}
+
+export interface DashboardData {
+  propertyCounts: StatusCount[]
+  clientCounts: StatusCount[]
+  pending: DashboardProperty[]
+  upcoming: DashboardViewing[]
+  stats: {
+    listings: number
+    published: number
+    underOffer: number
+    activeClients: number
+    viewingsNextWeek: number
+  }
 }

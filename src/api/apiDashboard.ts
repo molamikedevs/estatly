@@ -1,59 +1,85 @@
+import { toRequestError } from "@/lib/errors"
 import { supabase } from "@/lib/supabase"
-import type { DashboardStats } from "@/types/database"
+import type {
+  DashboardData,
+  DashboardProperty,
+  DashboardViewing,
+  UserRole,
+} from "@/types/database"
 
-export async function getDashboardStatsApi(): Promise<DashboardStats> {
-  const properties = supabase.from("properties")
-  const viewings = supabase.from("viewings")
-  const clients = supabase.from("clients")
-  const head = { count: "exact" as const, head: true }
+import { countByStatus, countOf, DAY_MS } from "@/features/dashboard/constant"
 
-  const nowIso = new Date().toISOString()
+export async function getDashboardApi(
+  role: UserRole,
+  userId: string
+): Promise<DashboardData> {
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  const inSevenDays = new Date(startOfToday.getTime() + 7 * DAY_MS)
 
-  const [
-    totalProperties,
-    totalViewings,
-    published,
-    pending,
-    underOffer,
-    active,
-    upcoming,
-  ] = await Promise.all([
-    properties.select("*", head),
-    viewings.select("*", head),
-    properties.select("*", head).eq("status", "published"),
-    properties.select("*", head).eq("status", "pending-approval"),
-    properties.select("*", head).eq("status", "under-offer"),
-    clients.select("*", head).eq("status", "active"),
-    viewings
-      .select("*", head)
-      .gte("scheduled_at", nowIso)
-      .eq("status", "scheduled"),
-  ])
-
-  const results = [
-    totalProperties,
-    totalViewings,
-    pending,
-    published,
-    underOffer,
-    active,
-    upcoming,
-  ]
-  if (results.some((r) => r.error)) {
-    console.error(
-      "getDashboardStatsApi error:",
-      results.find((r) => r.error)?.error
+  // Oldest first, so the listing that has waited longest comes first
+  let propertiesQuery = supabase
+    .from("properties")
+    .select(
+      "id, title, price, listing_type, status, main_image, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name)"
     )
-    throw new Error("Dashboard stats could not be loaded")
+    .order("created_at", { ascending: true })
+
+  let clientsQuery = supabase.from("clients").select("status")
+
+  let upcomingQuery = supabase
+    .from("viewings")
+    .select(
+      "id, scheduled_at, client_id, property:properties(id, title, main_image), client:clients(full_name)"
+    )
+    .eq("status", "scheduled")
+    .gte("scheduled_at", startOfToday.toISOString())
+    .order("scheduled_at", { ascending: true })
+    .limit(6)
+
+  let nextWeekQuery = supabase
+    .from("viewings")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "scheduled")
+    .gte("scheduled_at", startOfToday.toISOString())
+    .lt("scheduled_at", inSevenDays.toISOString())
+
+  // Agents see only their own work. RLS enforces the security; these filters set the scope.
+  if (role === "agent") {
+    propertiesQuery = propertiesQuery.eq("agent_id", userId)
+    clientsQuery = clientsQuery.eq("assigned_agent_id", userId)
+    upcomingQuery = upcomingQuery.eq("agent_id", userId)
+    nextWeekQuery = nextWeekQuery.eq("agent_id", userId)
   }
 
+  const [properties, clients, upcoming, nextWeek] = await Promise.all([
+    propertiesQuery,
+    clientsQuery,
+    upcomingQuery,
+    nextWeekQuery,
+  ])
+
+  const failed =
+    properties.error ?? clients.error ?? upcoming.error ?? nextWeek.error
+  if (failed) throw toRequestError(failed, "Dashboard")
+
+  const propertyRows = (properties.data ?? []) as unknown as DashboardProperty[]
+  const upcomingRows = (upcoming.data ?? []) as unknown as DashboardViewing[]
+
+  const propertyCounts = countByStatus(propertyRows)
+  const clientCounts = countByStatus(clients.data ?? [])
+
   return {
-    totalProperties: totalProperties.count ?? 0,
-    totalViewings: totalViewings.count ?? 0,
-    pendingCount: pending.count ?? 0,
-    publishedCount: published.count ?? 0,
-    underOfferCount: underOffer.count ?? 0,
-    activeClients: active.count ?? 0,
-    upcomingViewings: upcoming.count ?? 0,
+    propertyCounts,
+    clientCounts,
+    pending: propertyRows.filter((p) => p.status === "pending-approval"),
+    upcoming: upcomingRows,
+    stats: {
+      listings: propertyRows.length,
+      published: countOf(propertyCounts, "published"),
+      underOffer: countOf(propertyCounts, "under-offer"),
+      activeClients: countOf(clientCounts, "active"),
+      viewingsNextWeek: nextWeek.count ?? 0,
+    },
   }
 }
