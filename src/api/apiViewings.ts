@@ -1,64 +1,85 @@
+import { RESCHEDULABLE_STATUSES } from "@/lib/constants"
+import { ConflictError, ForbiddenError, toRequestError } from "@/lib/errors"
+import action from "@/lib/handler/action"
 import { supabase } from "@/lib/supabase"
+import {
+  rescheduleViewingSchema,
+  updateViewingStatusSchema,
+  viewingSchema,
+  type RescheduleFormValues,
+  type ViewingFormValues,
+} from "@/lib/validation"
 import type {
   Viewing,
   ViewingStatus,
   ViewingsQueryParams,
 } from "@/types/database"
-import type { ViewingFormValues } from "@/types/global"
 
-export async function createViewingApi(
-  newViewing: ViewingFormValues
-): Promise<Viewing> {
-  // agent_id comes from the session, not the form
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated")
+export async function createViewingApi(values: ViewingFormValues) {
+  // Schema turns form strings into numbers; agent_id comes from the session
+  const { params, user } = await action({
+    params: values,
+    schema: viewingSchema,
+    authorize: true,
+  })
 
-  // Convert form strings to the numbers/types the DB expects
-  const dbReady = {
-    property_id: Number(newViewing.property_id),
-    client_id: Number(newViewing.client_id),
-    agent_id: user.id,
-    scheduled_at: newViewing.scheduled_at,
-    duration_minutes: Number(newViewing.duration_minutes),
-    status: newViewing.status,
-    notes: newViewing.notes || null,
-  }
-
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("viewings")
-    .insert([dbReady])
-    .select()
-    .single()
+    .insert({ ...params, agent_id: user!.id, status: "scheduled" })
 
-  if (error) {
-    throw new Error("Viewings could not be created")
-  }
-
-  return data
+  if (error) throw toRequestError(error, "Viewing")
 }
 
-export async function updateViewingStatusApi(
-  id: number,
-  status: ViewingStatus,
-  feedback?: string
-): Promise<Viewing> {
-  const update: { status: ViewingStatus; feedback?: string } = { status }
-  if (feedback !== undefined) update.feedback = feedback
+export async function rescheduleViewingApi(
+  values: RescheduleFormValues & { id: number }
+) {
+  const { params } = await action({
+    params: values,
+    schema: rescheduleViewingSchema,
+  })
 
   const { data, error } = await supabase
     .from("viewings")
-    .update(update)
-    .eq("id", id)
-    .select()
-    .single()
+    .update({
+      scheduled_at: params.scheduled_at,
+      duration_minutes: params.duration_minutes,
+      status: "scheduled",
+    })
+    .eq("id", params.id)
+    .in("status", RESCHEDULABLE_STATUSES)
+    .select("id")
 
-  if (error) {
-    throw new Error("Viewing status could not be updated")
+  if (error) throw toRequestError(error, "Viewing")
+
+  // Zero rows: wrong status, or RLS blocked it (not your viewing)
+  if (data.length === 0) {
+    throw new ConflictError(
+      "Only your own scheduled or no-show viewings can be rescheduled"
+    )
   }
+}
 
-  return data
+export async function updateViewingStatusApi(values: {
+  id: number
+  status: ViewingStatus
+}) {
+  const { params } = await action({
+    params: values,
+    schema: updateViewingStatusSchema,
+  })
+
+  const { data, error } = await supabase
+    .from("viewings")
+    .update({ status: params.status })
+    .eq("id", params.id)
+    .select("id")
+
+  if (error) throw toRequestError(error, "Viewing")
+
+  // RLS blocks updates silently: no error, zero rows changed
+  if (data.length === 0) {
+    throw new ForbiddenError("You can only update your own viewings")
+  }
 }
 
 export async function getViewingsApi({
@@ -76,10 +97,10 @@ export async function getViewingsApi({
     { count: "exact" }
   )
 
-  // 1. Filter
+  // Filter
   if (filter !== "all") query = query.eq("status", filter)
 
-  // Search
+  // Search on the joined property
   if (search)
     query = query.or(`title.ilike.%${search}%,city.ilike.%${search}%`, {
       referencedTable: "properties",
@@ -94,17 +115,26 @@ export async function getViewingsApi({
   query = query.range(from, to)
 
   const { data, error, count } = await query
-  if (error) {
-    throw new Error("Viewings could not be loaded")
-  }
+  if (error) throw toRequestError(error, "Viewings")
 
   return { data: data ?? [], count: count ?? 0 }
 }
 
-export async function deleteViewingApi(id: number): Promise<void> {
-  const { error } = await supabase.from("viewings").delete().eq("id", id)
+export async function deleteViewingApi(id: number) {
+  // Only viewings that have not happened yet. Anything else gets a status.
+  const { data, error } = await supabase
+    .from("viewings")
+    .delete()
+    .eq("id", id)
+    .eq("status", "scheduled")
+    .select("id")
 
-  if (error) {
-    throw new Error("Viewing could not be deleted")
+  if (error) throw toRequestError(error, "Viewing")
+
+  // Zero rows: not scheduled, or RLS blocked it (not your viewing)
+  if (data.length === 0) {
+    throw new ConflictError(
+      "Only your own scheduled viewings can be deleted. Set a status instead."
+    )
   }
 }

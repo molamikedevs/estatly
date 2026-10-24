@@ -43,13 +43,18 @@ function parseValue(value: string): Date | undefined {
   return isNaN(d.getTime()) ? undefined : d
 }
 
+// "Sat, Oct 31 · 12:00", with the year only when it is not this year
 function formatDisplay(date: Date, withTime: boolean) {
+  const sameYear = date.getFullYear() === new Date().getFullYear()
+
   const datePart = date.toLocaleDateString("en-US", {
-    year: "numeric",
+    weekday: "short",
     month: "short",
     day: "numeric",
+    year: sameYear ? undefined : "numeric",
   })
   if (!withTime) return datePart
+
   const timePart = date.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
@@ -85,9 +90,9 @@ export default function DatePickerField<T extends FieldValues>({
       render={({ field, fieldState }) => {
         const selected = parseValue(field.value)
 
-        // Apply a time string to the currently-selected (or new) date
+        // Apply a time string to the selected date (or today)
         function applyTime(time: string) {
-          const base = selected ?? new Date()
+          const base = selected ? new Date(selected) : new Date()
           const [h, m] = time.split(":").map(Number)
           base.setHours(h || 0, m || 0, 0, 0)
           field.onChange(base.toISOString())
@@ -98,7 +103,7 @@ export default function DatePickerField<T extends FieldValues>({
             field.onChange("")
             return
           }
-          // Preserve existing time when only the date changes
+          // Keep the chosen time when only the date changes
           if (withTime && selected) {
             date.setHours(selected.getHours(), selected.getMinutes(), 0, 0)
           }
@@ -106,15 +111,21 @@ export default function DatePickerField<T extends FieldValues>({
           if (!withTime) setOpen(false)
         }
 
+        // Closing the picker counts as leaving the field, so errors can show
+        function handleOpenChange(next: boolean) {
+          setOpen(next)
+          if (!next) field.onBlur()
+        }
+
         return (
-          <Field data-invalid={fieldState.invalid}>
+          <Field data-invalid={fieldState.invalid} className="min-w-0">
             <FieldLabel htmlFor={id}>
               <FieldLabelText required={required} optional={optional}>
                 {label}
               </FieldLabelText>
             </FieldLabel>
 
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={open} onOpenChange={handleOpenChange}>
               <PopoverTrigger asChild>
                 <Button
                   id={id}
@@ -122,16 +133,18 @@ export default function DatePickerField<T extends FieldValues>({
                   variant="outline"
                   aria-invalid={fieldState.invalid}
                   className={cn(
-                    "h-10 w-full justify-start gap-2 font-normal",
+                    "h-10 w-full min-w-0 justify-start gap-2 font-normal",
                     !selected && "text-muted-foreground"
                   )}
                 >
-                  <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  {selected
-                    ? formatDisplay(selected, withTime)
-                    : withTime
-                      ? "Pick date & time"
-                      : "Pick a date"}
+                  <CalendarDays className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="truncate">
+                    {selected
+                      ? formatDisplay(selected, withTime)
+                      : withTime
+                        ? "Pick date and time"
+                        : "Pick a date"}
+                  </span>
                 </Button>
               </PopoverTrigger>
 
@@ -156,7 +169,7 @@ export default function DatePickerField<T extends FieldValues>({
                 />
 
                 {withTime && (
-                  <div className="border-t border-border/60 p-3">
+                  <div className="border-t p-3">
                     <label
                       htmlFor={`${id}-time`}
                       className="mb-1.5 block text-xs font-medium text-muted-foreground"
@@ -168,7 +181,7 @@ export default function DatePickerField<T extends FieldValues>({
                       type="time"
                       value={selected ? toTimeInput(selected) : ""}
                       onChange={(e) => applyTime(e.target.value)}
-                      className="h-9"
+                      className="h-10 text-base"
                     />
                   </div>
                 )}

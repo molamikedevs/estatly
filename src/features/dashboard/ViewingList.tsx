@@ -1,17 +1,14 @@
 import DataRenderer from "@/components/DataRenderer"
-import { formatViewingDate, formatViewingTime } from "@/lib/helpers"
+import {
+  formatViewingDate,
+  formatViewingTime,
+  getClientLabel,
+} from "@/lib/helpers"
 import { EMPTY_UPCOMING_VIEWINGS } from "@/lib/states"
 import type { DashboardViewing } from "@/types/database"
 
 function isToday(iso: string) {
   return new Date(iso).toDateString() === new Date().toDateString()
-}
-
-// RLS hides clients that belong to another agent, so say so instead of "Unknown"
-function clientLabel(viewing: DashboardViewing) {
-  if (viewing.client) return viewing.client.full_name
-  if (viewing.client_id) return "Client assigned to another agent"
-  return "No client"
 }
 
 export default function ViewingList({
@@ -78,7 +75,7 @@ function ViewingGroup({
                 {viewing.property?.title ?? "Property removed"}
               </p>
               <p className="truncate text-sm text-muted-foreground">
-                {clientLabel(viewing)}
+                {getClientLabel(viewing)}
               </p>
             </div>
           </li>

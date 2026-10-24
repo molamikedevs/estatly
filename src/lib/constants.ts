@@ -1,3 +1,5 @@
+import type { ViewingStatus } from "@/types/database"
+
 export const PAGE_SIZE = 8
 export const DESC_MAX = 2000
 export const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -43,12 +45,16 @@ export const durationOptions = [
   { value: "90", label: "1.5 hours" },
 ]
 
-export const viewingStatusOptions = [
+// One list for the filter, the status menu and anywhere else
+export const viewingStatusOptions: { value: ViewingStatus; label: string }[] = [
   { value: "scheduled", label: "Scheduled" },
   { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
+  { value: "offer-made", label: "Offer made" },
   { value: "no-show", label: "No show" },
+  { value: "cancelled", label: "Cancelled" },
 ]
+
+export const RESCHEDULABLE_STATUSES: ViewingStatus[] = ["scheduled", "no-show"]
 
 export const CLIENT_STATUS_OPTIONS = [
   { value: "active", label: "Active" },

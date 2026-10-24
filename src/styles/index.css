@@ -92,6 +92,9 @@
    2. LIGHT THEME: sand surfaces, ink primary
    ============================================ */
 :root {
+  /* Native controls (time picker, scrollbars, date inputs) follow this */
+  color-scheme: light;
+
   --radius: 0.625rem;
 
   --background: oklch(0.975 0.008 80);
@@ -158,6 +161,9 @@
    3. DARK THEME: ink surfaces, steel primary
    ============================================ */
 .dark {
+  /* Native controls (time picker, scrollbars, date inputs) follow this */
+  color-scheme: dark;
+
   --background: oklch(0.17 0.015 255);
   --foreground: oklch(0.94 0.01 80);
 
