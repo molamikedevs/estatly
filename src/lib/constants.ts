@@ -1,4 +1,4 @@
-import type { ViewingStatus } from "@/types/database"
+import type { ClientStatus, ViewingStatus } from "@/types/database"
 
 export const PAGE_SIZE = 8
 export const DESC_MAX = 2000
@@ -62,4 +62,16 @@ export const currencyOptions = [
   { value: "EUR", label: "EUR, Euro" },
   { value: "GBP", label: "GBP, British Pound" },
   { value: "AED", label: "AED, UAE Dirham" },
+]
+
+// Pipeline order and colors: the clients board and the dashboard chart
+export const CLIENT_STAGES: {
+  status: ClientStatus
+  label: string
+  color: string
+}[] = [
+  { status: "active", label: "Active", color: "var(--primary)" },
+  { status: "closed-won", label: "Closed, won", color: "var(--success)" },
+  { status: "closed-lost", label: "Closed, lost", color: "var(--destructive)" },
+  { status: "inactive", label: "Inactive", color: "var(--muted-foreground)" },
 ]
