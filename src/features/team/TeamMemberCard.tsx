@@ -1,107 +1,145 @@
-import RoleBadge from "@/components/RoleBadge"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import UserAvatar from "@/components/UserAvatar"
 import { cn } from "@/lib/utils"
-import type { CreatableRole, UserProfile } from "@/types/database"
-import { Mail, Phone } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import type { TeamMember } from "@/types/database"
+import {
+  Mail,
+  MoreHorizontal,
+  Pencil,
+  Phone,
+  UserCheck,
+  UserX,
+} from "lucide-react"
 
 interface TeamMemberCardProps {
-  member: UserProfile
-  role: CreatableRole
+  member: TeamMember
+  canManage: boolean
+  onEdit: () => void
+  onToggleActive: () => void
 }
 
-/** The contact rows are identical across both layouts. */
-function ContactDetails({ member }: { member: UserProfile }) {
+export default function TeamMemberCard({
+  member,
+  canManage,
+  onEdit,
+  onToggleActive,
+}: TeamMemberCardProps) {
   return (
-    <>
-      <span className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Mail className="h-3.5 w-3.5 shrink-0" />
-        <span className="truncate">{member.email}</span>
-      </span>
-      <span
-        className={cn(
-          "flex items-center gap-2 text-xs",
-          member.phone
-            ? "text-muted-foreground"
-            : "text-muted-foreground/60 italic"
-        )}
-      >
-        <Phone className="h-3.5 w-3.5 shrink-0" />
-        {member.phone || "Not provided"}
-      </span>
-    </>
-  )
-}
-
-export default function TeamMemberCard({ member, role }: TeamMemberCardProps) {
-  const navigate = useNavigate()
-  const displayName = member.full_name || member.email || `Unnamed ${role}`
-  const to = `/${role}s/${member.user_id}`
-
-  // ── Manager layout: gradient banner + overlaid avatar ──
-  if (role === "manager") {
-    return (
-      <button
-        onClick={() => navigate(to)}
-        className="card-hover group relative flex flex-col overflow-hidden rounded-2xl border bg-card text-left shadow-card"
-      >
-        <div className="relative h-16 bg-gradient-to-br from-primary via-primary/85 to-primary/65">
-          <div className="spotlight absolute inset-0 opacity-50" />
-          <div className="absolute top-3 right-3">
-            <RoleBadge
-              role={member.role}
-              className="bg-card/25 text-white backdrop-blur-sm"
-            />
-          </div>
-        </div>
-
-        <div className="-mt-7 flex flex-col items-start px-5">
-          <UserAvatar
-            name={displayName}
-            src={member.avatar}
-            size="lg"
-            ring
-            className="shadow-elevated ring-4"
-          />
-          <div className="mt-3 w-full min-w-0">
-            <p className="truncate text-sm font-semibold transition-colors group-hover:text-primary">
-              {displayName}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {member.specialization || "No specialization"}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-col gap-1.5 border-t border-border/60 px-5 py-3.5">
-          <ContactDetails member={member} />
-        </div>
-      </button>
-    )
-  }
-
-  // ── Agent layout: flat row ──
-  return (
-    <button
-      onClick={() => navigate(to)}
-      className="card-hover group flex flex-col rounded-xl border bg-card p-4 text-left shadow-card"
+    <article
+      className={cn(
+        "flex h-full flex-col rounded-xl border bg-card p-5",
+        !member.is_active && "opacity-60"
+      )}
     >
-      <div className="flex items-center gap-3">
-        <UserAvatar name={displayName} src={member.avatar} size="md" ring />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold transition-colors group-hover:text-primary">
-            {displayName}
-          </p>
-          <p className="truncate text-xs text-muted-foreground">
+      {/* Who */}
+      <div className="flex items-start gap-4">
+        <UserAvatar name={member.full_name} src={member.avatar} size="lg" />
+        <div className="min-w-0 flex-1 pt-0.5">
+          <h3 className="truncate font-medium">{member.full_name}</h3>
+          <p className="truncate text-sm text-muted-foreground">
             {member.specialization || "No specialization"}
           </p>
         </div>
-        <RoleBadge role={member.role} />
+        {canManage && (
+          <MemberActions
+            member={member}
+            onEdit={onEdit}
+            onToggleActive={onToggleActive}
+          />
+        )}
       </div>
 
-      <div className="mt-3.5 flex flex-col gap-1.5 border-t border-border/60 pt-3">
-        <ContactDetails member={member} />
+      {/* Workload: number on top, label below */}
+      <dl className="mt-5 grid grid-cols-3 divide-x rounded-lg bg-muted/60 py-3 text-center">
+        <Stat label="Listings" value={member.listing_count} />
+        <Stat label="Clients" value={member.active_client_count} />
+        <Stat label="Viewings" value={member.upcoming_viewing_count} />
+      </dl>
+
+      {/* Contact */}
+      <div className="mt-4 flex gap-2">
+        <Button asChild variant="outline" size="sm" className="flex-1">
+          <a href={`mailto:${member.email}`} title={member.email}>
+            <Mail />
+            Email
+          </a>
+        </Button>
+        {member.phone && (
+          <Button asChild variant="outline" size="sm" className="flex-1">
+            <a
+              href={`tel:${member.phone.replace(/\s/g, "")}`}
+              title={member.phone}
+            >
+              <Phone />
+              Call
+            </a>
+          </Button>
+        )}
       </div>
-    </button>
+    </article>
+  )
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    // flex-col-reverse: dt comes first in the HTML, but the number shows on top
+    <div className="flex flex-col-reverse px-2">
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd
+        className={cn(
+          "text-xl font-semibold tabular-nums",
+          value === 0 && "text-muted-foreground"
+        )}
+      >
+        {value}
+      </dd>
+    </div>
+  )
+}
+
+function MemberActions({
+  member,
+  onEdit,
+  onToggleActive,
+}: Omit<TeamMemberCardProps, "canManage">) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="-mt-1 -mr-2 size-9 shrink-0 text-muted-foreground"
+          aria-label={`Actions for ${member.full_name}`}
+        >
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onSelect={onEdit}>
+          <Pencil />
+          Edit details
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {member.is_active ? (
+          <DropdownMenuItem variant="destructive" onSelect={onToggleActive}>
+            <UserX />
+            Deactivate
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onSelect={onToggleActive}>
+            <UserCheck />
+            Reactivate
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

@@ -1,3 +1,4 @@
+import { toRequestError } from "@/lib/errors"
 import { supabase } from "@/lib/supabase"
 import type { AuthUser, UserLogin, UserProfile } from "@/types/database"
 import type { UpdateDataProps } from "@/types/global"
@@ -9,7 +10,20 @@ export async function loginApi({ email, password }: UserLogin) {
     password,
   })
 
-  if (error) throw new Error("User could not be logged in")
+  // invalid_credentials becomes "Email or password is incorrect"
+  if (error) throw toRequestError(error)
+
+  // Deactivated accounts are signed straight back out
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("is_active")
+    .eq("user_id", data.user.id)
+    .single()
+
+  if (!profile?.is_active) {
+    await supabase.auth.signOut()
+    throw new Error("Your account is not active. Contact your admin")
+  }
 
   return data
 }

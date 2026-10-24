@@ -1,84 +1,117 @@
+import CreateButton from "@/components/CreateButton"
+import DataRenderer from "@/components/DataRenderer"
 import FormSheet from "@/components/form-components/FormSheet"
 import PageHeader from "@/components/PageHeader"
-import { Button } from "@/components/ui/button"
 import { useUser } from "@/features/auth/useUser"
-import UserForm from "@/features/team/TeamMemberForm"
-import type { CreatableRole } from "@/types/database"
-import { Plus } from "lucide-react"
+import { EMPTY_AGENTS, EMPTY_MANAGERS } from "@/lib/states"
+import type { CreatableRole, TeamMember } from "@/types/database"
 import { useState } from "react"
 import TeamMemberCard from "./TeamMemberCard"
-import TeamMemberEmptyState from "./TeamMemberEmptyState"
-import UserCardSkeleton from "./UserCardSkeleton"
-import { useUsers } from "./useUsers"
+import TeamMemberEditForm from "./TeamMemberEditForm"
+import TeamMemberForm from "./TeamMemberForm"
+import TeamSkeleton from "./TeamSkeleton"
+import { useSetMemberActive } from "./useSetMemberActive"
+import { useTeam } from "./useTeam"
 
-interface UserListProps {
-  role: CreatableRole
+const COPY = {
+  agent: { title: "Agents", empty: EMPTY_AGENTS },
+  manager: { title: "Managers", empty: EMPTY_MANAGERS },
 }
 
-const copy: Record<CreatableRole, { heading: string; noun: string }> = {
-  agent: { heading: "Agents", noun: "agent" },
-  manager: { heading: "Managers", noun: "manager" },
-}
-
-export default function TeamMemberList({ role }: UserListProps) {
-  const [createOpen, setCreateOpen] = useState(false)
-  const { users, isLoading } = useUsers(role)
+export default function TeamMemberList({ role }: { role: CreatableRole }) {
   const { user } = useUser()
+  // Only admins manage people; managers see the agent team read-only
+  const isAdmin = user?.user_profile?.role === "admin"
 
-  const currentRole = user?.user_profile?.role
-  const canCreate = currentRole === "admin" || currentRole === "manager"
-  const hasusers = !isLoading && users && users.length > 0
+  const { team, isLoading, error, refetch } = useTeam(role)
+  const { setActive } = useSetMemberActive()
+  const [editTarget, setEditTarget] = useState<TeamMember>()
 
-  const { heading, noun } = copy[role]
+  const { title, empty } = COPY[role]
+
+  function renderCards(members: TeamMember[]) {
+    return (
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {members.map((member) => (
+          <li key={member.user_id}>
+            <TeamMemberCard
+              member={member}
+              canManage={isAdmin}
+              onEdit={() => setEditTarget(member)}
+              onToggleActive={() =>
+                setActive({
+                  userId: member.user_id,
+                  isActive: !member.is_active,
+                })
+              }
+            />
+          </li>
+        ))}
+      </ul>
+    )
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PageHeader
-          title={heading}
-          subText="Manage your agency team and their access"
-          count={users?.length ?? 0}
+          title={title}
+          subText="Who is on the team and what they are working on"
+          count={team?.length ?? 0}
           isLoading={isLoading}
         />
 
-        {canCreate && hasusers && (
-          <Button
-            onClick={() => setCreateOpen(true)}
-            className="gap-2 shadow-sm"
+        {isAdmin && (
+          <CreateButton
+            label={`Add ${role}`}
+            title={`Add ${role === "agent" ? "an agent" : "a manager"}`}
+            description="They sign in with the email and temporary password you set here."
           >
-            <Plus className="h-4 w-4" />
-            Create {noun}
-          </Button>
+            {(onClose) => <TeamMemberForm role={role} onClose={onClose} />}
+          </CreateButton>
         )}
       </div>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <UserCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : !hasusers ? (
-        <TeamMemberEmptyState
-          role={role}
-          canCreate={canCreate}
-          onCreate={() => setCreateOpen(true)}
-        />
-      ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {users.map((member) => (
-            <TeamMemberCard key={member.user_id} member={member} role={role} />
-          ))}
-        </div>
-      )}
+      <DataRenderer
+        data={team}
+        isLoading={isLoading}
+        error={error}
+        onRetry={() => refetch()}
+        loading={<TeamSkeleton />}
+        empty={empty}
+        render={(items) => {
+          const active = items.filter((m) => m.is_active)
+          const inactive = items.filter((m) => !m.is_active)
+
+          return (
+            <div className="space-y-8">
+              {active.length > 0 && renderCards(active)}
+
+              {inactive.length > 0 && (
+                <section className="space-y-3">
+                  <h2 className="text-sm font-medium text-muted-foreground">
+                    Deactivated · {inactive.length}
+                  </h2>
+                  {renderCards(inactive)}
+                </section>
+              )}
+            </div>
+          )
+        }}
+      />
 
       <FormSheet
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        title={`Create new ${noun}`}
-        description={`The ${noun} will receive sign-in credentials and can immediately access the platform.`}
+        open={Boolean(editTarget)}
+        onOpenChange={(open) => !open && setEditTarget(undefined)}
+        title="Edit details"
+        description="Name, phone and specialization."
       >
-        <UserForm role={role} onClose={() => setCreateOpen(false)} />
+        {editTarget && (
+          <TeamMemberEditForm
+            member={editTarget}
+            onClose={() => setEditTarget(undefined)}
+          />
+        )}
       </FormSheet>
     </div>
   )

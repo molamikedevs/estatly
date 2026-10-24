@@ -66,13 +66,23 @@ export interface UserLogin {
   password: string
 }
 
-// ─── Create Agent ─────────────────────────────────────────
+// ─── Team ─────────────────────────────────────────────
+
 export interface CreateUserInput {
   full_name: string
   email: string
   password: string
   role: Exclude<UserRole, "admin">
 }
+
+// A profile plus their workload, counted in the same query
+export interface TeamMember extends UserProfile {
+  listing_count: number
+  active_client_count: number
+  upcoming_viewing_count: number
+}
+
+// ─── Properties ───────────────────────────────────────
 
 export interface PropertyAgent {
   full_name: string
@@ -115,6 +125,8 @@ export type GalleryImage = {
   file?: File
 }
 
+// ─── Viewings ─────────────────────────────────────────
+
 export interface ViewingProperty {
   title: string
   city: string
@@ -150,6 +162,8 @@ export interface Viewing {
   agent: ViewingAgent | null
 }
 
+// ─── Clients ──────────────────────────────────────────
+
 export interface ClientAgent {
   full_name: string
   avatar: string | null
@@ -174,6 +188,8 @@ export interface Client {
   viewing_count: number
 }
 
+// ─── Form props ───────────────────────────────────────
+
 export interface PropertyFormProps {
   property?: Property
   onClose: () => void
@@ -187,6 +203,8 @@ export interface ClientFormProps {
   onClose: () => void
 }
 
+// ─── Settings ─────────────────────────────────────────
+
 export interface Settings {
   id: number
   created_at: string
@@ -196,6 +214,8 @@ export interface Settings {
   contact_email: string | null
   contact_phone: string | null
 }
+
+// ─── Queries ──────────────────────────────────────────
 
 export interface QueryParams<TFilter, TSort> {
   filter: TFilter

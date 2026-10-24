@@ -32,11 +32,6 @@ export const STATUS_OPTIONS = [
   { value: "archived", label: "Archived" },
 ]
 
-export const ROLE_OPTIONS = [
-  { value: "agent", label: "Agent" },
-  { value: "manager", label: "Manager" },
-]
-
 export const durationOptions = [
   { value: "15", label: "15 minutes" },
   { value: "30", label: "30 minutes" },
@@ -57,13 +52,6 @@ export const viewingStatusOptions: { value: ViewingStatus; label: string }[] = [
 // A viewing can be moved if it has not happened yet, or the client did not come
 export const RESCHEDULABLE_STATUSES: ViewingStatus[] = ["scheduled", "no-show"]
 
-export const currencyOptions = [
-  { value: "USD", label: "USD, US Dollar" },
-  { value: "EUR", label: "EUR, Euro" },
-  { value: "GBP", label: "GBP, British Pound" },
-  { value: "AED", label: "AED, UAE Dirham" },
-]
-
 // Pipeline order and colors: the clients board and the dashboard chart
 export const CLIENT_STAGES: {
   status: ClientStatus
@@ -74,4 +62,11 @@ export const CLIENT_STAGES: {
   { status: "closed-won", label: "Closed, won", color: "var(--success)" },
   { status: "closed-lost", label: "Closed, lost", color: "var(--destructive)" },
   { status: "inactive", label: "Inactive", color: "var(--muted-foreground)" },
+]
+
+export const currencyOptions = [
+  { value: "USD", label: "USD, US Dollar" },
+  { value: "EUR", label: "EUR, Euro" },
+  { value: "GBP", label: "GBP, British Pound" },
+  { value: "AED", label: "AED, UAE Dirham" },
 ]
