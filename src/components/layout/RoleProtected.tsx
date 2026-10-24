@@ -1,4 +1,4 @@
-import Spinner from "@/components/Spinner"
+import Loader from "@/components/Loader"
 import { useUser } from "@/features/auth/useUser"
 import type { UserRole } from "@/types/database"
 import { useEffect, type ReactNode } from "react"
@@ -27,13 +27,8 @@ export default function RoleProtected({
     }
   }, [isLoading, hasAccess, navigate, fallbackPath])
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner />
-      </div>
-    )
-  }
+  // Inside the layout, so the sidebar stays visible
+  if (isLoading) return <Loader fullScreen={false} />
 
   if (hasAccess) {
     return <>{children}</>

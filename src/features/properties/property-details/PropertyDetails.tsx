@@ -1,7 +1,7 @@
 import BackLink from "@/components/BackLink"
 import ConfirmDelete from "@/components/ConfirmDelete"
 import FormSheet from "@/components/form-components/FormSheet"
-import Spinner from "@/components/Spinner"
+import Loader from "@/components/Loader"
 import type { Property, PropertyStatus } from "@/types/database"
 import { useEffect } from "react"
 import PropertyAgentCard from "../PropertyAgentCard"
@@ -41,7 +41,7 @@ export default function PropertyDetails() {
   }, [property?.id, incrementViews])
 
   const { updateStatus } = useUpdatePropertyStatus()
-  if (isLoading) return <Spinner label="Loading property" />
+  if (isLoading) return <Loader />
   if (!property) return <PropertyEmptyState />
 
   function handleStatusChange(property: Property, status: PropertyStatus) {
