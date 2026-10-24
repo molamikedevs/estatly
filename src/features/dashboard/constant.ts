@@ -1,4 +1,4 @@
-import type { ClientStatus, StatusCount } from "@/types/database"
+import type { StatusCount } from "@/types/database"
 
 export const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -33,16 +33,4 @@ export const PROPERTY_STATUSES = [
   },
   { status: "rented", label: "Rented", color: "var(--status-rented)" },
   { status: "sold", label: "Sold", color: "var(--status-sold)" },
-]
-
-// Pipeline order and colors: the clients board and the dashboard chart
-export const CLIENT_STAGES: {
-  status: ClientStatus
-  label: string
-  color: string
-}[] = [
-  { status: "active", label: "Active", color: "var(--primary)" },
-  { status: "closed-won", label: "Closed, won", color: "var(--success)" },
-  { status: "closed-lost", label: "Closed, lost", color: "var(--destructive)" },
-  { status: "inactive", label: "Inactive", color: "var(--muted-foreground)" },
 ]
