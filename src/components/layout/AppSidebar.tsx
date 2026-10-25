@@ -9,10 +9,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { useUser } from "@/features/auth/useUser"
 import { getNavItems, isActivePath, NAV_GROUPS } from "@/lib/nav-items"
+import { useEffect, useRef, type FocusEvent } from "react"
 import { Link, useLocation } from "react-router-dom"
 import Logo from "./Logo"
 import ProfileLink from "./ProfileLink"
@@ -20,10 +21,9 @@ import ProfileLink from "./ProfileLink"
 export const collapsedButton =
   "group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
 
-// Hides text when the sidebar is collapsed
 export const hideWhenCollapsed = "group-data-[collapsible=icon]:hidden"
+const OPEN_DELAY_MS = 120
 
-// shadcn sets data-active="true" on the current item, so we style from that
 const itemClass = [
   "h-10 gap-3 px-3 text-[15px]",
   "text-sidebar-foreground/75 hover:text-sidebar-foreground",
@@ -37,14 +37,40 @@ const itemClass = [
 export default function AppSidebar() {
   const { user } = useUser()
   const { pathname } = useLocation()
+  const { setOpen, isMobile } = useSidebar()
+  const openTimer = useRef<number | undefined>(undefined)
 
   const role = user?.user_profile?.role
   const items = role ? getNavItems(role) : []
 
+  useEffect(() => () => window.clearTimeout(openTimer.current), [])
+
+  function open() {
+    if (isMobile) return
+    window.clearTimeout(openTimer.current)
+    openTimer.current = window.setTimeout(() => setOpen(true), OPEN_DELAY_MS)
+  }
+
+  function close() {
+    window.clearTimeout(openTimer.current)
+    setOpen(false)
+  }
+
+  // Keyboard users: open when focus enters, close when it leaves the sidebar
+  function handleBlur(e: FocusEvent<HTMLDivElement>) {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close()
+  }
+
   return (
-    <Sidebar collapsible="icon">
-      {/* Same height as the page header, so both borders line up */}
-      <SidebarHeader className="h-[calc(3.5rem+env(safe-area-inset-top))] justify-center border-b border-sidebar-border px-3 pt-[env(safe-area-inset-top)] group-data-[collapsible=icon]:items-center">
+    <Sidebar
+      collapsible="icon"
+      onMouseEnter={open}
+      onMouseLeave={close}
+      onFocus={open}
+      onBlur={handleBlur}
+      className="z-40 transition-shadow duration-200 group-data-[state=expanded]:shadow-2xl"
+    >
+      <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-3 group-data-[collapsible=icon]:items-center">
         <Logo className="px-1 group-data-[collapsible=icon]:px-0" />
       </SidebarHeader>
 
@@ -70,7 +96,8 @@ export default function AppSidebar() {
                         tooltip={label}
                         className={itemClass}
                       >
-                        <Link to={path}>
+                        {/* Choosing a page closes the sidebar */}
+                        <Link to={path} onClick={close}>
                           <Icon />
                           <span className={hideWhenCollapsed}>{label}</span>
                         </Link>
@@ -86,13 +113,11 @@ export default function AppSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border p-3">
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem onClick={close}>
             <ProfileLink inSidebar />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-
-      <SidebarRail />
     </Sidebar>
   )
 }

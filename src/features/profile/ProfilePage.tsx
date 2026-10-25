@@ -1,9 +1,11 @@
 import ErrorMessage from "@/components/common/ErrorMessage"
 import PageHeader from "@/components/common/PageHeader"
+import ThemeSwitch from "@/components/theme/ThemeSwitch"
 import { Button } from "@/components/ui/button"
 import { useLogout } from "@/features/auth/useLogout"
 import { useUser } from "@/features/auth/useUser"
 import { LogOut } from "lucide-react"
+import type { ReactNode } from "react"
 import PasswordForm from "./PasswordForm"
 import ProfileDetailsForm from "./ProfileDetailsForm"
 import ProfileHeader from "./ProfileHeader"
@@ -33,26 +35,50 @@ export default function ProfilePage() {
           <div className="divide-y rounded-xl border bg-card">
             <PasswordForm />
 
-            {/* One action: text left, button right, on one line */}
-            <section className="flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
-              <div>
-                <h2 className="font-medium">Sign out</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  End your session on this device.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                disabled={isSigningOut}
-                onClick={() => logout()}
-              >
-                <LogOut />
-                {isSigningOut ? "Signing out..." : "Sign out"}
-              </Button>
-            </section>
+            <SettingRow
+              title="Appearance"
+              description="Switch between light and dark mode."
+              action={<ThemeSwitch variant="outline" />}
+            />
+
+            <SettingRow
+              title="Sign out"
+              description="End your session on this device."
+              action={
+                <Button
+                  variant="outline"
+                  disabled={isSigningOut}
+                  onClick={() => logout()}
+                >
+                  <LogOut />
+                  {isSigningOut ? "Signing out…" : "Sign out"}
+                </Button>
+              }
+            />
           </div>
         </>
       )}
     </div>
+  )
+}
+
+/** One setting: text on the left, its control on the right. */
+function SettingRow({
+  title,
+  description,
+  action,
+}: {
+  title: string
+  description: string
+  action: ReactNode
+}) {
+  return (
+    <section className="flex items-center justify-between gap-4 p-5 sm:p-6">
+      <div className="min-w-0">
+        <h2 className="font-medium">{title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      </div>
+      <div className="shrink-0">{action}</div>
+    </section>
   )
 }

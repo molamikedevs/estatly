@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/common/UserAvatar"
 import {
   Sheet,
   SheetContent,
@@ -10,9 +11,11 @@ import { useUser } from "@/features/auth/useUser"
 import type { NavItem } from "@/lib/nav-items"
 import { getTabs, isActivePath } from "@/lib/nav-items"
 import { cn } from "@/lib/utils"
-import { Ellipsis } from "lucide-react"
+import { ChevronRight, Ellipsis } from "lucide-react"
 import { useState } from "react"
 import { NavLink, useLocation } from "react-router-dom"
+
+const PROFILE_PATH = "/profile"
 
 // Shared by the tabs and the More button so they look identical
 function tabClass(active: boolean) {
@@ -21,6 +24,13 @@ function tabClass(active: boolean) {
     "transition-[color,transform] duration-150 ease-out active:scale-95",
     "[-webkit-tap-highlight-color:transparent]",
     active ? "text-primary" : "text-muted-foreground"
+  )
+}
+
+function rowClass(isActive: boolean) {
+  return cn(
+    "flex items-center gap-3 rounded-lg px-3 transition-colors active:bg-accent",
+    isActive ? "bg-accent text-accent-foreground" : "text-foreground"
   )
 }
 
@@ -47,11 +57,10 @@ export default function MobileBottomNav() {
           </li>
         ))}
 
-        {more.length > 0 && (
-          <li className="flex-1">
-            <MoreSheet items={more} />
-          </li>
-        )}
+        {/* Always shown: it is the only way to the profile on a phone */}
+        <li className="flex-1">
+          <MoreSheet items={more} />
+        </li>
       </ul>
     </nav>
   )
@@ -60,8 +69,14 @@ export default function MobileBottomNav() {
 function MoreSheet({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const { user } = useUser()
+  const profile = user?.user_profile
 
-  const active = items.some((item) => isActivePath(pathname, item.path))
+  const active =
+    isActivePath(pathname, PROFILE_PATH) ||
+    items.some((item) => isActivePath(pathname, item.path))
+
+  const close = () => setOpen(false)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -79,31 +94,52 @@ function MoreSheet({ items }: { items: NavItem[] }) {
         <SheetHeader>
           <SheetTitle>More</SheetTitle>
           <SheetDescription className="sr-only">
-            Other pages in Estatly
+            Your profile and other pages in Estatly
           </SheetDescription>
         </SheetHeader>
 
-        <ul className="flex flex-col gap-1 px-2">
-          {items.map(({ label, path, icon: Icon }) => (
-            <li key={path}>
-              <NavLink
-                to={path}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  cn(
-                    "flex h-12 items-center gap-3 rounded-lg px-3 text-base font-medium transition-colors active:bg-accent",
-                    isActive
-                      ? "bg-accent text-accent-foreground"
-                      : "text-foreground"
-                  )
-                }
-              >
-                <Icon className="size-5 text-muted-foreground" />
-                {label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-2 px-2">
+          {/* Profile first: photo, theme and sign out all live there */}
+          <NavLink
+            to={PROFILE_PATH}
+            onClick={close}
+            className={({ isActive }) => cn(rowClass(isActive), "py-2.5")}
+          >
+            <UserAvatar
+              name={profile?.full_name}
+              src={profile?.avatar}
+              size="md"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-base font-semibold">
+                {profile?.full_name || "Your profile"}
+              </p>
+              <p className="text-sm text-muted-foreground capitalize">
+                {profile?.role ?? "View profile"}
+              </p>
+            </div>
+            <ChevronRight className="size-4 text-muted-foreground" />
+          </NavLink>
+
+          {items.length > 0 && (
+            <ul className="flex flex-col gap-1 border-t pt-2">
+              {items.map(({ label, path, icon: Icon }) => (
+                <li key={path}>
+                  <NavLink
+                    to={path}
+                    onClick={close}
+                    className={({ isActive }) =>
+                      cn(rowClass(isActive), "h-12 text-base font-medium")
+                    }
+                  >
+                    <Icon className="size-5 text-muted-foreground" />
+                    {label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   )
