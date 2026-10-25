@@ -17,7 +17,6 @@ export default function ProfileLink({
 
   const name = user.user_profile?.full_name || user.email || "User"
   const role = user.user_profile?.role
-  const to = `/profile/${user.id}`
 
   const avatar = (
     <UserAvatar name={name} src={user.user_profile?.avatar} size="sm" />
@@ -27,7 +26,7 @@ export default function ProfileLink({
   if (!inSidebar) {
     return (
       <Link
-        to={to}
+        to="/profile"
         aria-label="Your profile"
         className="flex rounded-full transition-transform duration-150 active:scale-95"
       >
@@ -41,11 +40,11 @@ export default function ProfileLink({
     <SidebarMenuButton
       asChild
       size="lg"
-      isActive={pathname.startsWith("/profile")}
+      isActive={pathname === "/profile"}
       tooltip={name}
       className={`h-12 gap-3 ${collapsedButton}`}
     >
-      <Link to={to}>
+      <Link to="/profile">
         {avatar}
         <span
           className={`grid flex-1 text-left leading-tight ${hideWhenCollapsed}`}

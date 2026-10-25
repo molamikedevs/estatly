@@ -4,18 +4,18 @@ import { supabase } from "@/lib/supabase"
 import { teamMemberSchema, type TeamMemberFormValues } from "@/lib/validation"
 import type {
   CreatableRole,
-  CreateUserInput,
+  CreateTeamInput,
   TeamMember,
   UserProfile,
 } from "@/types/database"
 
 // Admin creates a team member, then activates them with their role.
-export async function createUserApi({
+export async function createTeamApi({
   full_name,
   email,
   password,
   role,
-}: CreateUserInput) {
+}: CreateTeamInput) {
   // 1. signUp switches the session to the new user, so keep the admin's
   const { data: sessionData } = await supabase.auth.getSession()
   const adminSession = sessionData.session

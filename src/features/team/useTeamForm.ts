@@ -11,7 +11,7 @@ interface UserFormProps {
 }
 
 export function useTeamForm({ onClose, role }: UserFormProps) {
-  const { createUser, isPending } = useCreateTeam(role)
+  const { createTeam, isPending } = useCreateTeam(role)
 
   const form = useForm<CreateAgentFormValues>({
     resolver: zodResolver(createAgentSchema),
@@ -21,7 +21,7 @@ export function useTeamForm({ onClose, role }: UserFormProps) {
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    createUser(values, { onSuccess: onClose })
+    createTeam(values, { onSuccess: onClose })
   })
 
   return { form, isPending, onSubmit }

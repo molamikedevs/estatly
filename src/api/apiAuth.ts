@@ -1,8 +1,13 @@
 import { toRequestError } from "@/lib/errors"
+import action from "@/lib/handler/action"
 import { supabase } from "@/lib/supabase"
+import {
+  forgotPasswordSchema,
+  passwordSchema,
+  type ForgotPasswordValues,
+  type PasswordFormValues,
+} from "@/lib/validation"
 import type { AuthUser, UserLogin, UserProfile } from "@/types/database"
-import type { UpdateDataProps } from "@/types/global"
-import { avatarUploaderApi } from "./uploader"
 
 export async function loginApi({ email, password }: UserLogin) {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -28,103 +33,51 @@ export async function loginApi({ email, password }: UserLogin) {
   return data
 }
 
+export async function logoutApi() {
+  const { error } = await supabase.auth.signOut()
+  if (error) throw toRequestError(error)
+}
+
+// The signed-in user with their profile row attached
 export async function getCurrentUserApi(): Promise<AuthUser | null> {
-  // Step 1: Check if there's an active session
   const { data: session } = await supabase.auth.getSession()
   if (!session.session) return null
 
-  // Step 2: Get the auth user
   const { data, error } = await supabase.auth.getUser()
-  if (error) throw new Error("User session could not be loaded")
+  if (error) throw toRequestError(error)
   if (!data.user) return null
 
-  // Step 3: Fetch their profile from user_profiles table
   const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("user_id", data.user.id)
     .single<UserProfile>()
 
-  if (profileError) {
-    console.error("Profile fetch error:", profileError)
-    throw new Error("User profile could not be loaded")
-  }
+  if (profileError) throw toRequestError(profileError, "Profile")
 
-  // Step 4: Return user with profile attached
-  return {
-    ...data.user,
-    user_profile: profile,
-  }
+  return { ...data.user, user_profile: profile }
 }
 
-export async function updateUserApi({
-  full_name,
-  password,
-  avatar,
-  bio,
-  specialization,
-  phone,
-}: UpdateDataProps) {
-  // Get current user ID
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("No authenticated user")
+// Emails a one-time link that opens /reset-password
+export async function sendPasswordResetApi(values: ForgotPasswordValues) {
+  const { params } = await action({
+    params: values,
+    schema: forgotPasswordSchema,
+  })
 
-  // ---- 1. Update password (auth concern) ----
-  if (password) {
-    const { error } = await supabase.auth.updateUser({ password })
-    if (error) throw new Error("Password could not be updated")
-  }
+  const { error } = await supabase.auth.resetPasswordForEmail(params.email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  })
 
-  // ---- 2. Upload avatar to storage if provided ----
-  let avatarUrl: string | undefined
-
-  if (avatar) {
-    avatarUrl = await avatarUploaderApi({
-      file: avatar,
-      userId: user.id,
-      bucket: "avatars",
-    })
-  }
-
-  // ---- 3. Update user_profiles table with everything else ----
-  const profileUpdate: Partial<UserProfile> = {}
-
-  if (full_name !== undefined) profileUpdate.full_name = full_name
-  if (bio !== undefined) profileUpdate.bio = bio
-  if (specialization !== undefined)
-    profileUpdate.specialization = specialization
-  if (phone !== undefined) profileUpdate.phone = phone
-  if (avatarUrl !== undefined) profileUpdate.avatar = avatarUrl
-
-  // Only update if there's actually something to update
-  if (Object.keys(profileUpdate).length > 0) {
-    const { data: updatedProfile, error: profileError } = await supabase
-      .from("user_profiles")
-      .update(profileUpdate)
-      .eq("user_id", user.id)
-      .select()
-      .single()
-
-    if (profileError) {
-      console.error("updateProfileApi:", profileError)
-      throw new Error("User profile could not be updated")
-    }
-
-    return updatedProfile
-  }
-  // If nothing changed in the profile, just return current profile
-  const { data: currentProfile } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .single()
-
-  return currentProfile
+  if (error) throw toRequestError(error)
 }
 
-export async function logoutApi() {
-  const { error } = await supabase.auth.signOut()
-  if (error) throw new Error("User could not be logged out, please try again!")
+// Used by the Profile page and by the reset link page
+export async function changePasswordApi(values: PasswordFormValues) {
+  const { params } = await action({ params: values, schema: passwordSchema })
+
+  const { error } = await supabase.auth.updateUser({
+    password: params.password,
+  })
+  if (error) throw toRequestError(error)
 }

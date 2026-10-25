@@ -9,29 +9,18 @@ import type {
 } from "react-hook-form"
 import { z } from "zod"
 
-import { profileSchema, propertySchema } from "@/lib/validation"
+import { propertySchema } from "@/lib/validation"
 import type { UserRole } from "./database"
 
 // ─── Form Value Types (inferred from Zod) ─────────────
 
 export type PropertyFormValues = z.infer<typeof propertySchema>
-export type UserFormValues = z.infer<typeof profileSchema>
 
 export interface CreateAgentFormValues {
   full_name: string
   email: string
   password: string
   role: Exclude<UserRole, "admin">
-}
-
-// Used by the update-profile API/hook
-export interface UpdateDataProps {
-  full_name?: string
-  password?: string
-  avatar?: File
-  bio?: string
-  specialization?: string
-  phone?: string
 }
 
 // ─── Shared Field Primitives ──────────────────────────

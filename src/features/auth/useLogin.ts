@@ -1,4 +1,4 @@
-import { loginApi } from "@/api/apiAuth"
+import { getCurrentUserApi, loginApi } from "@/api/apiAuth"
 import type { UserLogin } from "@/types/database"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
@@ -9,12 +9,15 @@ export function useLogin() {
   const queryClient = useQueryClient()
 
   const { isPending, mutate: login } = useMutation({
-    mutationFn: ({ email, password }: UserLogin) =>
-      loginApi({ email, password }),
+    mutationFn: (values: UserLogin) => loginApi(values),
 
-    // success do this
-    onSuccess: (data) => {
-      queryClient.setQueryData(["user"], data.user)
+    // Load the full user (with role) before entering the app,
+    // so the sidebar never renders without a role
+    onSuccess: async () => {
+      await queryClient.fetchQuery({
+        queryKey: ["user"],
+        queryFn: getCurrentUserApi,
+      })
       navigate("/dashboard", { replace: true })
     },
 
