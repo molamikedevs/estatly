@@ -58,7 +58,7 @@ export default function ViewingsTable() {
         </CreateButton>
       </div>
 
-      {/* Always visible, so a filter with no results can be cleared */}
+      {/* Always visible, so a search or filter with no results can be cleared */}
       <ViewingsOperations />
 
       <DataRenderer
