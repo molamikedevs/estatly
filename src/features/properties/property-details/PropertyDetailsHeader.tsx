@@ -1,219 +1,106 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { formatDate, formatSize } from "@/lib/helpers"
+import type { Property } from "@/types/database"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useUser } from "@/features/auth/useUser"
-import { formatDate } from "@/lib/helpers"
-import { can } from "@/lib/permissions"
-import { cn } from "@/lib/utils"
-import type { Property, PropertyStatus } from "@/types/database"
-import {
-  BadgeCheck,
+  Bath,
+  BedDouble,
   CalendarDays,
-  CheckCircle,
   Eye,
-  Handshake,
-  KeyRound,
   MapPin,
-  MoreVertical,
-  Pencil,
-  RotateCcw,
-  Trash2,
+  Ruler,
+  Sofa,
+  type LucideIcon,
 } from "lucide-react"
-
-const statusStyles: Record<string, string> = {
-  published: "bg-success-muted text-success",
-  draft: "bg-warning-muted text-warning",
-  archived: "bg-muted text-muted-foreground",
-}
+import PropertyActionsMenu from "../PropertyActionsMenu"
+import PropertyStatusBadge from "../PropertyStatusBadge"
 
 interface PropertyDetailsHeaderProps {
   property: Property
   onEdit?: (property: Property) => void
   onDelete?: (property: Property) => void
-  onStatusChange?: (property: Property, status: PropertyStatus) => void
 }
 
 export default function PropertyDetailsHeader({
   property,
   onEdit,
   onDelete,
-  onStatusChange,
 }: PropertyDetailsHeaderProps) {
-  const { user } = useUser()
-  const role = user?.user_profile?.role
+  const views = property.views_count ?? 0
 
-  // Permissions flags
-  const canPublish = role ? can.publishProperty(role) : false
-  const canSetSaleStatus = role ? can.setSaleStatus(role) : false
-  const canDelete = role ? can.deleteProperty(role) : false
+  const facts: { icon: LucideIcon; label: string; value: string | number }[] = [
+    { icon: BedDouble, label: "Bedrooms", value: property.bedrooms },
+    { icon: Bath, label: "Bathrooms", value: property.bathrooms },
+    { icon: Ruler, label: "Size", value: formatSize(property.size_sqm) },
+    {
+      icon: CalendarDays,
+      label: "Year built",
+      value: property.year_built ?? "Not set",
+    },
+    {
+      icon: Sofa,
+      label: "Furnishing",
+      value: property.furnished ? "Furnished" : "Unfurnished",
+    },
+  ]
 
-  // Agent can edit only their own; managers/admins can edit any
-  const isOwner = property.agent_id === user?.id
-  const canEdit = role
-    ? can.editAnyProperty(role) || (role === "agent" && isOwner)
-    : false
-
-  function handleStatus(status: PropertyStatus) {
-    onStatusChange?.(property, status)
-  }
   return (
-    <div className="relative">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <header className="space-y-5">
+      <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge className="border-0 bg-accent text-[10px] font-semibold tracking-wide text-accent-foreground uppercase">
+          <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-semibold tracking-wide text-accent-foreground uppercase">
             For {property.listing_type}
-          </Badge>
-          <Badge
-            className={cn(
-              "border-0 text-[10px] font-semibold capitalize",
-              statusStyles[property.status] ?? statusStyles.archived
-            )}
-          >
-            {property.status}
-          </Badge>
-          <Badge
-            variant="outline"
-            className="gap-1 border-border/60 text-[10px] font-normal text-muted-foreground capitalize"
-          >
+          </span>
+          <PropertyStatusBadge status={property.status} />
+          <span className="rounded-full border border-border/60 px-2.5 py-1 text-[10px] font-medium text-muted-foreground capitalize">
             {property.property_type}
-          </Badge>
+          </span>
         </div>
 
-        {/* actions menu — appears on hover, bottom right */}
-        {(canEdit || canPublish || canSetSaleStatus || canDelete) && (
-          <div className="absolute right-3 bottom-3 transition-opacity">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="h-8 w-8 shadow-sm backdrop-blur-sm transition-colors data-[state=open]:bg-muted"
-                  aria-label="Property actions"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                {/* ── Manage ─────────────────────── */}
-                {canEdit && onEdit && (
-                  <>
-                    <DropdownMenuLabel className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                      Manage
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={() => onEdit(property)}
-                      className="gap-2 text-sm"
-                    >
-                      <Pencil className="h-4 w-4 text-muted-foreground" />
-                      Edit details
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {/* ── Approval ───────────────────── */}
-                {canPublish && property.status === "pending-approval" && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleStatus("published")}
-                      className="gap-2 text-sm"
-                    >
-                      <BadgeCheck className="h-4 w-4 text-success" />
-                      Approve & publish
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {/* ── Listing status ─────────────── */}
-                {canSetSaleStatus && property.status !== "pending-approval" && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                      Listing status
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={() => handleStatus("under-offer")}
-                      className="gap-2 text-sm"
-                    >
-                      <Handshake className="h-4 w-4 text-warning" />
-                      Mark under offer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleStatus("sold")}
-                      className="gap-2 text-sm"
-                    >
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      Mark sold
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleStatus("rented")}
-                      className="gap-2 text-sm"
-                    >
-                      <KeyRound className="h-4 w-4 text-info" />
-                      Mark rented
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {/* ── Re-list ────────────────────── */}
-                {canPublish &&
-                  (property.status === "sold" ||
-                    property.status === "rented") && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => handleStatus("published")}
-                        className="gap-2 text-sm"
-                      >
-                        <RotateCcw className="h-4 w-4 text-muted-foreground" />
-                        Re-list property
-                      </DropdownMenuItem>
-                    </>
-                  )}
-
-                {/* ── Delete ─────────────────────── */}
-                {canDelete && onDelete && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => onDelete(property)}
-                      className="gap-2 text-sm text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete property
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight text-balance sm:text-3xl">
+              {property.title}
+            </h1>
+            <p className="mt-1.5 flex items-start gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+              {property.address}
+            </p>
           </div>
-        )}
+          <PropertyActionsMenu
+            property={property}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            className="shrink-0"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Eye className="h-3.5 w-3.5" />
+            <span className="tabular">{views}</span>{" "}
+            {views === 1 ? "view" : "views"}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <CalendarDays className="h-3.5 w-3.5" />
+            Listed {formatDate(property.created_at)}
+          </span>
+        </div>
       </div>
 
-      <h1 className="mt-3 text-2xl font-bold tracking-tight">
-        {property.title}
-      </h1>
-      <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-        <MapPin className="h-4 w-4 shrink-0" />
-        {property.address}
-      </p>
-      <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Eye className="h-3.5 w-3.5" />
-          {property.views_count} views
-        </span>
-        <span className="flex items-center gap-1">
-          <CalendarDays className="h-3.5 w-3.5" />
-          Listed {formatDate(property.created_at)}
-        </span>
-      </div>
-    </div>
+      {/* Key specs */}
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {facts.map(({ icon: Icon, label, value }) => (
+          <div
+            key={label}
+            className="rounded-xl border border-border/60 bg-card px-4 py-3"
+          >
+            <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Icon aria-hidden className="h-3.5 w-3.5" />
+              {label}
+            </dt>
+            <dd className="tabular mt-1 text-base font-semibold">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </header>
   )
 }

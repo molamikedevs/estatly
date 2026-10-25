@@ -1,27 +1,41 @@
 import BackLink from "@/components/common/BackLink"
 import ConfirmDelete from "@/components/common/ConfirmDelete"
+import DataRenderer from "@/components/common/DataRenderer"
 import Loader from "@/components/common/Loader"
 import FormSheet from "@/components/form-components/FormSheet"
-import type { Property, PropertyStatus } from "@/types/database"
-import { useEffect } from "react"
-import PropertyAgentCard from "../PropertyAgentCard"
-import PropertyEmptyState from "../PropertyEmptyState"
+import { useProperty } from "@/features/properties/useProperty"
+import { EMPTY_PROPERTY } from "@/lib/states"
+import type { Property } from "@/types/database"
+import { useEffect, useRef } from "react"
 import PropertyForm from "../PropertyForm"
 import { useIncrementPropertyViews } from "../useIncrementPropertyViews"
-import { useUpdatePropertyStatus } from "../useUpdatePropertyStatus"
-import PropertyDescription from "./PropertyDescription"
 import PropertyDetailsHeader from "./PropertyDetailsHeader"
 import PropertyGallery from "./PropertyGallery"
-import PropertyPriceCard from "./PropertyPriceCard"
-import PropertySpecs from "./PropertySpecs"
-import PropertyStatsGrid from "./PropertyStatsGrid"
+import PropertySections from "./PropertySections"
+import PropertySidebar from "./PropertySidebar"
 import { usePropertyDetails } from "./usePropertyDetails"
 
 export default function PropertyDetails() {
+  const { isLoading, property, error, refetch } = useProperty()
+
+  return (
+    <div className="space-y-6">
+      <BackLink route="/properties" label="Back to properties" />
+      <DataRenderer
+        data={property ? [property] : undefined}
+        isLoading={isLoading}
+        error={error}
+        onRetry={refetch}
+        loading={<Loader />}
+        empty={EMPTY_PROPERTY}
+        render={([loaded]) => <PropertyDetailsContent property={loaded} />}
+      />
+    </div>
+  )
+}
+
+function PropertyDetailsContent({ property }: { property: Property }) {
   const {
-    isLoading,
-    property,
-    isRent,
     galleryImages,
     editOpen,
     setEditOpen,
@@ -29,50 +43,33 @@ export default function PropertyDetails() {
     setDeleteOpen,
     isDeleting,
     handleConfirmDelete,
-  } = usePropertyDetails()
+  } = usePropertyDetails(property)
 
-  const { mutate: incrementViews } = useIncrementPropertyViews()
+  const { incrementViews } = useIncrementPropertyViews()
 
-  // Bump view count once when the page mounts
+  // Count one view per listing opened. The ref stops React StrictMode
+  // in development from counting every visit twice.
+  const countedId = useRef<number | null>(null)
   useEffect(() => {
-    if (property?.id) {
-      incrementViews(Number(property?.id))
-    }
-  }, [property?.id, incrementViews])
-
-  const { updateStatus } = useUpdatePropertyStatus()
-  if (isLoading) return <Loader />
-  if (!property) return <PropertyEmptyState />
-
-  function handleStatusChange(property: Property, status: PropertyStatus) {
-    updateStatus({ id: property.id, status })
-  }
+    if (countedId.current === property.id) return
+    countedId.current = property.id
+    incrementViews(property.id)
+  }, [property.id, incrementViews])
 
   return (
-    <div className="group space-y-6">
-      <BackLink route="/properties" label="Back to properties" />
-
+    <div className="space-y-6">
       <PropertyGallery images={galleryImages} title={property.title} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
-        {/* Main column */}
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0">
           <PropertyDetailsHeader
             property={property}
             onEdit={() => setEditOpen(true)}
             onDelete={() => setDeleteOpen(true)}
-            onStatusChange={handleStatusChange}
           />
-          <PropertyStatsGrid property={property} />
-          <PropertyDescription property={property} />
-          <PropertySpecs property={property} />
+          <PropertySections property={property} />
         </div>
-
-        {/* Sticky sidebar */}
-        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-          <PropertyPriceCard property={property} isRent={isRent} />
-          <PropertyAgentCard />
-        </aside>
+        <PropertySidebar property={property} />
       </div>
 
       <FormSheet

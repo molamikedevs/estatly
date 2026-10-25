@@ -1,4 +1,8 @@
-import type { ClientStatus, ViewingStatus } from "@/types/database"
+import type {
+  ClientStatus,
+  PropertyStatus,
+  ViewingStatus,
+} from "@/types/database"
 
 export const PAGE_SIZE = 8
 export const DESC_MAX = 2000
@@ -63,3 +67,14 @@ export const CLIENT_STAGES: {
   { status: "closed-lost", label: "Closed, lost", color: "var(--destructive)" },
   { status: "inactive", label: "Inactive", color: "var(--muted-foreground)" },
 ]
+
+export const PROPERTY_STATUS: Record<
+  PropertyStatus,
+  { label: string; tone: string }
+> = {
+  published: { label: "Published", tone: "text-success" },
+  "pending-approval": { label: "Pending approval", tone: "text-warning" },
+  "under-offer": { label: "Under offer", tone: "text-info" },
+  sold: { label: "Sold", tone: "text-chart-1" },
+  rented: { label: "Rented", tone: "text-chart-4" },
+}

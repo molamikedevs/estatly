@@ -1,28 +1,34 @@
-import { Badge } from "@/components/ui/badge"
+import { PROPERTY_STATUS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import type { PropertyStatus } from "@/types/database"
 
-const statusStyles: Record<PropertyStatus, string> = {
-  published: "bg-background/85 text-success",
-  sold: "bg-background/85 text-chart-1",
-  rented: "bg-background/75 text-chart-4",
-  "pending-approval": "bg-background/85 text-warning",
-  "under-offer": "bg-background/85 text-info",
+interface PropertyStatusBadgeProps {
+  status: PropertyStatus
+  /** "overlay" for photos, "inline" for the page */
+  variant?: "overlay" | "inline"
+  className?: string
 }
 
 export default function PropertyStatusBadge({
   status,
-}: {
-  status: PropertyStatus
-}) {
+  variant = "inline",
+  className,
+}: PropertyStatusBadgeProps) {
+  const config = PROPERTY_STATUS[status] ?? PROPERTY_STATUS.published
+
   return (
-    <Badge
+    <span
       className={cn(
-        "pointer-events-none absolute top-3 right-3 border-0 text-[10px] font-semibold capitalize backdrop-blur-sm",
-        statusStyles[status] ?? statusStyles.published
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold whitespace-nowrap",
+        variant === "overlay"
+          ? "bg-background/90 shadow-sm backdrop-blur-sm"
+          : "border border-border/60 bg-muted/50",
+        config.tone,
+        className
       )}
     >
-      {status}
-    </Badge>
+      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
+      {config.label}
+    </span>
   )
 }
