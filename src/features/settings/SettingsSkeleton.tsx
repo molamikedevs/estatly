@@ -1,31 +1,20 @@
+import { Skeleton } from "@/components/ui/skeleton"
+import { SKELETON_KEYS } from "@/lib/constants"
+
 export default function SettingsSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-3xl">
-      <div className="mb-6 space-y-2">
-        <div className="shimmer h-7 w-32 rounded" />
-        <div className="shimmer h-4 w-72 max-w-full rounded" />
-      </div>
-
-      {Array.from({ length: 2 }).map((_, s) => (
+    <div role="status" className="divide-y rounded-xl border bg-card">
+      <span className="sr-only">Loading settings</span>
+      {SKELETON_KEYS.slice(0, 3).map((key) => (
         <div
-          key={s}
-          className="mb-6 rounded-2xl border bg-card p-5 shadow-card sm:p-6"
+          key={key}
+          className="grid gap-4 p-5 sm:p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-10"
         >
-          <div className="mb-5 space-y-2">
-            <div className="shimmer h-5 w-40 rounded" />
-            <div className="shimmer h-3 w-56 max-w-full rounded" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-48" />
           </div>
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, r) => (
-              <div
-                key={r}
-                className="flex items-center justify-between gap-4 py-2"
-              >
-                <div className="shimmer h-3 w-28 rounded" />
-                <div className="shimmer h-4 w-40 max-w-[50%] rounded" />
-              </div>
-            ))}
-          </div>
+          <Skeleton className="h-10" />
         </div>
       ))}
     </div>

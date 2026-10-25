@@ -1,7 +1,10 @@
+import { ForbiddenError, toRequestError } from "@/lib/errors"
+import action from "@/lib/handler/action"
 import { supabase } from "@/lib/supabase"
+import { settingsSchema, type SettingsFormValues } from "@/lib/validation"
 import type { Settings } from "@/types/database"
-import type { SettingsFormValues } from "@/types/global"
 
+// The app has one agency, so settings are its single row
 export async function getAgencySettingsApi(): Promise<Settings> {
   const { data, error } = await supabase
     .from("agencies")
@@ -9,35 +12,29 @@ export async function getAgencySettingsApi(): Promise<Settings> {
     .limit(1)
     .single()
 
-  if (error) {
-    console.error("getAgencySettingsApi error", error)
-    throw new Error("Agency info could not be loaded")
-  }
+  if (error) throw toRequestError(error, "Settings")
   return data
 }
 
-export async function updateAgencySettingsApi(
-  id: number,
+export async function updateAgencySettingsApi({
+  id,
+  values,
+}: {
+  id: number
   values: SettingsFormValues
-): Promise<Settings> {
-  const dbReady = {
-    name: values.name,
-    commission_rate: Number(values.commission_rate),
-    default_currency: values.default_currency,
-    contact_email: values.contact_email || null,
-    contact_phone: values.contact_phone || null,
-  }
+}) {
+  const { params } = await action({ params: values, schema: settingsSchema })
 
   const { data, error } = await supabase
     .from("agencies")
-    .update(dbReady)
+    .update(params)
     .eq("id", id)
-    .select()
-    .single()
+    .select("id")
 
-  if (error) {
-    console.error("updateAgencySettingsApi error", error)
-    throw new Error("Agency info could not be updated")
+  if (error) throw toRequestError(error, "Settings")
+
+  // RLS lets only admins update; anyone else changes zero rows
+  if (data.length === 0) {
+    throw new ForbiddenError("Only admins can change settings")
   }
-  return data
 }

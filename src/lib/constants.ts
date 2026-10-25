@@ -63,10 +63,3 @@ export const CLIENT_STAGES: {
   { status: "closed-lost", label: "Closed, lost", color: "var(--destructive)" },
   { status: "inactive", label: "Inactive", color: "var(--muted-foreground)" },
 ]
-
-export const currencyOptions = [
-  { value: "USD", label: "USD, US Dollar" },
-  { value: "EUR", label: "EUR, Euro" },
-  { value: "GBP", label: "GBP, British Pound" },
-  { value: "AED", label: "AED, UAE Dirham" },
-]
