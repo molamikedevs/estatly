@@ -1,4 +1,4 @@
-import DataRenderer from "@/components/DataRenderer"
+import DataRenderer from "@/components/common/DataRenderer"
 import {
   formatViewingDate,
   formatViewingTime,

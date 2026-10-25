@@ -1,4 +1,4 @@
-import CreateButton from "@/components/CreateButton"
+import CreateButton from "@/components/common/CreateButton"
 import { Building2 } from "lucide-react"
 import PropertyForm from "./PropertyForm"
 

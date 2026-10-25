@@ -1,5 +1,5 @@
-import Filter from "@/components/Filter"
-import SortBy from "@/components/SortBy"
+import Filter from "@/components/common/Filter"
+import SortBy from "@/components/common/SortBy"
 
 export default function PropertiesOperations() {
   return (

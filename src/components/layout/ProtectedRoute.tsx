@@ -1,4 +1,4 @@
-import Loader from "@/components/Loader"
+import Loader from "@/components/common/Loader"
 import { useUser } from "@/features/auth/useUser"
 import { useEffect, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"

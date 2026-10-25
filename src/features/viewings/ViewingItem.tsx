@@ -1,4 +1,5 @@
 import Thumbnail from "@/components/common/Thumbnail"
+import UserAvatar from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -8,7 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import UserAvatar from "@/components/UserAvatar"
 import { RESCHEDULABLE_STATUSES, viewingStatusOptions } from "@/lib/constants"
 import {
   formatViewingDate,

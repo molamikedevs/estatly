@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 import { useSearchParams } from "react-router-dom"
-import { Button } from "./ui/button"
+import { Button } from "../ui/button"
 
 interface FilterOption {
   value: string

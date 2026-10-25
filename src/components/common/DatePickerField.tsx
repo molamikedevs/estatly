@@ -17,7 +17,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form"
-import FieldLabelText from "./form-components/FieldLabelText"
+import FieldLabelText from "../form-components/FieldLabelText"
 
 interface DatePickerFieldProps<T extends FieldValues> {
   control: Control<T>

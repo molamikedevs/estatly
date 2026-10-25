@@ -1,5 +1,5 @@
 import ErrorMessage from "@/components/common/ErrorMessage"
-import PageHeader from "@/components/PageHeader"
+import PageHeader from "@/components/common/PageHeader"
 import { Button } from "@/components/ui/button"
 import { useLogout } from "@/features/auth/useLogout"
 import { useUser } from "@/features/auth/useUser"

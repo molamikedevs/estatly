@@ -1,4 +1,4 @@
-import SearchInput from "@/components/SearchInput"
+import SearchInput from "@/components/common/SearchInput"
 import ThemeSwitch from "@/components/theme/ThemeSwitch"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { SEARCH_PLACEHOLDERS } from "@/lib/constants"

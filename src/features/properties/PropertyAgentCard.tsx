@@ -1,7 +1,7 @@
 import { Mail } from "lucide-react"
 
+import UserAvatar from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
-import UserAvatar from "@/components/UserAvatar"
 import { useProperty } from "./useProperty"
 
 export default function PropertyAgentCard() {

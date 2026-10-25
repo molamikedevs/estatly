@@ -1,4 +1,4 @@
-import DatePickerField from "@/components/DatePickerField"
+import DatePickerField from "@/components/common/DatePickerField"
 import { FormFooter } from "@/components/form-components/FormFooter"
 import SelectField from "@/components/form-components/SelectField"
 import { durationOptions } from "@/lib/constants"

@@ -1,5 +1,5 @@
 import ErrorMessage from "@/components/common/ErrorMessage"
-import PageHeader from "@/components/PageHeader"
+import PageHeader from "@/components/common/PageHeader"
 import SettingsForm from "./SettingsForm"
 import SettingsSkeleton from "./SettingsSkeleton"
 import { useSettings } from "./useSettings"

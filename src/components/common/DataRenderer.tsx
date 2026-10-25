@@ -1,7 +1,7 @@
 import type { EmptyState } from "@/lib/states"
 import type { ReactNode } from "react"
-import EmptyMessage from "./common/EmptyMessage"
-import ErrorMessage from "./common/ErrorMessage"
+import EmptyMessage from "./EmptyMessage"
+import ErrorMessage from "./ErrorMessage"
 
 //Loading → error → empty → data
 

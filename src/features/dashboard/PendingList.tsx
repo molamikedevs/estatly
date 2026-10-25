@@ -1,4 +1,4 @@
-import DataRenderer from "@/components/DataRenderer"
+import DataRenderer from "@/components/common/DataRenderer"
 import Thumbnail from "@/components/common/Thumbnail"
 import { formatPrice } from "@/lib/helpers"
 import { EMPTY_PENDING } from "@/lib/states"

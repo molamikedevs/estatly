@@ -1,5 +1,5 @@
 import ErrorMessage from "@/components/common/ErrorMessage"
-import PageHeader from "@/components/PageHeader"
+import PageHeader from "@/components/common/PageHeader"
 import { CLIENT_STAGES } from "@/lib/constants"
 import { EMPTY_CLIENTS_BY_STAGE, EMPTY_LISTINGS_BY_STATUS } from "@/lib/states"
 import { Link } from "react-router-dom"

@@ -2,7 +2,7 @@ import { PAGE_SIZE } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useSearchParams } from "react-router-dom"
-import { Button } from "./ui/button"
+import { Button } from "../ui/button"
 
 interface PaginationProps {
   count: number

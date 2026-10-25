@@ -1,4 +1,4 @@
-import Spinner from "@/components/SpinnerMini"
+import Spinner from "@/components/common/SpinnerMini"
 import {
   AlertDialog,
   AlertDialogAction,

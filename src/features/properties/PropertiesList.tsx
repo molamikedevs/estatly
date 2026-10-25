@@ -1,14 +1,14 @@
-import Pagination from "@/components/Pagination"
+import Pagination from "@/components/common/Pagination"
 
 import PropertiesEmptyState from "./PropertiesEmptyState"
 import PropertiesOperations from "./PropertiesOperations"
 import PropertyCard from "./PropertyCard"
 import PropertyCardSkeleton from "./PropertyCardSkeleton"
 
-import ConfirmDelete from "@/components/ConfirmDelete"
-import CreateButton from "@/components/CreateButton"
+import ConfirmDelete from "@/components/common/ConfirmDelete"
+import CreateButton from "@/components/common/CreateButton"
+import PageHeader from "@/components/common/PageHeader"
 import FormSheet from "@/components/form-components/FormSheet"
-import PageHeader from "@/components/PageHeader"
 import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
 import { SKELETON_KEYS } from "@/lib/constants"
 import type { Property, PropertyStatus } from "@/types/database"
