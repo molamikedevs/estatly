@@ -1,4 +1,4 @@
-import Heading from "@/components/Heading"
+import Heading from "@/components/common/Heading"
 import Logo from "@/components/layout/Logo"
 import LoginForm from "@/features/auth/LoginForm"
 

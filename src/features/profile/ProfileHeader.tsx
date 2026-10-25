@@ -1,5 +1,5 @@
+import UserAvatar from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
-import UserAvatar from "@/components/UserAvatar"
 import { formatDate } from "@/lib/helpers"
 import type { UserProfile } from "@/types/database"
 import { Camera } from "lucide-react"

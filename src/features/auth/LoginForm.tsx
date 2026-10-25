@@ -1,5 +1,5 @@
-import IconField from "@/components/form-components/IconField"
 import PasswordField from "@/components/form-components/PasswordField"
+import TextField from "@/components/form-components/TextField"
 import { Button } from "@/components/ui/button"
 import { useLogin } from "@/features/auth/useLogin"
 import { loginSchema } from "@/lib/validation"
@@ -22,14 +22,14 @@ export default function LoginForm() {
 
   const onSubmit = handleSubmit((values) => {
     login(values, {
-      // Keep the email on a failed attempt — only clear the password.
+      // Keep the email on a failed attempt: only clear the password.
       onError: () => resetField("password"),
     })
   })
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
-      <IconField
+      <TextField
         control={control}
         name="email"
         id="login-email"
@@ -68,7 +68,7 @@ export default function LoginForm() {
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Signing in...
+            Signing in…
           </>
         ) : (
           "Sign in"

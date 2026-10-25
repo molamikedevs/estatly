@@ -1,3 +1,4 @@
+import UserAvatar from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -6,7 +7,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import UserAvatar from "@/components/UserAvatar"
 import { cn } from "@/lib/utils"
 import type { TeamMember } from "@/types/database"
 import {

@@ -6,7 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { lazy, Suspense } from "react"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
-import Loader from "@/components/Loader"
+import Loader from "@/components/common/Loader"
 import AppLayout from "@/components/layout/AppLayout"
 
 // ── Lazy-loaded pages: each becomes its own chunk ──

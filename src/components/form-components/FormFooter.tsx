@@ -1,4 +1,4 @@
-import Spinner from "@/components/SpinnerMini"
+import Spinner from "@/components/common/SpinnerMini"
 import { Button } from "@/components/ui/button"
 
 interface FormFooterProps {
@@ -7,7 +7,6 @@ interface FormFooterProps {
   onCancel: () => void
   submitLabel?: string
   submittingLabel?: string
-  variant?: "drawer" | "card"
 }
 
 export function FormFooter({

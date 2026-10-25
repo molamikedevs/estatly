@@ -1,4 +1,4 @@
-import Heading from "@/components/Heading"
+import Heading from "@/components/common/Heading"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Compass, Home, Search } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"

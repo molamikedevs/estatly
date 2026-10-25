@@ -1,5 +1,5 @@
-import BrandMark from "@/components/BrandMark"
-import Heading from "@/components/Heading"
+import BrandMark from "@/components/common/BrandMark"
+import Heading from "@/components/common/Heading"
 import { Button } from "@/components/ui/button"
 import { getErrorMessage } from "@/lib/errors"
 import type { FallbackProps } from "react-error-boundary"

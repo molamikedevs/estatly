@@ -1,26 +1,25 @@
-import DatePickerField from "@/components/DatePickerField"
+import DatePickerField from "@/components/common/DatePickerField"
+import GalleryUploader from "@/components/common/GalleryUploader"
+import { FormFooter } from "@/components/form-components/FormFooter"
 import FormSection from "@/components/form-components/FormSection"
-import IconField from "@/components/form-components/IconField"
 import SelectField from "@/components/form-components/SelectField"
 import SwitchField from "@/components/form-components/SwitchField"
 import TagField from "@/components/form-components/TagField"
 import TextareaField from "@/components/form-components/TextareaField"
 import TextField from "@/components/form-components/TextField"
-import GalleryUploader from "@/components/GalleryUploader"
 import { FieldGroup } from "@/components/ui/field"
 import { usePropertyForm } from "@/features/properties/usePropertyForm"
 import { DESC_MAX, LISTING_TYPE_OPTIONS, propertyTypes } from "@/lib/constants"
 import type { PropertyFormProps } from "@/types/database"
 import {
+  Banknote,
   Bath,
   BedDouble,
   Building2,
-  DollarSign,
   MapPin,
   Ruler,
 } from "lucide-react"
 import { Controller } from "react-hook-form"
-import { FormFooter } from "../../components/form-components/FormFooter"
 
 export default function PropertyForm({ property, onClose }: PropertyFormProps) {
   const { form, isEdit, isPending, onSubmit } = usePropertyForm({
@@ -57,7 +56,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               required
             />
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <SelectField
                 control={control}
                 name="listing_type"
@@ -85,17 +84,17 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
         >
           <FieldGroup className="space-y-5">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <IconField
+              <TextField
                 control={control}
                 name="price"
                 id="price"
                 label="Price (AED)"
-                icon={DollarSign}
+                icon={Banknote}
                 type="number"
                 placeholder="145000"
                 required
               />
-              <IconField
+              <TextField
                 control={control}
                 name="size_sqm"
                 id="size"
@@ -108,7 +107,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-              <IconField
+              <TextField
                 control={control}
                 name="bedrooms"
                 id="bedrooms"
@@ -118,7 +117,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
                 placeholder="2"
                 required
               />
-              <IconField
+              <TextField
                 control={control}
                 name="bathrooms"
                 id="bathrooms"
@@ -128,7 +127,6 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
                 placeholder="2"
                 required
               />
-
               <DatePickerField
                 control={control}
                 name="year_built"
@@ -158,7 +156,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
         >
           <FieldGroup className="space-y-5">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <IconField
+              <TextField
                 control={control}
                 name="city"
                 id="city"
@@ -167,7 +165,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
                 placeholder="Dubai"
                 required
               />
-              <IconField
+              <TextField
                 control={control}
                 name="neighborhood"
                 id="neighborhood"
@@ -178,7 +176,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               />
             </div>
 
-            <IconField
+            <TextField
               control={control}
               name="address"
               id="address"

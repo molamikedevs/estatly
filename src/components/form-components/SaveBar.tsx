@@ -1,4 +1,4 @@
-import SpinnerMini from "@/components/SpinnerMini"
+import SpinnerMini from "@/components/common/SpinnerMini"
 import { Button } from "@/components/ui/button"
 
 // Render inside a <form>, only when the form has unsaved changes.

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { useState, type ReactNode } from "react"
-import FormSheet from "./form-components/FormSheet"
+import FormSheet from "../form-components/FormSheet"
 
 type CreateButtonSize = "sm" | "md" | "lg"
 

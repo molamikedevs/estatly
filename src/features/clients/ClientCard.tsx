@@ -1,4 +1,4 @@
-import UserAvatar from "@/components/UserAvatar"
+import UserAvatar from "@/components/common/UserAvatar"
 import { propertyTypes } from "@/lib/constants"
 import { formatBudgetRange } from "@/lib/helpers"
 import type { Client, ClientStatus } from "@/types/database"

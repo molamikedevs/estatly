@@ -1,4 +1,4 @@
-import SpinnerMini from "@/components/SpinnerMini"
+import SpinnerMini from "@/components/common/SpinnerMini"
 import { Button } from "@/components/ui/button"
 import { useLogout } from "@/features/auth/useLogout"
 import { LogOut } from "lucide-react"

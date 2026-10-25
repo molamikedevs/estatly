@@ -1,5 +1,5 @@
 import { FormFooter } from "@/components/form-components/FormFooter"
-import IconField from "@/components/form-components/IconField"
+import TextField from "@/components/form-components/TextField"
 import {
   teamMemberFormSchema,
   type TeamMemberFormValues,
@@ -48,7 +48,7 @@ export default function TeamMemberEditForm({
           <p className="truncate font-medium">{member.email}</p>
         </div>
 
-        <IconField
+        <TextField
           control={control}
           name="full_name"
           id="member-name"
@@ -56,7 +56,7 @@ export default function TeamMemberEditForm({
           icon={UserIcon}
           required
         />
-        <IconField
+        <TextField
           control={control}
           name="phone"
           id="member-phone"
@@ -66,7 +66,7 @@ export default function TeamMemberEditForm({
           placeholder="+971 50 000 0000"
           optional
         />
-        <IconField
+        <TextField
           control={control}
           name="specialization"
           id="member-specialization"
@@ -82,7 +82,7 @@ export default function TeamMemberEditForm({
         isSubmitting={isPending}
         onCancel={onClose}
         submitLabel="Save changes"
-        submittingLabel="Saving..."
+        submittingLabel="Saving…"
       />
     </form>
   )

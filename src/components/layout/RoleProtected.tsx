@@ -1,4 +1,4 @@
-import Loader from "@/components/Loader"
+import Loader from "@/components/common/Loader"
 import { useUser } from "@/features/auth/useUser"
 import type { UserRole } from "@/types/database"
 import { useEffect, type ReactNode } from "react"

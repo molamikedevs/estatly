@@ -1,4 +1,4 @@
-import UserAvatar from "@/components/UserAvatar"
+import UserAvatar from "@/components/common/UserAvatar"
 import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { useUser } from "@/features/auth/useUser"
 import { ChevronRight } from "lucide-react"
