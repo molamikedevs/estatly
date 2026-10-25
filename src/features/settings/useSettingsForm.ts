@@ -1,36 +1,37 @@
-import { settingsSchema } from "@/lib/validation"
+import { settingsFormSchema, type SettingsFormValues } from "@/lib/validation"
 import type { Settings } from "@/types/database"
-import type { SettingsFormValues } from "@/types/global"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useUpdateSettings } from "./useUpdateSettings"
 
-interface UseSettingsFormParams {
-  settings: Settings
-  onClose: () => void
-}
-
-function settingsToFormValues(s: Settings): SettingsFormValues {
+// Database values (numbers, nulls) → form values (strings)
+function toFormValues(settings: Settings): SettingsFormValues {
   return {
-    name: s.name,
-    contact_email: s.contact_email ?? "",
-    contact_phone: s.contact_phone ?? "",
-    commission_rate: String(s.commission_rate ?? ""),
-    default_currency: s.default_currency,
+    name: settings.name,
+    contact_email: settings.contact_email ?? "",
+    contact_phone: settings.contact_phone ?? "",
+    commission_rate: String(settings.commission_rate ?? ""),
+    default_viewing_duration: String(
+      settings.default_viewing_duration
+    ) as SettingsFormValues["default_viewing_duration"],
   }
 }
 
-export function useSettingsForm({ settings, onClose }: UseSettingsFormParams) {
+export function useSettingsForm({ settings }: { settings: Settings }) {
   const { updateSettings, isPending } = useUpdateSettings()
 
   const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsSchema),
-    mode: "onBlur",
-    defaultValues: settingsToFormValues(settings),
+    resolver: zodResolver(settingsFormSchema),
+    mode: "onTouched",
+    defaultValues: toFormValues(settings),
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    updateSettings({ id: settings.id, values }, { onSuccess: () => onClose() })
+    updateSettings(
+      { id: settings.id, values },
+      // The saved values become the new starting point, so the save bar hides
+      { onSuccess: () => form.reset(values) }
+    )
   })
 
   return { form, isPending, onSubmit }

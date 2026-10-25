@@ -205,14 +205,15 @@ export interface ClientFormProps {
 
 // ─── Settings ─────────────────────────────────────────
 
+// One row in the agencies table; prices are always AED
 export interface Settings {
   id: number
   created_at: string
   name: string
   commission_rate: number
-  default_currency: string
   contact_email: string | null
   contact_phone: string | null
+  default_viewing_duration: number
 }
 
 // ─── Queries ──────────────────────────────────────────

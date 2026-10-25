@@ -1,11 +1,20 @@
 import { z } from "zod"
 
 /* ─────────────────────────────────────────────
-  Schema
+  Shared
    ───────────────────────────────────────────── */
 
 const BIO_MAX = 280
 const CURRENT_YEAR = new Date().getFullYear()
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const PHONE = /^[+\d\s()-]*$/
+
+// Viewing lengths in minutes, as strings for select fields
+const DURATIONS = ["15", "30", "45", "60", "90"] as const
+
+/* ─────────────────────────────────────────────
+  Profile
+   ───────────────────────────────────────────── */
 
 export const profileSchema = z
   .object({
@@ -22,7 +31,7 @@ export const profileSchema = z
       .string()
       .trim()
       .max(20, "Phone number is too long")
-      .regex(/^[+\d\s()-]*$/, "Use digits, spaces, +, -, or ()")
+      .regex(PHONE, "Use digits, spaces, +, -, or ()")
       .optional()
       .or(z.literal("")),
     specialization: z
@@ -68,11 +77,7 @@ export const createAgentSchema = z.object({
     .trim()
     .min(2, "Full name is required")
     .max(80, "Name is too long"),
-  email: z
-    .string()
-    .trim()
-    .min(1, "Email is required")
-    .email("Enter a valid email"),
+  email: z.string().trim().min(1, "Email is required").email("Enter a valid email"),
   password: z
     .string()
     .min(8, "At least 8 characters")
@@ -91,7 +96,7 @@ export const teamMemberFormSchema = z.object({
     .string()
     .trim()
     .max(20, "Phone number is too long")
-    .regex(/^[+\d\s()-]*$/, "Use digits, spaces, +, -, or ()"),
+    .regex(PHONE, "Use digits, spaces, +, -, or ()"),
   specialization: z.string().trim().max(80, "Specialization is too long"),
 })
 
@@ -102,6 +107,10 @@ export const teamMemberSchema = teamMemberFormSchema.transform((values) => ({
 }))
 
 export type TeamMemberFormValues = z.infer<typeof teamMemberFormSchema>
+
+/* ─────────────────────────────────────────────
+  Auth
+   ───────────────────────────────────────────── */
 
 export const passwordSchema = z
   .object({
@@ -226,9 +235,7 @@ export const viewingFormSchema = z.object({
       (v) => new Date(v).getTime() > Date.now(),
       "Pick a time in the future"
     ),
-  duration_minutes: z.enum(["15", "30", "45", "60", "90"], {
-    message: "Select a duration",
-  }),
+  duration_minutes: z.enum(DURATIONS, { message: "Select a duration" }),
 })
 
 export const viewingSchema = viewingFormSchema.transform((values) => ({
@@ -292,7 +299,7 @@ export const clientFormSchema = z
       .string()
       .trim()
       .max(20, "Phone number is too long")
-      .regex(/^[+\d\s()-]*$/, "Use digits, spaces, +, -, or ()"),
+      .regex(PHONE, "Use digits, spaces, +, -, or ()"),
     nationality: z.string().trim().max(60, "Too long"),
     budget_min: budgetText,
     budget_max: budgetText,
@@ -333,24 +340,39 @@ export const updateClientStatusSchema = z.object({
   Settings
    ───────────────────────────────────────────── */
 
-export const settingsSchema = z.object({
-  name: z.string().min(2, "Agency name is required").max(100, "Too long"),
+export const settingsFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Agency name is required")
+    .max(100, "Name is too long"),
+  contact_email: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || EMAIL.test(v), "Enter a valid email"),
+  contact_phone: z
+    .string()
+    .trim()
+    .max(20, "Phone number is too long")
+    .regex(PHONE, "Use digits, spaces, +, -, or ()"),
   commission_rate: z
     .string()
     .min(1, "Commission rate is required")
     .refine(
-      (v) => Number(v) >= 0 && Number(v) <= 100,
+      (v) => !Number.isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 100,
       "Enter a rate between 0 and 100"
     ),
-  default_currency: z.string().min(1, "Select a currency"),
-  contact_email: z
-    .string()
-    .email("Enter a valid email")
-    .optional()
-    .or(z.literal("")),
-  contact_phone: z
-    .string()
-    .max(20, "Phone number is too long")
-    .optional()
-    .or(z.literal("")),
+  default_viewing_duration: z.enum(DURATIONS, {
+    message: "Select a duration",
+  }),
 })
+
+export const settingsSchema = settingsFormSchema.transform((values) => ({
+  name: values.name,
+  contact_email: textOrNull(values.contact_email.toLowerCase()),
+  contact_phone: textOrNull(values.contact_phone),
+  commission_rate: Number(values.commission_rate),
+  default_viewing_duration: Number(values.default_viewing_duration),
+}))
+
+export type SettingsFormValues = z.infer<typeof settingsFormSchema>
