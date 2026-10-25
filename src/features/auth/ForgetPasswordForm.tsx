@@ -1,4 +1,4 @@
-import IconField from "@/components/form-components/IconField"
+import TextField from "@/components/form-components/TextField"
 import { Button } from "@/components/ui/button"
 import {
   forgotPasswordSchema,
@@ -34,7 +34,7 @@ export default function ForgotPasswordForm() {
       noValidate
       className="space-y-5"
     >
-      <IconField
+      <TextField
         control={control}
         name="email"
         id="reset-email"
@@ -46,7 +46,7 @@ export default function ForgotPasswordForm() {
         required
       />
       <Button type="submit" className="h-11 w-full" disabled={isPending}>
-        {isPending ? "Sending..." : "Send reset link"}
+        {isPending ? "Sending…" : "Send reset link"}
       </Button>
     </form>
   )

@@ -1,7 +1,7 @@
 import { FormFooter } from "@/components/form-components/FormFooter"
-import IconField from "@/components/form-components/IconField"
 import SelectField from "@/components/form-components/SelectField"
 import TagField from "@/components/form-components/TagField"
+import TextField from "@/components/form-components/TextField"
 import { propertyTypes } from "@/lib/constants"
 import type { ClientFormProps } from "@/types/database"
 import { Banknote, Globe, Mail, Phone, User as UserIcon } from "lucide-react"
@@ -24,7 +24,7 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
       <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
         <section className="space-y-5">
           <h3 className="text-sm font-medium">Contact</h3>
-          <IconField
+          <TextField
             control={control}
             name="full_name"
             id="full_name"
@@ -33,7 +33,7 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
             placeholder="Omar Al-Rashid"
             required
           />
-          <IconField
+          <TextField
             control={control}
             name="email"
             id="email"
@@ -44,7 +44,7 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
             required
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <IconField
+            <TextField
               control={control}
               name="phone"
               id="phone"
@@ -54,7 +54,7 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
               placeholder="+971 50 000 0000"
               optional
             />
-            <IconField
+            <TextField
               control={control}
               name="nationality"
               id="nationality"
@@ -69,7 +69,7 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
         <section className="space-y-5 border-t pt-6">
           <h3 className="text-sm font-medium">What they are looking for</h3>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <IconField
+            <TextField
               control={control}
               name="budget_min"
               id="budget_min"
@@ -79,7 +79,7 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
               placeholder="500000"
               optional
             />
-            <IconField
+            <TextField
               control={control}
               name="budget_max"
               id="budget_max"
@@ -114,7 +114,7 @@ export default function ClientForm({ client, onClose }: ClientFormProps) {
         isSubmitting={isPending}
         onCancel={onClose}
         submitLabel={isEdit ? "Save changes" : "Add client"}
-        submittingLabel={isEdit ? "Saving..." : "Adding..."}
+        submittingLabel={isEdit ? "Saving…" : "Adding…"}
       />
     </form>
   )

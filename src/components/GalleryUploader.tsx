@@ -27,14 +27,19 @@ export default function GalleryUploader({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Revoke blob URLs for new files on unmount
+  // Track the latest images so unmount cleanup sees every blob URL,
+  // not just the ones that existed on first render.
+  const latestRef = useRef(value)
+  useEffect(() => {
+    latestRef.current = value
+  }, [value])
+
   useEffect(() => {
     return () => {
-      value.forEach((img) => {
+      latestRef.current.forEach((img) => {
         if (img.file) URL.revokeObjectURL(img.url)
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
@@ -108,9 +113,14 @@ export default function GalleryUploader({
             <ImagePlus className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">Property images</p>
+            <p className="text-sm font-medium">
+              Property images{" "}
+              <span className="tabular text-xs font-normal text-muted-foreground">
+                ({value.length}/{MAX_IMAGES})
+              </span>
+            </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              JPG, PNG or WebP — up to {MAX_IMAGES}. First image is the cover.
+              JPG, PNG or WebP. The first image is the cover.
             </p>
           </div>
           <Button
@@ -160,21 +170,21 @@ export default function GalleryUploader({
 
               {/* Cover badge */}
               {index === 0 && (
-                <span className="absolute top-1.5 left-1.5 flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[9px] font-semibold text-primary-foreground">
+                <span className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[9px] font-semibold text-primary-foreground shadow-sm">
                   <Star className="h-2.5 w-2.5 fill-current" />
                   Cover
                 </span>
               )}
 
-              {/* Hover actions */}
-              <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100">
+              {/* Actions: always visible on touch, on hover/focus from sm up */}
+              <div className="absolute top-1.5 right-1.5 flex gap-1 transition-opacity focus-within:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
                 {index !== 0 && (
                   <Button
                     type="button"
                     size="icon"
                     variant="secondary"
                     onClick={() => makeCover(img.id)}
-                    className="h-7 w-7"
+                    className="h-7 w-7 shadow-sm"
                     aria-label="Set as cover"
                   >
                     <Star className="h-3.5 w-3.5" />
@@ -185,7 +195,7 @@ export default function GalleryUploader({
                   size="icon"
                   variant="destructive"
                   onClick={() => removeImage(img.id)}
-                  className="h-7 w-7"
+                  className="h-7 w-7 shadow-sm"
                   aria-label="Remove image"
                 >
                   <X className="h-3.5 w-3.5" />

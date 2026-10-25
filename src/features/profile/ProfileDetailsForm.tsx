@@ -1,6 +1,6 @@
-import IconField from "@/components/form-components/IconField"
 import PageSection from "@/components/form-components/PageSection"
 import SaveBar from "@/components/form-components/SaveBar"
+import TextField from "@/components/form-components/TextField"
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validation"
 import type { UserProfile } from "@/types/database"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -43,7 +43,7 @@ export default function ProfileDetailsForm({
           title="Details"
           description="Shown to your team on cards and lists. Your email and role are set by your admin."
         >
-          <IconField
+          <TextField
             control={control}
             name="full_name"
             id="profile-name"
@@ -53,7 +53,7 @@ export default function ProfileDetailsForm({
             required
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <IconField
+            <TextField
               control={control}
               name="phone"
               id="profile-phone"
@@ -64,7 +64,7 @@ export default function ProfileDetailsForm({
               placeholder="+971 50 000 0000"
               optional
             />
-            <IconField
+            <TextField
               control={control}
               name="specialization"
               id="profile-specialization"

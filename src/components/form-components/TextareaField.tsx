@@ -1,48 +1,45 @@
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 import type { TextareaFieldProps } from "@/types/global"
 import type { FieldValues } from "react-hook-form"
 import ControlledField from "./ControlledField"
 
 export default function TextareaField<T extends FieldValues>({
-  control,
-  name,
-  id,
-  label,
-  required,
-  optional,
   placeholder,
   rows = 4,
   maxLength,
+  ...fieldProps
 }: TextareaFieldProps<T>) {
   return (
-    <ControlledField
-      control={control}
-      name={name}
-      id={id}
-      label={label}
-      required={required}
-      optional={optional}
-    >
-      {(field, fieldState) => (
-        <>
-          {maxLength && (
-            <div className="mb-2 flex justify-end">
-              <span className="text-[10px] text-muted-foreground tabular-nums">
-                {(field.value ?? "").length}/{maxLength}
-              </span>
-            </div>
-          )}
+    <ControlledField {...fieldProps}>
+      {(field, fieldState) => {
+        const length = (field.value ?? "").length
+        const nearLimit = maxLength && length >= maxLength * 0.9
 
-          <Textarea
-            {...field}
-            id={id}
-            rows={rows}
-            placeholder={placeholder}
-            className="resize-none"
-            aria-invalid={fieldState.invalid}
-          />
-        </>
-      )}
+        return (
+          <div className="space-y-1.5">
+            <Textarea
+              {...field}
+              id={fieldProps.id}
+              rows={rows}
+              placeholder={placeholder}
+              maxLength={maxLength}
+              className="resize-none"
+              aria-invalid={fieldState.invalid}
+            />
+            {maxLength && (
+              <p
+                className={cn(
+                  "text-right text-[10px] tabular-nums",
+                  nearLimit ? "text-warning" : "text-muted-foreground"
+                )}
+              >
+                {length}/{maxLength}
+              </p>
+            )}
+          </div>
+        )
+      }}
     </ControlledField>
   )
 }

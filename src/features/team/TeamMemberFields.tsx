@@ -1,5 +1,5 @@
-import IconField from "@/components/form-components/IconField"
 import PasswordField from "@/components/form-components/PasswordField"
+import TextField from "@/components/form-components/TextField"
 import { FieldGroup } from "@/components/ui/field"
 import type { CreatableRole } from "@/types/database"
 import type { AgentFieldsProps } from "@/types/global"
@@ -15,7 +15,7 @@ export default function TeamMemberFields({
 }: TeamMemberFieldsProps) {
   return (
     <FieldGroup className="space-y-5">
-      <IconField
+      <TextField
         control={control}
         name="full_name"
         id="user-name"
@@ -26,7 +26,7 @@ export default function TeamMemberFields({
         required
       />
 
-      <IconField
+      <TextField
         control={control}
         name="email"
         id="user-email"

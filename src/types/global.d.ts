@@ -38,29 +38,46 @@ export interface FieldLabelTextProps {
 
 // ─── Form Component Props ─────────────────────────────
 
-export interface PasswordFieldProps<T extends FieldValues> {
+export interface ControlledFieldProps<T extends FieldValues> {
   control: Control<T>
   name: Path<T>
   id: string
   label: string
-  placeholder?: string
-  autoComplete?: string
-  required?: boolean
-  description?: ReactNode
-  labelAddon?: ReactNode
-}
-
-export interface IconFieldProps<T extends FieldValues> {
-  control: Control<T>
-  name: Path<T>
-  id: string
-  label: string
-  icon: LucideIcon
-  placeholder?: string
-  type?: HTMLInputTypeAttribute
-  autoComplete?: string
   required?: boolean
   optional?: boolean
+  description?: ReactNode
+  labelAddon?: ReactNode
+  children: (
+    field: ControllerRenderProps<T, Path<T>>,
+    fieldState: ControllerFieldState
+  ) => ReactNode
+}
+
+export type TextFieldProps<T extends FieldValues> = Omit<
+  ControlledFieldProps<T>,
+  "children"
+> & {
+  placeholder?: string
+  type?: HTMLInputTypeAttribute
+  icon?: LucideIcon
+  autoComplete?: string
+}
+
+export type PasswordFieldProps<T extends FieldValues> = Omit<
+  ControlledFieldProps<T>,
+  "children"
+> & {
+  placeholder?: string
+  autoComplete?: string
+}
+
+export type TextareaFieldProps<T extends FieldValues> = Omit<
+  ControlledFieldProps<T>,
+  "children"
+> & {
+  placeholder?: string
+  rows?: number
+  maxLength?: number
 }
 
 export interface SelectFieldProps<T extends FieldValues> {
@@ -83,44 +100,14 @@ export interface TagFieldProps<T extends FieldValues> {
   placeholder?: string
 }
 
-export interface ControlledFieldProps<T extends FieldValues> {
-  control: Control<T>
-  name: Path<T>
-  id: string
-  label: string
-  required?: boolean
-  optional?: boolean
-  children: (
-    field: ControllerRenderProps<T, Path<T>>,
-    fieldState: ControllerFieldState
-  ) => ReactNode
-}
-
-export interface AgentFieldsProps {
-  control: Control<CreateAgentFormValues>
-}
-
-export type TextareaFieldProps<T extends FieldValues> = Omit<
-  ControlledFieldProps<T>,
-  "children"
-> & {
-  placeholder?: string
-  rows?: number
-  maxLength?: number
-}
-
-export type TextFieldProps<T extends FieldValues> = Omit<
-  ControlledFieldProps<T>,
-  "children"
-> & {
-  placeholder?: string
-  type?: string
-}
-
 export interface SwitchFieldProps<T extends FieldValues> {
   control: Control<T>
   name: Path<T>
   id: string
   label: string
   description?: string
+}
+
+export interface AgentFieldsProps {
+  control: Control<CreateAgentFormValues>
 }

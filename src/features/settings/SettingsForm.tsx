@@ -1,7 +1,7 @@
-import IconField from "@/components/form-components/IconField"
 import PageSection from "@/components/form-components/PageSection"
 import SaveBar from "@/components/form-components/SaveBar"
 import SelectField from "@/components/form-components/SelectField"
+import TextField from "@/components/form-components/TextField"
 import { durationOptions } from "@/lib/constants"
 import type { Settings } from "@/types/database"
 import { Building2, Clock, Mail, Percent, Phone } from "lucide-react"
@@ -18,7 +18,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           title="Agency"
           description="Your agency's name and how clients reach the office."
         >
-          <IconField
+          <TextField
             control={control}
             name="name"
             id="agency-name"
@@ -27,7 +27,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             required
           />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <IconField
+            <TextField
               control={control}
               name="contact_email"
               id="agency-email"
@@ -37,7 +37,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
               placeholder="office@agency.ae"
               optional
             />
-            <IconField
+            <TextField
               control={control}
               name="contact_phone"
               id="agency-phone"
@@ -55,7 +55,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           description="Used to estimate the agency's earnings on each listing. Prices are in AED."
         >
           <div className="sm:max-w-48">
-            <IconField
+            <TextField
               control={control}
               name="commission_rate"
               id="commission-rate"

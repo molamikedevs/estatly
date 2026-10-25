@@ -14,10 +14,10 @@ interface FilterProps {
 
 export default function Filter({ filterField, options }: FilterProps) {
   const [searchParams, setSearchParams] = useSearchParams()
-
   const currentFilter = searchParams.get(filterField) || options[0].value
 
   function handleClick(value: string) {
+    if (value === currentFilter) return
     const next = new URLSearchParams(searchParams)
     next.set(filterField, value)
     if (next.get("page")) next.set("page", "1")
@@ -25,7 +25,10 @@ export default function Filter({ filterField, options }: FilterProps) {
   }
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-lg border bg-card p-1 shadow-sm">
+    <div
+      role="group"
+      className="inline-flex items-center gap-1 rounded-lg border bg-card p-1 shadow-sm"
+    >
       {options.map((option) => {
         const isActive = option.value === currentFilter
         return (
@@ -33,10 +36,10 @@ export default function Filter({ filterField, options }: FilterProps) {
             key={option.value}
             variant="ghost"
             size="sm"
+            aria-pressed={isActive}
             onClick={() => handleClick(option.value)}
-            disabled={isActive}
             className={cn(
-              "h-8 px-3 text-xs font-medium transition-colors disabled:opacity-100",
+              "h-8 px-3 text-xs font-medium transition-colors",
               isActive
                 ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground"

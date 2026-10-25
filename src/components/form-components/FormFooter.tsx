@@ -7,7 +7,6 @@ interface FormFooterProps {
   onCancel: () => void
   submitLabel?: string
   submittingLabel?: string
-  variant?: "drawer" | "card"
 }
 
 export function FormFooter({

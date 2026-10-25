@@ -1,4 +1,9 @@
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 import type { ControlledFieldProps } from "@/types/global"
 import type { ReactNode } from "react"
 import {
@@ -12,8 +17,8 @@ import FieldLabelText from "./FieldLabelText"
 
 /**
  * Shared scaffold for a single controlled form field: the Controller,
- * the label, and error display. The caller renders only the control
- * itself, via the children render-prop.
+ * the label (with an optional addon on the same row), an optional
+ * description and error display. The caller renders only the control.
  */
 export default function ControlledField<T extends FieldValues>({
   control,
@@ -22,20 +27,40 @@ export default function ControlledField<T extends FieldValues>({
   label,
   required,
   optional,
+  description,
+  labelAddon,
   children,
 }: ControlledFieldProps<T>) {
+  const labelEl = (
+    <FieldLabel htmlFor={id}>
+      <FieldLabelText required={required} optional={optional}>
+        {label}
+      </FieldLabelText>
+    </FieldLabel>
+  )
+
   return (
     <Controller
       control={control}
       name={name}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={id}>
-            <FieldLabelText required={required} optional={optional}>
-              {label}
-            </FieldLabelText>
-          </FieldLabel>
+          {labelAddon ? (
+            <div className="flex items-center justify-between">
+              {labelEl}
+              {labelAddon}
+            </div>
+          ) : (
+            labelEl
+          )}
+
           {children(field, fieldState)}
+
+          {description && (
+            <FieldDescription className="text-xs">
+              {description}
+            </FieldDescription>
+          )}
           {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}
