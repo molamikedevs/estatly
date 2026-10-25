@@ -63,12 +63,27 @@ export const EMPTY_STAGE: EmptyState = {
   message: "Move a client here from its menu.",
 }
 
-// ─── Other routes ─────────────────────────────────────
+// ─── Properties ───────────────────────────────────────
 
 export const EMPTY_PROPERTIES: EmptyState = {
-  title: "No properties found",
-  message: "Try another search or filter, or add a new listing.",
+  title: "No properties yet",
+  message: "Add your first listing with the Add property button.",
 }
+
+export const EMPTY_PROPERTIES_FILTERED: EmptyState = {
+  title: "No properties match",
+  message: "Try another listing type or search.",
+  // The bare route drops every filter
+  button: { text: "Clear filters", href: "/properties" },
+}
+
+export const EMPTY_PROPERTY: EmptyState = {
+  title: "Property not found",
+  message: "This listing may have been removed, or the link is wrong.",
+  button: { text: "Back to properties", href: "/properties" },
+}
+
+// ─── Team ─────────────────────────────────────────────
 
 export const EMPTY_AGENTS: EmptyState = {
   title: "No agents yet",

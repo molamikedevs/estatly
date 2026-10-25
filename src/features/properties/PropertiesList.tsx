@@ -1,44 +1,39 @@
-import Pagination from "@/components/common/Pagination"
-
-import PropertiesEmptyState from "./PropertiesEmptyState"
-import PropertiesOperations from "./PropertiesOperations"
-import PropertyCard from "./PropertyCard"
-import PropertyCardSkeleton from "./PropertyCardSkeleton"
-
 import ConfirmDelete from "@/components/common/ConfirmDelete"
 import CreateButton from "@/components/common/CreateButton"
+import DataRenderer from "@/components/common/DataRenderer"
 import PageHeader from "@/components/common/PageHeader"
+import Pagination from "@/components/common/Pagination"
 import FormSheet from "@/components/form-components/FormSheet"
 import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
 import { SKELETON_KEYS } from "@/lib/constants"
-import type { Property, PropertyStatus } from "@/types/database"
+import { EMPTY_PROPERTIES, EMPTY_PROPERTIES_FILTERED } from "@/lib/states"
+import PropertiesOperations from "./PropertiesOperations"
+import PropertyCard from "./PropertyCard"
+import PropertyCardSkeleton from "./PropertyCardSkeleton"
 import PropertyForm from "./PropertyForm"
-import { useUpdatePropertyStatus } from "./useUpdatePropertyStatus"
+
+const GRID = "grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-4"
 
 export default function PropertiesList() {
   const {
-    isFiltered,
+    isLoading,
+    error,
+    refetch,
     properties,
     total,
-    isLoading,
+    isFiltered,
     editProperty,
-    deleteProperty,
     editOpen,
-    isDeleting,
-    handleEdit,
-    setDeleteProperty,
     setEditOpen,
+    handleEdit,
+    deleteTarget,
+    setDeleteTarget,
+    isDeleting,
     handleConfirmDelete,
   } = usePropertiesOperations()
 
-  const { updateStatus } = useUpdatePropertyStatus()
-
-  function handleStatusChange(property: Property, status: PropertyStatus) {
-    updateStatus({ id: property.id, status })
-  }
   return (
-    <div className="space-y-6">
-      {/* Page header */}
+    <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PageHeader
           title="Properties"
@@ -46,8 +41,6 @@ export default function PropertiesList() {
           count={total}
           isLoading={isLoading}
         />
-
-        {/* Create flow — CreateButton owns its own open/close state */}
         <CreateButton
           label="Add property"
           size="lg"
@@ -58,55 +51,57 @@ export default function PropertiesList() {
         </CreateButton>
       </div>
 
-      {!isLoading && total > 0 && <PropertiesOperations />}
+      {!isLoading && (total > 0 || isFiltered) && <PropertiesOperations />}
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {SKELETON_KEYS.map((k) => (
-            <PropertyCardSkeleton key={k} />
-          ))}
-        </div>
-      ) : total === 0 ? (
-        <PropertiesEmptyState filtered={isFiltered} />
-      ) : (
-        <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {properties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onEdit={handleEdit}
-                onDelete={setDeleteProperty}
-                onStatusChange={handleStatusChange}
-              />
+      <DataRenderer
+        data={properties}
+        isLoading={isLoading}
+        error={error}
+        onRetry={refetch}
+        empty={isFiltered ? EMPTY_PROPERTIES_FILTERED : EMPTY_PROPERTIES}
+        loading={
+          <div className={GRID}>
+            {SKELETON_KEYS.map((k) => (
+              <PropertyCardSkeleton key={k} />
             ))}
           </div>
+        }
+        render={(items) => (
+          <div className="space-y-10">
+            <div className={GRID}>
+              {items.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  onEdit={handleEdit}
+                  onDelete={setDeleteTarget}
+                />
+              ))}
+            </div>
+            <Pagination count={total} label="properties" />
+          </div>
+        )}
+      />
 
-          {/* Edit flow — open state owned by usePropertiesOperations */}
-
-          <FormSheet
-            open={editOpen}
-            onOpenChange={setEditOpen}
-            size="lg"
-            title="Edit property"
-            description="Update the listing details below."
-          >
-            <PropertyForm
-              property={editProperty}
-              onClose={() => setEditOpen(false)}
-            />
-          </FormSheet>
-
-          <Pagination count={total} label="properties" />
-        </>
-      )}
+      <FormSheet
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        size="lg"
+        title="Edit property"
+        description="Update the listing details below."
+      >
+        <PropertyForm
+          property={editProperty}
+          onClose={() => setEditOpen(false)}
+        />
+      </FormSheet>
 
       <ConfirmDelete
-        open={Boolean(deleteProperty)}
-        onOpenChange={(open) => !open && setDeleteProperty(undefined)}
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(undefined)}
         onConfirm={handleConfirmDelete}
         isPending={isDeleting}
-        resourceName={deleteProperty?.title}
+        resourceName={deleteTarget?.title}
       />
     </div>
   )

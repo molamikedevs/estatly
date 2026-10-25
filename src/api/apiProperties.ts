@@ -7,6 +7,17 @@ import type {
 } from "@/types/database"
 import type { PropertyFormValues } from "@/types/global"
 
+const PROPERTY_WITH_AGENT =
+  "*, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name, avatar, email)"
+
+/** Remove characters that break PostgREST's or() filter or act as wildcards. */
+function cleanSearch(term: string) {
+  return term
+    .replace(/[,()%_*\\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
 export async function createPropertyApi(
   newProperty: PropertyFormValues
 ): Promise<Property> {
@@ -15,7 +26,7 @@ export async function createPropertyApi(
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated user")
+  if (!user) throw new Error("You need to be signed in to add a property")
 
   const { data, error } = await supabase
     .from("properties")
@@ -30,6 +41,7 @@ export async function createPropertyApi(
 
   return data
 }
+
 export async function updatePropertyApi(
   newProperty: PropertyFormValues,
   id: string
@@ -60,22 +72,14 @@ export async function getPropertiesApi({
 }: PropertiesQueryParams): Promise<{ data: Property[]; count: number }> {
   let query = supabase
     .from("properties")
-    .select(
-      `*, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name, avatar, email)`,
-      { count: "exact" }
-    )
+    .select(PROPERTY_WITH_AGENT, { count: "exact" })
 
-  //Filter
   if (filter !== "all") query = query.eq("listing_type", filter)
 
-  // search
-  if (search) query = query.or(`title.ilike.%${search}%,city.ilike.%${search}%`)
+  const term = cleanSearch(search)
+  if (term) query = query.or(`title.ilike.%${term}%,city.ilike.%${term}%`)
 
-  // Sort
   switch (sortBy) {
-    case "newest":
-      query = query.order("created_at", { ascending: false })
-      break
     case "oldest":
       query = query.order("created_at", { ascending: true })
       break
@@ -92,20 +96,18 @@ export async function getPropertiesApi({
       query = query.order("created_at", { ascending: false })
   }
 
-  // paginate
   const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-  query = query.range(from, to)
+  query = query.range(from, from + pageSize - 1)
 
   const { data, error, count } = await query
   if (error) {
+    console.error("getPropertiesApi error:", error)
     throw new Error("Properties could not be loaded")
   }
 
   return { data: data ?? [], count: count ?? 0 }
 }
 
-// in apiProperties
 export async function getAllPropertiesApi(): Promise<
   Pick<Property, "id" | "title">[]
 > {
@@ -115,9 +117,26 @@ export async function getAllPropertiesApi(): Promise<
     .order("title")
 
   if (error) {
+    console.error("getAllPropertiesApi error:", error)
     throw new Error("Properties could not be loaded")
   }
   return data ?? []
+}
+
+/** Returns null when the listing doesn't exist, so the page shows "not found". */
+export async function getPropertyApi(id: number): Promise<Property | null> {
+  const { data, error } = await supabase
+    .from("properties")
+    .select(PROPERTY_WITH_AGENT)
+    .eq("id", id)
+    .maybeSingle()
+
+  if (error) {
+    console.error("getPropertyApi error:", error)
+    throw new Error("Property could not be loaded")
+  }
+
+  return data
 }
 
 export async function updatePropertyStatusApi(
@@ -138,54 +157,27 @@ export async function updatePropertyStatusApi(
   return data
 }
 
+/** Adds one view in a single database step (see increment_property_views). */
 export async function incrementPropertyViewsApi(id: number): Promise<number> {
-  const { data, error: readError } = await supabase
-    .from("properties")
-    .select("views_count")
-    .eq("id", id)
-    .single()
-
-  if (readError) {
-    console.error("incrementPropertyViewsApi read error:", readError)
-    throw new Error(readError.message)
-  }
-
-  const nextCount = (data.views_count ?? 0) + 1
-
-  const { error: writeError } = await supabase
-    .from("properties")
-    .update({ views_count: nextCount })
-    .eq("id", id)
-
-  if (writeError) {
-    console.error("incrementPropertyViewsApi write error:", writeError)
-    throw new Error(writeError.message)
-  }
-
-  return nextCount
-}
-
-export async function getPropertyApi(id: number): Promise<Property> {
-  const { data, error } = await supabase
-    .from("properties")
-    .select(
-      "*, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name, avatar, email)"
-    )
-    .eq("id", id)
-    .single()
+  const { data, error } = await supabase.rpc("increment_property_views", {
+    property_id: id,
+  })
 
   if (error) {
-    console.error("getPropertyApi error:", error)
-    throw new Error("Property id details could not be loaded")
+    console.error("incrementPropertyViewsApi error:", error)
+    throw new Error("View could not be counted")
   }
 
-  return data
+  return data as number
 }
 
-export async function deletePropertyApi(id: string | number) {
+export async function deletePropertyApi(id: number) {
   const { error } = await supabase.from("properties").delete().eq("id", id)
 
-  if (error) throw new Error("Property could not be deleted")
+  if (error) {
+    console.error("deletePropertyApi error:", error)
+    throw new Error("Property could not be deleted")
+  }
 }
 
 export async function getPropertiesByStatusApi(): Promise<

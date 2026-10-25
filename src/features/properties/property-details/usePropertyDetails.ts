@@ -1,45 +1,38 @@
-import { useProperty } from "@/features/properties/useProperty"
+import type { Property } from "@/types/database"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useConfirmDeleteProperty } from "../useConfirmDeleteProperty"
+import { useDeleteProperty } from "../useDeleteProperty"
 
-export function usePropertyDetails() {
-  const { isLoading, property } = useProperty()
+export function usePropertyDetails(property: Property) {
   const navigate = useNavigate()
-
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const { deleteProperty, isPending: isDeleting } = useDeleteProperty()
 
-  // On a single-property screen, a successful delete leaves nothing to
-  // show — close the dialog and return to the list.
-  const { confirmDelete, isDeleting } = useConfirmDeleteProperty(() => {
-    setDeleteOpen(false)
-    navigate("/properties")
-  })
-
+  // Nothing is left to show after a delete, so go back to the list
   function handleConfirmDelete() {
-    confirmDelete(property?.id?.toString())
+    deleteProperty(property.id, {
+      onSuccess: () => {
+        setDeleteOpen(false)
+        navigate("/properties")
+      },
+    })
   }
 
-  // Fall back to the main image (or nothing) when there's no gallery.
-  const galleryImages = property
-    ? property.gallery_images?.length > 0
-      ? property.gallery_images
-      : property.main_image
-        ? [property.main_image]
-        : []
-    : []
+  // Use the gallery, fall back to the main image, or show nothing
+  const galleryImages = property.gallery_images?.length
+    ? property.gallery_images
+    : property.main_image
+      ? [property.main_image]
+      : []
 
   return {
-    isLoading,
-    property,
-    isRent: property?.listing_type === "rent",
     galleryImages,
     editOpen,
-    deleteOpen,
-    isDeleting,
     setEditOpen,
+    deleteOpen,
     setDeleteOpen,
+    isDeleting,
     handleConfirmDelete,
   }
 }

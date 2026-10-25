@@ -1,270 +1,132 @@
-import { Button } from "@/components/ui/button"
+import { formatSize } from "@/lib/helpers"
+import type { Property } from "@/types/database"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useUser } from "@/features/auth/useUser"
-import { formatPrice, formatSize } from "@/lib/helpers"
-import { can } from "@/lib/permissions"
-import type { Property, PropertyStatus } from "@/types/database"
-import {
-  BadgeCheck,
   Bath,
   BedDouble,
-  CheckCircle,
   Eye,
-  Handshake,
   ImageOff,
-  KeyRound,
   MapPin,
-  MoreVertical,
-  Pencil,
-  RotateCcw,
   Ruler,
-  Trash2,
+  type LucideIcon,
 } from "lucide-react"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
+import PropertyActionsMenu from "./PropertyActionsMenu"
+import PropertyPrice from "./PropertyPrice"
 import PropertyStatusBadge from "./PropertyStatusBadge"
 
 interface PropertyCardProps {
   property: Property
   onEdit?: (property: Property) => void
   onDelete?: (property: Property) => void
-  onStatusChange?: (property: Property, status: PropertyStatus) => void
 }
 
 export default function PropertyCard({
   property,
   onEdit,
   onDelete,
-  onStatusChange,
 }: PropertyCardProps) {
-  const navigate = useNavigate()
   const [imgError, setImgError] = useState(false)
-  const { user } = useUser()
-  const role = user?.user_profile?.role
-
-  const isRent = property.listing_type === "rent"
-
-  // Permissions flags
-  const canPublish = role ? can.publishProperty(role) : false
-  const canSetSaleStatus = role ? can.setSaleStatus(role) : false
-  const canDelete = role ? can.deleteProperty(role) : false
-
-  // Agent can edit only their own; managers/admins can edit any
-  const isOwner = property.agent_id === user?.id
-  const canEdit = role
-    ? can.editAnyProperty(role) || (role === "agent" && isOwner)
-    : false
-
-  function goToDetail() {
-    navigate(`/properties/${property.id}`)
-  }
-
-  function handleStatus(status: PropertyStatus) {
-    onStatusChange?.(property, status)
-  }
+  const showImage = Boolean(property.main_image) && !imgError
 
   return (
-    <div className="card-hover group flex flex-col overflow-hidden rounded-xl border bg-card text-left shadow-card">
-      {/* ── Image ──────────────────────────────── */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {/* clickable image → detail */}
-        <button
-          onClick={goToDetail}
-          className="block h-full w-full"
-          aria-label={`View ${property.title}`}
-        >
-          {property.main_image && !imgError ? (
-            <img
-              src={property.main_image}
-              alt={property.title}
-              loading="lazy"
-              onError={() => setImgError(true)}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-              <ImageOff className="h-8 w-8" />
-            </div>
-          )}
-        </button>
+    <article className="card-hover group relative flex flex-col overflow-hidden rounded-xl border bg-card shadow-card">
+      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+        {showImage ? (
+          <img
+            src={property.main_image!}
+            alt=""
+            loading="lazy"
+            onError={() => setImgError(true)}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-muted-foreground/60">
+            <ImageOff className="h-7 w-7" />
+          </div>
+        )}
 
-        {/* listing type — top left */}
-        <span className="pointer-events-none absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-foreground uppercase backdrop-blur-sm">
-          For {property.listing_type}
-        </span>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/25 to-transparent"
+        />
 
-        <PropertyStatusBadge status={property.status} />
+        <div className="pointer-events-none absolute inset-x-2.5 top-2.5 flex items-start justify-between gap-2">
+          <span className="rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase shadow-sm backdrop-blur-sm">
+            For {property.listing_type}
+          </span>
+          <PropertyStatusBadge
+            status={property.status}
+            variant="overlay"
+            className="px-2 py-0.5"
+          />
+        </div>
 
-        {/* views — bottom left */}
         {property.views_count > 0 && (
-          <span className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-background/85 px-2 py-1 text-[10px] font-medium text-muted-foreground backdrop-blur-sm">
+          <span className="pointer-events-none absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
             <Eye className="h-3 w-3" />
-
-            {property.views_count ?? 0}
+            <span className="tabular">{property.views_count}</span>
+            <span className="sr-only">views</span>
           </span>
         )}
 
-        {/* actions menu — appears on hover, bottom right */}
-        {(canEdit || canPublish || canSetSaleStatus || canDelete) && (
-          <div className="absolute right-3 bottom-3 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="h-8 w-8 shadow-sm backdrop-blur-sm transition-colors data-[state=open]:bg-muted"
-                  aria-label="Property actions"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                {/* ── Manage ─────────────────────── */}
-                {canEdit && onEdit && (
-                  <>
-                    <DropdownMenuLabel className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                      Manage
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={() => onEdit(property)}
-                      className="gap-2 text-sm"
-                    >
-                      <Pencil className="h-4 w-4 text-muted-foreground" />
-                      Edit details
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {/* ── Approval ───────────────────── */}
-                {canPublish && property.status === "pending-approval" && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleStatus("published")}
-                      className="gap-2 text-sm"
-                    >
-                      <BadgeCheck className="h-4 w-4 text-success" />
-                      Approve & publish
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {/* ── Listing status ─────────────── */}
-                {canSetSaleStatus && property.status !== "pending-approval" && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                      Listing status
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={() => handleStatus("under-offer")}
-                      className="gap-2 text-sm"
-                    >
-                      <Handshake className="h-4 w-4 text-warning" />
-                      Mark under offer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleStatus("sold")}
-                      className="gap-2 text-sm"
-                    >
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      Mark sold
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleStatus("rented")}
-                      className="gap-2 text-sm"
-                    >
-                      <KeyRound className="h-4 w-4 text-info" />
-                      Mark rented
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {/* ── Re-list ────────────────────── */}
-                {canPublish &&
-                  (property.status === "sold" ||
-                    property.status === "rented") && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => handleStatus("published")}
-                        className="gap-2 text-sm"
-                      >
-                        <RotateCcw className="h-4 w-4 text-muted-foreground" />
-                        Re-list property
-                      </DropdownMenuItem>
-                    </>
-                  )}
-
-                {/* ── Delete ─────────────────────── */}
-                {canDelete && onDelete && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => onDelete(property)}
-                      className="gap-2 text-sm text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete property
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
+        <PropertyActionsMenu
+          property={property}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          triggerVariant="overlay"
+          className="absolute right-2.5 bottom-2.5 z-10 transition-opacity focus-within:opacity-100 has-[[data-state=open]]:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+        />
       </div>
 
-      {/* ── Body — clickable → detail ──────────── */}
-      <button
-        onClick={goToDetail}
-        className="flex flex-1 flex-col p-4 text-left"
-      >
-        <h3 className="line-clamp-1 text-sm font-semibold transition-colors group-hover:text-primary">
-          {property.title}
+      <div className="flex flex-1 flex-col p-3.5">
+        <PropertyPrice property={property} className="text-base" />
+
+        <h3 className="mt-0.5 line-clamp-1 text-sm font-semibold transition-colors group-hover:text-primary">
+          {/* Stretched link: the whole card opens the listing, the menu sits above it */}
+          <Link
+            to={`/properties/${property.id}`}
+            className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
+          >
+            {property.title}
+          </Link>
         </h3>
-        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
+
+        <p className="mt-0.5 mb-3 flex items-center gap-1 text-xs text-muted-foreground">
+          <MapPin className="h-3 w-3 shrink-0" />
           <span className="line-clamp-1">
             {property.neighborhood}, {property.city}
           </span>
         </p>
 
-        <p className="tabular mt-2.5 text-lg font-bold text-primary">
-          {formatPrice(property.price, property.listing_type).replace(
-            "/yr",
-            ""
-          )}
-          {isRent && (
-            <span className="text-xs font-normal text-muted-foreground">
-              /yr
-            </span>
-          )}
-        </p>
+        <dl className="mt-auto flex items-center gap-3 border-t border-border/60 pt-2.5 text-xs text-muted-foreground">
+          <Spec icon={BedDouble} label="Bedrooms" value={property.bedrooms} />
+          <Spec icon={Bath} label="Bathrooms" value={property.bathrooms} />
+          <Spec
+            icon={Ruler}
+            label="Size"
+            value={formatSize(property.size_sqm)}
+          />
+        </dl>
+      </div>
+    </article>
+  )
+}
 
-        {/* specs */}
-        <div className="mt-auto flex items-center gap-3 border-t border-border/60 pt-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <BedDouble className="h-4 w-4" />
-            <span className="tabular">{property.bedrooms}</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Bath className="h-4 w-4" />
-            <span className="tabular">{property.bathrooms}</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Ruler className="h-4 w-4" />
-            <span className="tabular">{formatSize(property.size_sqm)}</span>
-          </span>
-        </div>
-      </button>
+function Spec({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon
+  label: string
+  value: string | number
+}) {
+  return (
+    <div className="flex items-center gap-1">
+      <dt className="sr-only">{label}</dt>
+      <Icon aria-hidden className="h-3.5 w-3.5" />
+      <dd className="tabular font-medium text-foreground">{value}</dd>
     </div>
   )
 }
