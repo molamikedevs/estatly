@@ -11,9 +11,8 @@ import AppLayout from "@/components/layout/AppLayout"
 
 // ── Lazy-loaded pages: each becomes its own chunk ──
 const Login = lazy(() => import("@/pages/Login"))
-const UpdatePasswordForm = lazy(
-  () => import("@/features/auth/UpdatePasswordForm")
-)
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"))
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"))
 const Dashboard = lazy(() => import("@/pages/Dashboard"))
 const Properties = lazy(() => import("@/pages/Properties"))
 const Property = lazy(() => import("@/pages/Property"))
@@ -43,7 +42,8 @@ export default function App() {
           <Routes>
             {/* PUBLIC ROUTES */}
             <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<UpdatePasswordForm />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* PROTECTED ROUTES (require authentication) */}
             <Route
@@ -64,7 +64,7 @@ export default function App() {
 
               <Route path="/viewings" element={<Viewings />} />
 
-              <Route path="/profile/:profileId" element={<Profile />} />
+              <Route path="/profile" element={<Profile />} />
 
               <Route
                 path="/agents"

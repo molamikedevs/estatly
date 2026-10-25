@@ -4,7 +4,6 @@ import { z } from "zod"
   Shared
    ───────────────────────────────────────────── */
 
-const BIO_MAX = 280
 const CURRENT_YEAR = new Date().getFullYear()
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE = /^[+\d\s()-]*$/
@@ -13,61 +12,41 @@ const PHONE = /^[+\d\s()-]*$/
 const DURATIONS = ["15", "30", "45", "60", "90"] as const
 
 /* ─────────────────────────────────────────────
-  Profile
+  Auth
    ───────────────────────────────────────────── */
 
-export const profileSchema = z
+export const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+})
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Enter a valid email"),
+})
+
+export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>
+
+export const passwordSchema = z
   .object({
-    full_name: z
-      .string()
-      .min(1, "Full name is required")
-      .min(2, "Name must be at least 2 characters")
-      .max(80, "Name is too long")
-      .regex(
-        /^[a-zA-Z\u00C0-\u017F\s'-]+$/,
-        "Use letters, spaces, hyphens or apostrophes only"
-      ),
-    phone: z
-      .string()
-      .trim()
-      .max(20, "Phone number is too long")
-      .regex(PHONE, "Use digits, spaces, +, -, or ()")
-      .optional()
-      .or(z.literal("")),
-    specialization: z
-      .string()
-      .trim()
-      .max(80, "Specialization is too long")
-      .optional()
-      .or(z.literal("")),
-    bio: z
-      .string()
-      .max(BIO_MAX, `Bio must be under ${BIO_MAX} characters`)
-      .optional()
-      .or(z.literal("")),
     password: z
       .string()
-      .max(72, "Password is too long")
-      .refine((val) => val === "" || val.length >= 8, {
-        message: "Password must be at least 8 characters",
-      })
-      .optional()
-      .or(z.literal("")),
-    confirmPassword: z.string().optional().or(z.literal("")),
+      .min(8, "Password must be at least 8 characters")
+      .max(72, "Password is too long"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
   })
-  .refine(
-    (data) => {
-      if (!data.password) return true // skip if not changing
-      return data.password === data.confirmPassword
-    },
-    {
-      message: "Passwords don't match",
-      path: ["confirmPassword"],
-    }
-  )
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  })
+
+export type PasswordFormValues = z.infer<typeof passwordSchema>
 
 /* ─────────────────────────────────────────────
-  Team
+  People: team edit and your own profile share the same fields
    ───────────────────────────────────────────── */
 
 // Create: the role comes from the page, not from a field
@@ -77,7 +56,11 @@ export const createAgentSchema = z.object({
     .trim()
     .min(2, "Full name is required")
     .max(80, "Name is too long"),
-  email: z.string().trim().min(1, "Email is required").email("Enter a valid email"),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Enter a valid email"),
   password: z
     .string()
     .min(8, "At least 8 characters")
@@ -85,7 +68,7 @@ export const createAgentSchema = z.object({
   role: z.enum(["manager", "agent"], { message: "Choose a role" }),
 })
 
-// Edit: the details an admin may change (email and role are locked)
+// Edit details (email and role are locked)
 export const teamMemberFormSchema = z.object({
   full_name: z
     .string()
@@ -108,27 +91,10 @@ export const teamMemberSchema = teamMemberFormSchema.transform((values) => ({
 
 export type TeamMemberFormValues = z.infer<typeof teamMemberFormSchema>
 
-/* ─────────────────────────────────────────────
-  Auth
-   ───────────────────────────────────────────── */
-
-export const passwordSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(72, "Password is too long"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  })
-
-export const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
-  password: z.string().min(1, "Password is required"),
-})
+// Your own profile: same fields and rules as editing a team member
+export const profileFormSchema = teamMemberFormSchema
+export const profileSchema = teamMemberSchema
+export type ProfileFormValues = TeamMemberFormValues
 
 /* ─────────────────────────────────────────────
   Properties

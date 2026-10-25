@@ -1,4 +1,4 @@
-import { updateTeamMemberApi } from "@/api/apiUsers"
+import { updateTeamMemberApi } from "@/api/apiTeam"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 

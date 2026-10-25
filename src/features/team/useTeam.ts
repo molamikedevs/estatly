@@ -1,4 +1,4 @@
-import { getTeamApi } from "@/api/apiUsers"
+import { getTeamApi } from "@/api/apiTeam"
 import type { CreatableRole } from "@/types/database"
 import { useQuery } from "@tanstack/react-query"
 

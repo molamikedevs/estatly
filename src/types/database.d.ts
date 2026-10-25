@@ -68,7 +68,7 @@ export interface UserLogin {
 
 // ─── Team ─────────────────────────────────────────────
 
-export interface CreateUserInput {
+export interface CreateTeamInput {
   full_name: string
   email: string
   password: string
