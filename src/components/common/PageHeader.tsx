@@ -1,8 +1,11 @@
+import PageTitle from "@/components/common/PageTitle"
+
 interface Props {
   isLoading?: boolean
   count?: number
   title: string
   subText: string
+  pageTitle?: string
 }
 
 export default function PageHeader({
@@ -10,9 +13,11 @@ export default function PageHeader({
   count = 0,
   title,
   subText,
+  pageTitle,
 }: Props) {
   return (
     <div>
+      <PageTitle title={pageTitle ?? title} />
       <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         {subText}

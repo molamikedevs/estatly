@@ -1,12 +1,12 @@
 import Heading from "@/components/common/Heading"
+import PageTitle from "@/components/common/PageTitle"
 import Logo from "@/components/layout/Logo"
 import LoginForm from "@/features/auth/LoginForm"
 
 export default function Login() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
-      {/* ambient background — soft emerald spotlight + dotted pattern */}
-      <div className="spotlight pointer-events-none absolute inset-0" />
+      <PageTitle title="Sign in" />
       <div className="pattern-dots pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] opacity-40" />
 
       <div className="relative w-full max-w-[420px]">
