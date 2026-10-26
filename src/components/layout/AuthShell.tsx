@@ -1,3 +1,4 @@
+import PageTitle from "@/components/common/PageTitle"
 import type { ReactNode } from "react"
 import Logo from "./Logo"
 
@@ -14,6 +15,7 @@ export default function AuthShell({
 }) {
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-4 py-12">
+      <PageTitle title={title} />
       <div className="w-full max-w-sm">
         <div className="mb-8 flex justify-center">
           <Logo />
