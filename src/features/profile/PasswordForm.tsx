@@ -2,12 +2,15 @@ import PageSection from "@/components/form-components/PageSection"
 import PasswordField from "@/components/form-components/PasswordField"
 import { Button } from "@/components/ui/button"
 import { useChangePassword } from "@/features/auth/useChangePassword"
+import { useUser } from "@/features/auth/useUser"
+import { isDemoEmail } from "@/lib/demo"
 import { passwordSchema, type PasswordFormValues } from "@/lib/validation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
 // Its own form: changing your password never mixes with your details
 export default function PasswordForm() {
+  const { user } = useUser()
   const { changePassword, isPending } = useChangePassword()
 
   const { control, handleSubmit, reset } = useForm<PasswordFormValues>({
@@ -19,6 +22,20 @@ export default function PasswordForm() {
   const onSubmit = handleSubmit((values) => {
     changePassword(values, { onSuccess: () => reset() })
   })
+
+  // The database also blocks this; hiding it just avoids a confusing error
+  if (isDemoEmail(user?.email)) {
+    return (
+      <PageSection
+        title="Password"
+        description="Shared demo accounts keep the same password for everyone."
+      >
+        <p className="text-sm text-muted-foreground">
+          Password changes are turned off for demo accounts.
+        </p>
+      </PageSection>
+    )
+  }
 
   return (
     <form onSubmit={onSubmit} noValidate>
