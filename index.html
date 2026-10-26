@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
@@ -17,11 +18,52 @@
       content="#11151C"
       media="(prefers-color-scheme: dark)"
     />
+
+    <!-- Fallback title. Each page replaces it with its own title. -->
+    <title>Estatly</title>
     <meta
       name="description"
-      content="Estatly, a property management tool for real estate agencies in Dubai."
+      content="Estatly, a property management tool for real estate agencies in Dubai. Listings, clients and viewings in one place."
     />
-    <title>Estatly</title>
+    <link rel="canonical" href="https://estatly-three.vercel.app/" />
+
+    <!-- Link previews (LinkedIn, WhatsApp, Slack). Crawlers don't run JS, so these must be static. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Estatly" />
+    <meta property="og:url" content="https://estatly-three.vercel.app/" />
+    <meta
+      property="og:title"
+      content="Estatly · Property management for Dubai agencies"
+    />
+    <meta
+      property="og:description"
+      content="Listings, clients and viewings in one place. Demo access, no signup."
+    />
+    <meta
+      property="og:image"
+      content="https://estatly-three.vercel.app/og-image.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Estatly: listings, clients and viewings for Dubai agencies"
+    />
+
+    <!-- X (Twitter) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Estatly · Property management for Dubai agencies"
+    />
+    <meta
+      name="twitter:description"
+      content="Listings, clients and viewings in one place. Demo access, no signup."
+    />
+    <meta
+      name="twitter:image"
+      content="https://estatly-three.vercel.app/og-image.png"
+    />
   </head>
   <body>
     <div id="root"></div>

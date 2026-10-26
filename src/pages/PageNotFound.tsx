@@ -1,4 +1,5 @@
 import Heading from "@/components/common/Heading"
+import PageTitle from "@/components/common/PageTitle"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Compass, Home, Search } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
@@ -8,13 +9,13 @@ export default function PageNotFound() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
-      <div className="spotlight pointer-events-none absolute inset-0 opacity-60" />
+      <PageTitle title="Page not found" />
       <div className="pattern-dots pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] opacity-30" />
 
       <div className="relative w-full max-w-[520px] text-center">
         <div className="relative mx-auto mb-8 flex h-32 w-32 items-center justify-center">
           <span className="absolute inset-0 rounded-full bg-primary/10 blur-2xl" />
-          <span className="text-gradient tabular relative text-[110px] leading-none font-bold tracking-tighter">
+          <span className="relative text-[110px] leading-none font-bold tracking-tighter tabular-nums">
             404
           </span>
         </div>
