@@ -1,8 +1,8 @@
 import Loader from "@/components/common/Loader"
 import { useUser } from "@/features/auth/useUser"
 import type { UserRole } from "@/types/database"
-import { useEffect, type ReactNode } from "react"
-import { useNavigate } from "react-router-dom"
+import type { ReactNode } from "react"
+import { Navigate } from "react-router-dom"
 
 interface Props {
   children: ReactNode
@@ -15,24 +15,16 @@ export default function RoleProtected({
   allowed,
   fallbackPath = "/dashboard",
 }: Props) {
-  const navigate = useNavigate()
   const { isLoading, user } = useUser()
-
-  const userRole = user?.user_profile?.role as UserRole | undefined
-  const hasAccess = userRole ? allowed.includes(userRole) : false
-
-  useEffect(() => {
-    if (!isLoading && !hasAccess) {
-      navigate(fallbackPath, { replace: true })
-    }
-  }, [isLoading, hasAccess, navigate, fallbackPath])
 
   // Inside the layout, so the sidebar stays visible
   if (isLoading) return <Loader fullScreen={false} />
 
-  if (hasAccess) {
-    return <>{children}</>
-  }
+  const role = user?.user_profile?.role
+  const hasAccess = role ? allowed.includes(role) : false
 
-  return null
+  // Wrong role: send them somewhere they are allowed to be
+  if (!hasAccess) return <Navigate to={fallbackPath} replace />
+
+  return <>{children}</>
 }

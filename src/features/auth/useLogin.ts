@@ -12,11 +12,14 @@ export function useLogin() {
     mutationFn: (values: UserLogin) => loginApi(values),
 
     // Load the full user (with role) before entering the app,
-    // so the sidebar never renders without a role
+    // so the sidebar never renders without a role.
+    // staleTime: 0 forces a real fetch: a signed-out visit may have
+    // cached `null` for the user, and that cache must not be reused.
     onSuccess: async () => {
       await queryClient.fetchQuery({
         queryKey: ["user"],
         queryFn: getCurrentUserApi,
+        staleTime: 0,
       })
       navigate("/dashboard", { replace: true })
     },

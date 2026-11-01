@@ -1,30 +1,20 @@
 import Loader from "@/components/common/Loader"
 import { useUser } from "@/features/auth/useUser"
-import { useEffect, type ReactNode } from "react"
-import { useNavigate } from "react-router-dom"
+import type { ReactNode } from "react"
+import { Navigate } from "react-router-dom"
 
 interface Props {
   children: ReactNode
 }
 
 export default function ProtectedRoute({ children }: Props) {
-  const navigate = useNavigate()
   const { isLoading, isAuthenticated } = useUser()
 
-  useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
-      navigate("/login", { replace: true })
-    }
-  }, [isAuthenticated, isLoading, navigate])
-
-  // Show the brand loader while checking authentication
+  // Show the brand loader while checking the session
   if (isLoading) return <Loader />
 
-  // Only render children if authenticated
-  if (isAuthenticated) {
-    return <>{children}</>
-  }
+  // Not signed in: go to login, replacing this entry in history
+  if (!isAuthenticated) return <Navigate to="/login" replace />
 
-  // While redirect is happening, render nothing
-  return null
+  return <>{children}</>
 }
