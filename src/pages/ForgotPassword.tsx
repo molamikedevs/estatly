@@ -1,5 +1,5 @@
 import AuthShell from "@/components/layout/AuthShell"
-import ForgotPasswordForm from "@/features/auth/ForgetPasswordForm"
+import ForgotPasswordForm from "@/features/auth/ForgotPasswordForm"
 import { Link } from "react-router-dom"
 
 export default function ForgotPassword() {
