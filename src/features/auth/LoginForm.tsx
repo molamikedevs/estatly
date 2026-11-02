@@ -21,7 +21,7 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
     // Validate a field when the user leaves it, not on every keystroke
-    mode: "onBlur",
+    mode: "onTouched",
   })
 
   const onSubmit = handleSubmit((values) => {
@@ -38,7 +38,7 @@ export default function LoginForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
         <TextField
           control={control}
           name="email"
