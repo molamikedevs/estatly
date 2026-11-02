@@ -2,17 +2,12 @@ import PasswordField from "@/components/form-components/PasswordField"
 import TextField from "@/components/form-components/TextField"
 import { Button } from "@/components/ui/button"
 import { useLogin } from "@/features/auth/useLogin"
-import {
-  DEMO_ACCOUNTS,
-  DEMO_PASSWORD,
-  getDemoRole,
-  type DemoRole,
-} from "@/lib/demo"
+import { DEMO_ACCOUNTS, DEMO_PASSWORD, type DemoRole } from "@/lib/demo"
 import { loginSchema } from "@/lib/validation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Mail } from "lucide-react"
 import { useForm } from "react-hook-form"
-import { Link, useSearchParams } from "react-router-dom"
+import { Link } from "react-router-dom"
 import type { z } from "zod"
 
 type LoginFormValues = z.infer<typeof loginSchema>
@@ -22,33 +17,28 @@ const DEMO_ROLES: DemoRole[] = ["admin", "manager", "agent"]
 export default function LoginForm() {
   const { isPending, login } = useLogin()
 
-  // /login?demo=admin arrives from the portfolio with the form filled in
-  const [searchParams] = useSearchParams()
-  const demoRole = getDemoRole(searchParams.get("demo"))
-
   const { control, handleSubmit, resetField } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: demoRole ? DEMO_ACCOUNTS[demoRole] : "",
-      password: demoRole ? DEMO_PASSWORD : "",
-    },
-    mode: "onBlur",
+    defaultValues: { email: "", password: "" },
+    // Validate a field when the user leaves it, not on every keystroke
+    mode: "onTouched",
   })
 
   const onSubmit = handleSubmit((values) => {
     login(values, {
-      // Keep the email on a failed attempt: only clear the password.
+      // Keep the email on a failed attempt: only clear the password
       onError: () => resetField("password"),
     })
   })
 
+  // Demo buttons skip the form: there is nothing to type or validate
   function signInAs(role: DemoRole) {
     login({ email: DEMO_ACCOUNTS[role], password: DEMO_PASSWORD })
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
         <TextField
           control={control}
           name="email"

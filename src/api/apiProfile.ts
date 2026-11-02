@@ -15,6 +15,7 @@ export async function updateProfileApi(values: ProfileFormValues) {
     authorize: true,
   })
 
+  // authorize: true guarantees a user, so the ! is safe
   const { data, error } = await supabase
     .from("user_profiles")
     .update(params)
@@ -22,6 +23,8 @@ export async function updateProfileApi(values: ProfileFormValues) {
     .select("id")
 
   if (error) throw toRequestError(error, "Profile")
+
+  // RLS blocks updates silently (0 rows, no error), so check the result
   if (data.length === 0)
     throw new ForbiddenError("Your profile could not be saved")
 }
@@ -32,15 +35,17 @@ export async function uploadAvatarApi(file: File) {
   const userId = sessionData.session?.user.id
   if (!userId) throw new UnauthorizedError()
 
+  // A new name per upload, so browsers never show the old cached photo
   const ext = file.name.split(".").pop() ?? "webp"
   const fileName = `avatar-${userId}-${Date.now()}.${ext}`
 
   const { error: uploadError } = await supabase.storage
     .from("avatars")
-    .upload(fileName, file, { upsert: true })
+    .upload(fileName, file)
 
   if (uploadError) throw new RequestError(400, "Photo could not be uploaded")
 
+  // Builds the URL string only, no network request
   const { data } = supabase.storage.from("avatars").getPublicUrl(fileName)
 
   const { error } = await supabase
