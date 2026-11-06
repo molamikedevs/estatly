@@ -50,7 +50,8 @@ export type PasswordFormValues = z.infer<typeof passwordSchema>
    ───────────────────────────────────────────── */
 
 // Create: the role comes from the page, not from a field
-export const createAgentSchema = z.object({
+// Add a team member: the page sets the role, the admin sets a temporary password
+export const createTeamMemberSchema = z.object({
   full_name: z
     .string()
     .trim()
@@ -64,9 +65,12 @@ export const createAgentSchema = z.object({
   password: z
     .string()
     .min(8, "At least 8 characters")
+    // bcrypt only uses the first 72 bytes
     .max(72, "Password is too long"),
   role: z.enum(["manager", "agent"], { message: "Choose a role" }),
 })
+
+export type CreateTeamMemberValues = z.infer<typeof createTeamMemberSchema>
 
 // Edit details (email and role are locked)
 export const teamMemberFormSchema = z.object({
