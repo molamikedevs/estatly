@@ -1,22 +1,10 @@
 import UserAvatar from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import type { TeamMember } from "@/types/database"
-import {
-  Mail,
-  MoreHorizontal,
-  Pencil,
-  Phone,
-  UserCheck,
-  UserX,
-} from "lucide-react"
+import { Mail, Phone } from "lucide-react"
+import MemberActions from "./MemberActions"
+import Stat from "./Stat"
 
 interface TeamMemberCardProps {
   member: TeamMember
@@ -84,62 +72,5 @@ export default function TeamMemberCard({
         )}
       </div>
     </article>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    // flex-col-reverse: dt comes first in the HTML, but the number shows on top
-    <div className="flex flex-col-reverse px-2">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd
-        className={cn(
-          "text-xl font-semibold tabular-nums",
-          value === 0 && "text-muted-foreground"
-        )}
-      >
-        {value}
-      </dd>
-    </div>
-  )
-}
-
-function MemberActions({
-  member,
-  onEdit,
-  onToggleActive,
-}: Omit<TeamMemberCardProps, "canManage">) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="-mt-1 -mr-2 size-9 shrink-0 text-muted-foreground"
-          aria-label={`Actions for ${member.full_name}`}
-        >
-          <MoreHorizontal />
-        </Button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onSelect={onEdit}>
-          <Pencil />
-          Edit details
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        {member.is_active ? (
-          <DropdownMenuItem variant="destructive" onSelect={onToggleActive}>
-            <UserX />
-            Deactivate
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem onSelect={onToggleActive}>
-            <UserCheck />
-            Reactivate
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
   )
 }

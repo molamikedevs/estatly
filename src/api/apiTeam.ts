@@ -1,21 +1,23 @@
 import { ForbiddenError, toRequestError } from "@/lib/errors"
 import action from "@/lib/handler/action"
 import { supabase } from "@/lib/supabase"
-import { teamMemberSchema, type TeamMemberFormValues } from "@/lib/validation"
-import type {
-  CreatableRole,
-  CreateTeamInput,
-  TeamMember,
-  UserProfile,
-} from "@/types/database"
+import {
+  createTeamMemberSchema,
+  teamMemberSchema,
+  type CreateTeamMemberValues,
+  type TeamMemberFormValues,
+} from "@/lib/validation"
+import type { CreatableRole, TeamMember, UserProfile } from "@/types/database"
 
 // Admin creates a team member, then activates them with their role.
-export async function createTeamApi({
-  full_name,
-  email,
-  password,
-  role,
-}: CreateTeamInput) {
+// signUp runs in the browser, so the admin's session is swapped out and back
+export async function createTeamMemberApi(values: CreateTeamMemberValues) {
+  const { params } = await action({
+    params: values,
+    schema: createTeamMemberSchema,
+  })
+  const { full_name, email, password, role } = params
+
   // 1. signUp switches the session to the new user, so keep the admin's
   const { data: sessionData } = await supabase.auth.getSession()
   const adminSession = sessionData.session

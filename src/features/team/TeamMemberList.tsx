@@ -2,30 +2,34 @@ import CreateButton from "@/components/common/CreateButton"
 import DataRenderer from "@/components/common/DataRenderer"
 import PageHeader from "@/components/common/PageHeader"
 import FormSheet from "@/components/form-components/FormSheet"
-import { useUser } from "@/features/auth/useUser"
 import { EMPTY_AGENTS, EMPTY_MANAGERS } from "@/lib/states"
 import type { CreatableRole, TeamMember } from "@/types/database"
-import { useState } from "react"
 import TeamMemberCard from "./TeamMemberCard"
+import TeamMemberCreateForm from "./TeamMemberCreateForm"
 import TeamMemberEditForm from "./TeamMemberEditForm"
-import TeamMemberForm from "./TeamMemberForm"
 import TeamSkeleton from "./TeamSkeleton"
-import { useSetMemberActive } from "./useSetMemberActive"
-import { useTeam } from "./useTeam"
+import { useTeamMemberList } from "./useTeamMemberList"
 
+// The only differences between /agents and /managers
 const COPY = {
   agent: { title: "Agents", empty: EMPTY_AGENTS },
   manager: { title: "Managers", empty: EMPTY_MANAGERS },
 }
 
 export default function TeamMemberList({ role }: { role: CreatableRole }) {
-  const { user } = useUser()
-  // Only admins manage people; managers see the agent team read-only
-  const isAdmin = user?.user_profile?.role === "admin"
-
-  const { team, isLoading, error, refetch } = useTeam(role)
-  const { setActive } = useSetMemberActive()
-  const [editTarget, setEditTarget] = useState<TeamMember>()
+  const {
+    team,
+    active,
+    inactive,
+    isLoading,
+    error,
+    refetch,
+    isAdmin,
+    editTarget,
+    openEdit,
+    closeEdit,
+    toggleActive,
+  } = useTeamMemberList(role)
 
   const { title, empty } = COPY[role]
 
@@ -37,13 +41,8 @@ export default function TeamMemberList({ role }: { role: CreatableRole }) {
             <TeamMemberCard
               member={member}
               canManage={isAdmin}
-              onEdit={() => setEditTarget(member)}
-              onToggleActive={() =>
-                setActive({
-                  userId: member.user_id,
-                  isActive: !member.is_active,
-                })
-              }
+              onEdit={() => openEdit(member)}
+              onToggleActive={() => toggleActive(member)}
             />
           </li>
         ))}
@@ -67,7 +66,9 @@ export default function TeamMemberList({ role }: { role: CreatableRole }) {
             title={`Add ${role === "agent" ? "an agent" : "a manager"}`}
             description="They sign in with the email and temporary password you set here."
           >
-            {(onClose) => <TeamMemberForm role={role} onClose={onClose} />}
+            {(onClose) => (
+              <TeamMemberCreateForm role={role} onClose={onClose} />
+            )}
           </CreateButton>
         )}
       </div>
@@ -79,38 +80,31 @@ export default function TeamMemberList({ role }: { role: CreatableRole }) {
         onRetry={() => refetch()}
         loading={<TeamSkeleton />}
         empty={empty}
-        render={(items) => {
-          const active = items.filter((m) => m.is_active)
-          const inactive = items.filter((m) => !m.is_active)
+        render={() => (
+          <div className="space-y-8">
+            {active.length > 0 && renderCards(active)}
 
-          return (
-            <div className="space-y-8">
-              {active.length > 0 && renderCards(active)}
-
-              {inactive.length > 0 && (
-                <section className="space-y-3">
-                  <h2 className="text-sm font-medium text-muted-foreground">
-                    Deactivated · {inactive.length}
-                  </h2>
-                  {renderCards(inactive)}
-                </section>
-              )}
-            </div>
-          )
-        }}
+            {inactive.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-sm font-medium text-muted-foreground">
+                  Deactivated · {inactive.length}
+                </h2>
+                {renderCards(inactive)}
+              </section>
+            )}
+          </div>
+        )}
       />
 
       <FormSheet
         open={Boolean(editTarget)}
-        onOpenChange={(open) => !open && setEditTarget(undefined)}
+        onOpenChange={(open) => !open && closeEdit()}
         title="Edit details"
         description="Name, phone and specialization."
       >
+        {/* Mounts a fresh form per member: useForm reads defaultValues once */}
         {editTarget && (
-          <TeamMemberEditForm
-            member={editTarget}
-            onClose={() => setEditTarget(undefined)}
-          />
+          <TeamMemberEditForm member={editTarget} onClose={closeEdit} />
         )}
       </FormSheet>
     </div>
