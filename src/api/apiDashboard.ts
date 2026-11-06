@@ -1,3 +1,4 @@
+import { countByStatus, countOf } from "@/lib/counts"
 import { toRequestError } from "@/lib/errors"
 import { supabase } from "@/lib/supabase"
 import type {
@@ -6,16 +7,15 @@ import type {
   DashboardViewing,
   UserRole,
 } from "@/types/database"
-
-import { countByStatus, countOf, DAY_MS } from "@/features/dashboard/constant"
+import { addDays, startOfToday } from "date-fns"
 
 export async function getDashboardApi(
   role: UserRole,
   userId: string
 ): Promise<DashboardData> {
-  const startOfToday = new Date()
-  startOfToday.setHours(0, 0, 0, 0)
-  const inSevenDays = new Date(startOfToday.getTime() + 7 * DAY_MS)
+  // Midnight today, and midnight seven days later
+  const today = startOfToday()
+  const inSevenDays = addDays(today, 7)
 
   // Oldest first, so the listing that has waited longest comes first
   let propertiesQuery = supabase
@@ -33,15 +33,16 @@ export async function getDashboardApi(
       "id, scheduled_at, client_id, property:properties(id, title, main_image), client:clients(full_name)"
     )
     .eq("status", "scheduled")
-    .gte("scheduled_at", startOfToday.toISOString())
+    .gte("scheduled_at", today.toISOString())
     .order("scheduled_at", { ascending: true })
     .limit(6)
 
+  // head: true returns only the count, no rows
   let nextWeekQuery = supabase
     .from("viewings")
     .select("id", { count: "exact", head: true })
     .eq("status", "scheduled")
-    .gte("scheduled_at", startOfToday.toISOString())
+    .gte("scheduled_at", today.toISOString())
     .lt("scheduled_at", inSevenDays.toISOString())
 
   // Agents see only their own work. RLS enforces the security; these filters set the scope.
@@ -63,6 +64,7 @@ export async function getDashboardApi(
     properties.error ?? clients.error ?? upcoming.error ?? nextWeek.error
   if (failed) throw toRequestError(failed, "Dashboard")
 
+  // The client is not typed with the database schema yet, so joined rows need a cast
   const propertyRows = (properties.data ?? []) as unknown as DashboardProperty[]
   const upcomingRows = (upcoming.data ?? []) as unknown as DashboardViewing[]
 

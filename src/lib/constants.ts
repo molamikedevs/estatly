@@ -68,6 +68,27 @@ export const CLIENT_STAGES: {
   { status: "inactive", label: "Inactive", color: "var(--muted-foreground)" },
 ]
 
+// Listing lifecycle order and colors: the dashboard chart
+export const PROPERTY_STATUSES: {
+  status: PropertyStatus
+  label: string
+  color: string
+}[] = [
+  {
+    status: "pending-approval",
+    label: "Pending approval",
+    color: "var(--status-pending)",
+  },
+  { status: "published", label: "Published", color: "var(--status-published)" },
+  {
+    status: "under-offer",
+    label: "Under offer",
+    color: "var(--status-under-offer)",
+  },
+  { status: "rented", label: "Rented", color: "var(--status-rented)" },
+  { status: "sold", label: "Sold", color: "var(--status-sold)" },
+]
+
 export const PROPERTY_STATUS: Record<
   PropertyStatus,
   { label: string; tone: string }
