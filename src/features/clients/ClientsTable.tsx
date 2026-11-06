@@ -15,7 +15,7 @@ import ClientForm from "./ClientForm"
 import ClientsSkeleton from "./ClientsSkeleton"
 import { useClients } from "./useClients"
 import { useDeleteClient } from "./useDeleteClient"
-import { useUpdateClient } from "./useUpdateClient"
+import { useMoveClient } from "./useMoveClient"
 
 export default function ClientsTable() {
   const { user } = useUser()
@@ -23,7 +23,7 @@ export default function ClientsTable() {
   const showAgent = user?.user_profile?.role !== "agent"
 
   const { clients, isLoading, error, refetch } = useClients()
-  const { updateClient } = useUpdateClient()
+  const { moveClient } = useMoveClient()
   const { isPending: isDeleting, deleteClient } = useDeleteClient()
 
   const [editTarget, setEditTarget] = useState<Client>()
@@ -134,7 +134,7 @@ export default function ClientsTable() {
                               showAgent={showAgent}
                               onEdit={() => setEditTarget(client)}
                               onMove={(status) =>
-                                updateClient({ id: client.id, status })
+                                moveClient({ id: client.id, status })
                               }
                               onDelete={() => setDeleteTarget(client)}
                             />

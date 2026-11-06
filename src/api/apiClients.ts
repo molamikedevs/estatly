@@ -68,7 +68,7 @@ export async function updateClientApi({
   }
 }
 
-export async function updateClientStatusApi(values: {
+export async function moveClientApi(values: {
   id: number
   status: ClientStatus
 }) {
