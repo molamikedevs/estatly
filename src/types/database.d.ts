@@ -198,13 +198,8 @@ export interface ViewingFormProps {
   viewing?: Viewing
   onClose: () => void
 }
-export interface ClientFormProps {
-  client?: Client
-  onClose: () => void
-}
 
 // ─── Settings ─────────────────────────────────────────
-
 // One row in the agencies table; prices are always AED
 export interface Settings {
   id: number

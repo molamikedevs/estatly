@@ -3,9 +3,14 @@ import SelectField from "@/components/form-components/SelectField"
 import TagField from "@/components/form-components/TagField"
 import TextField from "@/components/form-components/TextField"
 import { propertyTypes } from "@/lib/constants"
-import type { ClientFormProps } from "@/types/database"
+import type { Client } from "@/types/database"
 import { Banknote, Globe, Mail, Phone, User as UserIcon } from "lucide-react"
 import { useClientForm } from "./useClientForm"
+
+interface ClientFormProps {
+  client?: Client
+  onClose: () => void
+}
 
 // One form for add and edit: both change the same fields
 export default function ClientForm({ client, onClose }: ClientFormProps) {

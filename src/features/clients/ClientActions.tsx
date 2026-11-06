@@ -7,14 +7,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Client, ClientStatus } from "@/types/database"
-
 import { CLIENT_STAGES } from "@/lib/constants"
+import type { Client, ClientStatus } from "@/types/database"
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 
-interface ClientCardProps {
+interface ClientActionsProps {
   client: Client
-  showAgent: boolean
   onEdit: () => void
   onMove: (status: ClientStatus) => void
   onDelete: () => void
@@ -25,7 +23,7 @@ export default function ClientActions({
   onEdit,
   onMove,
   onDelete,
-}: Omit<ClientCardProps, "showAgent">) {
+}: ClientActionsProps) {
   // Clients with viewings are records: close them with a stage, not a delete
   const canDelete = client.viewing_count === 0
   const otherStages = CLIENT_STAGES.filter((s) => s.status !== client.status)

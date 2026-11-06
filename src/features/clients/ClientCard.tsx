@@ -85,9 +85,9 @@ export default function ClientCard({
         )}
       </div>
 
-      {/* Owner and activity */}
-      <div className="mt-2 flex items-center justify-between gap-2 border-t pt-3 text-xs text-muted-foreground">
-        {showAgent ? (
+      {/* Owner and activity. ml-auto keeps the count right when the agent is hidden */}
+      <div className="mt-2 flex items-center gap-2 border-t pt-3 text-xs text-muted-foreground">
+        {showAgent && (
           <span className="flex min-w-0 items-center gap-2">
             <UserAvatar
               name={client.agent?.full_name}
@@ -98,10 +98,8 @@ export default function ClientCard({
               {client.agent?.full_name ?? "No agent"}
             </span>
           </span>
-        ) : (
-          <span />
         )}
-        <span className="shrink-0 tabular-nums">{viewingsLabel}</span>
+        <span className="ml-auto shrink-0 tabular-nums">{viewingsLabel}</span>
       </div>
     </article>
   )
