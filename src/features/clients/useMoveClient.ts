@@ -1,13 +1,12 @@
-import { updateClientStatusApi } from "@/api/apiClients"
+import { moveClientApi } from "@/api/apiClients"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
-// Moves a client to another pipeline stage
-export function useUpdateClient() {
+export function useMoveClient() {
   const queryClient = useQueryClient()
 
-  const { isPending, mutate: updateClient } = useMutation({
-    mutationFn: updateClientStatusApi,
+  const { isPending, mutate: moveClient } = useMutation({
+    mutationFn: moveClientApi,
 
     onSuccess: () => {
       toast.success("Client moved")
@@ -18,5 +17,5 @@ export function useUpdateClient() {
     onError: (err) => toast.error(err.message),
   })
 
-  return { isPending, updateClient }
+  return { isPending, moveClient }
 }

@@ -11,8 +11,8 @@ export function useEditClient() {
     onSuccess: () => {
       toast.success("Client updated")
       queryClient.invalidateQueries({ queryKey: ["clients"] })
-      // Viewings show the client's name
       queryClient.invalidateQueries({ queryKey: ["viewings"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
 
     onError: (err) => toast.error(err.message),

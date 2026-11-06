@@ -1,5 +1,5 @@
-import ClientsTable from "@/features/clients/ClientsTable"
+import ClientsBoard from "@/features/clients/ClientsBoard"
 
 export default function Clients() {
-  return <ClientsTable />
+  return <ClientsBoard />
 }
