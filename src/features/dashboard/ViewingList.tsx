@@ -1,16 +1,10 @@
 import DataRenderer from "@/components/common/DataRenderer"
-import {
-  formatViewingDate,
-  formatViewingTime,
-  getClientLabel,
-} from "@/lib/helpers"
 import { EMPTY_UPCOMING_VIEWINGS } from "@/lib/states"
 import type { DashboardViewing } from "@/types/database"
+import { isToday } from "date-fns"
+import ViewingGroup from "./ViewingGroup"
 
-function isToday(iso: string) {
-  return new Date(iso).toDateString() === new Date().toDateString()
-}
-
+// Splits the upcoming viewings into "Today" and "Upcoming" groups
 export default function ViewingList({
   viewings,
 }: {
@@ -22,8 +16,8 @@ export default function ViewingList({
       empty={EMPTY_UPCOMING_VIEWINGS}
       compact
       render={(items) => {
-        const today = items.filter((v) => isToday(v.scheduled_at))
-        const later = items.filter((v) => !isToday(v.scheduled_at))
+        const today = items.filter((v) => isToday(new Date(v.scheduled_at)))
+        const later = items.filter((v) => !isToday(new Date(v.scheduled_at)))
 
         return (
           <div className="space-y-4">
@@ -37,50 +31,5 @@ export default function ViewingList({
         )
       }}
     />
-  )
-}
-
-function ViewingGroup({
-  label,
-  viewings,
-  showDate = false,
-}: {
-  label: string
-  viewings: DashboardViewing[]
-  showDate?: boolean
-}) {
-  return (
-    <div>
-      <h3 className="mb-1 text-xs font-medium text-muted-foreground">
-        {label}
-      </h3>
-      <ul className="divide-y">
-        {viewings.map((viewing) => (
-          <li
-            key={viewing.id}
-            className="flex min-h-14 items-center gap-3 py-2"
-          >
-            <div className="w-14 shrink-0">
-              <p className="text-sm font-semibold tabular-nums">
-                {formatViewingTime(viewing.scheduled_at)}
-              </p>
-              {showDate && (
-                <p className="text-xs text-muted-foreground">
-                  {formatViewingDate(viewing.scheduled_at)}
-                </p>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">
-                {viewing.property?.title ?? "Property removed"}
-              </p>
-              <p className="truncate text-sm text-muted-foreground">
-                {getClientLabel(viewing)}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
   )
 }

@@ -1,9 +1,8 @@
 import ErrorMessage from "@/components/common/ErrorMessage"
 import PageHeader from "@/components/common/PageHeader"
-import { CLIENT_STAGES } from "@/lib/constants"
+import { CLIENT_STAGES, PROPERTY_STATUSES } from "@/lib/constants"
 import { EMPTY_CLIENTS_BY_STAGE, EMPTY_LISTINGS_BY_STATUS } from "@/lib/states"
 import { Link } from "react-router-dom"
-import { PROPERTY_STATUSES } from "./constant"
 import DashboardSkeleton from "./DashboardSkeleton"
 import Panel from "./Panel"
 import PendingList from "./PendingList"
@@ -34,7 +33,7 @@ export default function DashboardLayout() {
         }
       />
 
-      {isLoading && <DashboardSkeleton />}
+      {isLoading && <DashboardSkeleton isAgent={isAgent} />}
 
       {error && <ErrorMessage error={error} onRetry={() => refetch()} />}
 
