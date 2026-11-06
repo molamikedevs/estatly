@@ -33,7 +33,7 @@ export default function DashboardLayout() {
         }
       />
 
-      {isLoading && <DashboardSkeleton />}
+      {isLoading && <DashboardSkeleton isAgent={isAgent} />}
 
       {error && <ErrorMessage error={error} onRetry={() => refetch()} />}
 
