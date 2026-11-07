@@ -10,7 +10,7 @@ function toFormValues(settings: Settings): SettingsFormValues {
     name: settings.name,
     contact_email: settings.contact_email ?? "",
     contact_phone: settings.contact_phone ?? "",
-    commission_rate: String(settings.commission_rate ?? ""),
+    commission_rate: String(settings.commission_rate),
     default_viewing_duration: String(
       settings.default_viewing_duration
     ) as SettingsFormValues["default_viewing_duration"],
