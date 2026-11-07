@@ -24,7 +24,7 @@ export default function SaveBar({
         </Button>
         <Button type="submit" disabled={isPending} className="gap-2">
           {isPending && <SpinnerMini size="sm" />}
-          {isPending ? "Saving..." : "Save changes"}
+          {isPending ? "Saving…" : "Save changes"}
         </Button>
       </div>
     </div>

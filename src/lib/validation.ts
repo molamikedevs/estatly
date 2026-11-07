@@ -319,6 +319,7 @@ export const settingsFormSchema = z.object({
   contact_email: z
     .string()
     .trim()
+    .toLowerCase()
     .refine((v) => v === "" || EMAIL.test(v), "Enter a valid email"),
   contact_phone: z
     .string()
@@ -339,7 +340,7 @@ export const settingsFormSchema = z.object({
 
 export const settingsSchema = settingsFormSchema.transform((values) => ({
   name: values.name,
-  contact_email: textOrNull(values.contact_email.toLowerCase()),
+  contact_email: textOrNull(values.contact_email),
   contact_phone: textOrNull(values.contact_phone),
   commission_rate: Number(values.commission_rate),
   default_viewing_duration: Number(values.default_viewing_duration),

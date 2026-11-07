@@ -36,14 +36,6 @@ export const STATUS_OPTIONS = [
   { value: "archived", label: "Archived" },
 ]
 
-export const durationOptions = [
-  { value: "15", label: "15 minutes" },
-  { value: "30", label: "30 minutes" },
-  { value: "45", label: "45 minutes" },
-  { value: "60", label: "1 hour" },
-  { value: "90", label: "1.5 hours" },
-]
-
 // One list for the filter, the status menu and anywhere else
 export const viewingStatusOptions: { value: ViewingStatus; label: string }[] = [
   { value: "scheduled", label: "Scheduled" },
@@ -99,3 +91,21 @@ export const PROPERTY_STATUS: Record<
   sold: { label: "Sold", tone: "text-chart-1" },
   rented: { label: "Rented", tone: "text-chart-4" },
 }
+
+// Viewing lengths in minutes, as strings for select fields
+export const DURATIONS = ["15", "30", "45", "60", "90"] as const
+
+// Record forces a label for every duration: add one above and
+// TypeScript errors here until it has a label
+const DURATION_LABELS: Record<(typeof DURATIONS)[number], string> = {
+  "15": "15 minutes",
+  "30": "30 minutes",
+  "45": "45 minutes",
+  "60": "1 hour",
+  "90": "1.5 hours",
+}
+
+export const durationOptions = DURATIONS.map((value) => ({
+  value,
+  label: DURATION_LABELS[value],
+}))
