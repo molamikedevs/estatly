@@ -2,14 +2,14 @@ import { updateViewingStatusApi } from "@/api/apiViewings"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
-export function useUpdateViewing() {
+export function useSetViewingStatus() {
   const queryClient = useQueryClient()
 
-  const { isPending, mutate: updateViewing } = useMutation({
+  const { isPending, mutate: setStatus } = useMutation({
     mutationFn: updateViewingStatusApi,
 
     onSuccess: () => {
-      toast.success("Viewing updated")
+      toast.success("Status updated")
       queryClient.invalidateQueries({ queryKey: ["viewings"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
       queryClient.invalidateQueries({ queryKey: ["team"] })
@@ -18,5 +18,5 @@ export function useUpdateViewing() {
     onError: (err) => toast.error(err.message),
   })
 
-  return { isPending, updateViewing }
+  return { isPending, setStatus }
 }

@@ -109,3 +109,9 @@ export const durationOptions = DURATIONS.map((value) => ({
   value,
   label: DURATION_LABELS[value],
 }))
+
+// "latest" and "soonest" stay as URL values, so old links keep working
+export const viewingSortOptions = [
+  { value: "latest", label: "Date: newest first" },
+  { value: "soonest", label: "Date: oldest first" },
+]

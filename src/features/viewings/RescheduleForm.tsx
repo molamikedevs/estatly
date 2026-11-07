@@ -84,7 +84,7 @@ export default function RescheduleForm({
         isSubmitting={isPending}
         onCancel={onClose}
         submitLabel="Reschedule"
-        submittingLabel="Rescheduling..."
+        submittingLabel="Rescheduling…"
       />
     </form>
   )
