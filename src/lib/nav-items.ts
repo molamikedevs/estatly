@@ -22,7 +22,7 @@ export interface NavItem {
 
 // The order here is the order on screen, in the sidebar and the bottom bar.
 // Roles must match the RoleProtected lists in App.tsx.
-export const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS: NavItem[] = [
   {
     label: "Dashboard",
     path: "/dashboard",

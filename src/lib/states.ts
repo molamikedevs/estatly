@@ -9,11 +9,6 @@ export const DEFAULT_ERROR = {
   message: "Check your connection and try again.",
 }
 
-export const DEFAULT_EMPTY: EmptyState = {
-  title: "Nothing here yet",
-  message: "When there is something to show, it will appear here.",
-}
-
 // ─── Dashboard ────────────────────────────────────────
 
 export const EMPTY_PENDING: EmptyState = {

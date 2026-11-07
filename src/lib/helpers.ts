@@ -68,7 +68,7 @@ export function getClientLabel(viewing: {
   return "No client"
 }
 
-export function formatBudgetShort(amount: number) {
+function formatBudgetShort(amount: number) {
   if (amount >= 1_000_000) {
     return `${(amount / 1_000_000).toFixed(amount % 1_000_000 === 0 ? 0 : 1)}M`
   }
