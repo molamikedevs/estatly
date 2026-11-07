@@ -6,8 +6,10 @@ import type {
 
 export const PAGE_SIZE = 8
 export const DESC_MAX = 2000
-export const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h"]
 export const SEARCH_DEBOUNCE_MS = 400
+export const MAX_IMAGE_SIZE = 25 * 1024 * 1024
+export const SKELETON_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h"]
+export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
 // Pages that show the search box in the header
 export const SEARCH_PLACEHOLDERS: Record<string, string> = {

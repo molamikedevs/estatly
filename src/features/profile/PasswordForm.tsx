@@ -65,7 +65,7 @@ export default function PasswordForm() {
         {/* Wrapper keeps the button its natural width */}
         <div className="flex">
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Updating..." : "Update password"}
+            {isPending ? "Updating…" : "Update password"}
           </Button>
         </div>
       </PageSection>

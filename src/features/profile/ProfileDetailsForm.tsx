@@ -4,14 +4,13 @@ import TextField from "@/components/form-components/TextField"
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validation"
 import type { UserProfile } from "@/types/database"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Briefcase, Phone, User as UserIcon } from "lucide-react"
+import { Briefcase, Phone } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useUpdateProfile } from "./useUpdateProfile"
 
 // Database values (nulls) → form values (strings)
 function toFormValues(profile: UserProfile): ProfileFormValues {
   return {
-    full_name: profile.full_name ?? "",
     phone: profile.phone ?? "",
     specialization: profile.specialization ?? "",
   }
@@ -41,17 +40,8 @@ export default function ProfileDetailsForm({
       <div className="rounded-xl border bg-card">
         <PageSection
           title="Details"
-          description="Shown to your team on cards and lists. Your email and role are set by your admin."
+          description="Shown to your team on cards and lists. Your name, email and role are set by your admin."
         >
-          <TextField
-            control={control}
-            name="full_name"
-            id="profile-name"
-            label="Full name"
-            icon={UserIcon}
-            autoComplete="name"
-            required
-          />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <TextField
               control={control}

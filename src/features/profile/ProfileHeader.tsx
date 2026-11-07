@@ -1,10 +1,11 @@
 import UserAvatar from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
+import { IMAGE_TYPES } from "@/lib/constants"
 import { formatDate } from "@/lib/helpers"
 import type { UserProfile } from "@/types/database"
 import { Camera } from "lucide-react"
 import { useRef } from "react"
-import { ACCEPTED_TYPES, useUploadAvatar } from "./useUploadAvatar"
+import { useUploadAvatar } from "./useUploadAvatar"
 
 interface ProfileHeaderProps {
   profile: UserProfile
@@ -21,9 +22,9 @@ export default function ProfileHeader({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const buttonLabel = isProcessing
-    ? "Optimizing..."
+    ? "Optimizing…"
     : isBusy
-      ? "Uploading..."
+      ? "Uploading…"
       : "Change photo"
 
   return (
@@ -57,7 +58,7 @@ export default function ProfileHeader({
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPTED_TYPES.join(",")}
+        accept={IMAGE_TYPES.join(",")}
         className="sr-only"
         tabIndex={-1}
         aria-hidden="true"

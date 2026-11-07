@@ -44,10 +44,10 @@ export const passwordSchema = z
 export type PasswordFormValues = z.infer<typeof passwordSchema>
 
 /* ─────────────────────────────────────────────
-  People: team edit and your own profile share the same fields
+  People: admins create and edit team members;
+  your own profile reuses the phone and specialization rules
    ───────────────────────────────────────────── */
 
-// Create: the role comes from the page, not from a field
 // Add a team member: the page sets the role, the admin sets a temporary password
 export const createTeamMemberSchema = z.object({
   full_name: z
@@ -70,7 +70,7 @@ export const createTeamMemberSchema = z.object({
 
 export type CreateTeamMemberValues = z.infer<typeof createTeamMemberSchema>
 
-// Edit details (email and role are locked)
+// Admin edits a member's details (email and role are locked)
 export const teamMemberFormSchema = z.object({
   full_name: z
     .string()
@@ -93,10 +93,20 @@ export const teamMemberSchema = teamMemberFormSchema.transform((values) => ({
 
 export type TeamMemberFormValues = z.infer<typeof teamMemberFormSchema>
 
-// Your own profile: same fields and rules as editing a team member
-export const profileFormSchema = teamMemberFormSchema
-export const profileSchema = teamMemberSchema
-export type ProfileFormValues = TeamMemberFormValues
+// Your own profile: phone and specialization only. Your name, email and
+// role are set by an admin, so they are not in the form. pick() reuses
+// the team rules, so both forms always validate these fields the same way
+export const profileFormSchema = teamMemberFormSchema.pick({
+  phone: true,
+  specialization: true,
+})
+
+export const profileSchema = profileFormSchema.transform((values) => ({
+  phone: values.phone || null,
+  specialization: values.specialization || null,
+}))
+
+export type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 /* ─────────────────────────────────────────────
   Properties

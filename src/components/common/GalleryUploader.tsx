@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { IMAGE_TYPES, MAX_IMAGE_SIZE } from "@/lib/constants"
 import { resizeImage } from "@/lib/resizeImage"
 import { cn } from "@/lib/utils"
 import type { GalleryImage } from "@/types/database"
@@ -6,8 +7,6 @@ import { ImagePlus, Loader2, Star, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
-const HARD_MAX_SIZE = 25 * 1024 * 1024
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const MAX_IMAGES = 10
 
 interface GalleryUploaderProps {
@@ -57,11 +56,11 @@ export default function GalleryUploader({
     try {
       const processed: GalleryImage[] = []
       for (const file of accepted) {
-        if (!ACCEPTED_TYPES.includes(file.type)) {
+        if (!IMAGE_TYPES.includes(file.type)) {
           toast.error(`${file.name}: use JPG, PNG or WebP`)
           continue
         }
-        if (file.size > HARD_MAX_SIZE) {
+        if (file.size > MAX_IMAGE_SIZE) {
           toast.error(`${file.name}: too large to process`)
           continue
         }
@@ -142,7 +141,7 @@ export default function GalleryUploader({
         <input
           ref={fileInputRef}
           type="file"
-          accept={ACCEPTED_TYPES.join(",")}
+          accept={IMAGE_TYPES.join(",")}
           multiple
           className="hidden"
           onChange={handleFiles}
