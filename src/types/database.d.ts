@@ -1,4 +1,6 @@
+import { propertyFormSchema } from "@/lib/validation"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
+export type PropertyFormValues = z.infer<typeof propertyFormSchema>
 
 // ─── Enums / Unions ───────────────────────────────────
 

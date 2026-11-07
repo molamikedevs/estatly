@@ -14,11 +14,13 @@ export default function PropertyDetails() {
       {/* One title for every state: loading, error, empty and loaded */}
       <PageTitle title={property?.title ?? "Property"} />
       <BackLink route="/properties" label="Back to properties" />
+      {/* DataRenderer works with lists, so one property becomes a list of one;
+          null (not found) becomes undefined and shows the empty state */}
       <DataRenderer
         data={property ? [property] : undefined}
         isLoading={isLoading}
         error={error}
-        onRetry={refetch}
+        onRetry={() => refetch()}
         loading={<Loader />}
         empty={EMPTY_PROPERTY}
         render={([loaded]) => <PropertyDetailsContent property={loaded} />}

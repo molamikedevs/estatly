@@ -1,13 +1,12 @@
 import { getViewingsApi } from "@/api/apiViewings"
+import { useStepBackFromEmptyPage } from "@/hooks/useStepBackFromEmptyPage"
 import { PAGE_SIZE } from "@/lib/constants"
-import { RequestError } from "@/lib/errors"
 import type { ViewingsQueryParams } from "@/types/database"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 
 export function useViewings() {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
 
   // The URL is the state: shareable, survives a refresh, works with Back
   const params: ViewingsQueryParams = {
@@ -27,21 +26,7 @@ export function useViewings() {
     placeholderData: keepPreviousData,
   })
 
-  // Deleting the last viewing on the last page, or changing its status under
-  // a filter, leaves the page past the end: step back one page
-  const pageIsGone = error instanceof RequestError && error.statusCode === 416
-
-  useEffect(() => {
-    if (!pageIsGone || params.page <= 1) return
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        next.set("page", String(params.page - 1))
-        return next
-      },
-      { replace: true }
-    )
-  }, [pageIsGone, params.page, setSearchParams])
+  useStepBackFromEmptyPage(error, params.page)
 
   return {
     viewings: data?.data,

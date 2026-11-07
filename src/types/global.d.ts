@@ -7,14 +7,12 @@ import type {
   FieldValues,
   Path,
 } from "react-hook-form"
-import { z } from "zod"
 
-import { propertySchema } from "@/lib/validation"
 import type { UserRole } from "./database"
 
 // ─── Form Value Types (inferred from Zod) ─────────────
 
-export type PropertyFormValues = z.infer<typeof propertySchema>
+export type { PropertyFormValues } from "@/lib/validation"
 
 export interface CreateAgentFormValues {
   full_name: string

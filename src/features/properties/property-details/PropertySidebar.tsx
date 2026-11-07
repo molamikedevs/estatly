@@ -1,11 +1,20 @@
 import UserAvatar from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
-import { formatDate } from "@/lib/helpers"
+import { formatAmount, formatDate } from "@/lib/helpers"
 import type { Property } from "@/types/database"
 import { Mail } from "lucide-react"
 import PropertyPrice from "../PropertyPrice"
 
-export default function PropertySidebar({ property }: { property: Property }) {
+interface PropertySidebarProps {
+  property: Property
+  // Computed in usePropertyDetails; null until settings load
+  commission: { rate: number; amount: number } | null
+}
+
+export default function PropertySidebar({
+  property,
+  commission,
+}: PropertySidebarProps) {
   const isRent = property.listing_type === "rent"
   const agent = property.agent
   const agentName = agent?.full_name || "Unassigned agent"
@@ -21,6 +30,16 @@ export default function PropertySidebar({ property }: { property: Property }) {
           {isRent ? "Yearly rent" : "Asking price"}
         </p>
         <PropertyPrice property={property} className="mt-1 text-4xl" />
+
+        {commission && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Est. agency commission{" "}
+            <span className="tabular font-medium text-foreground">
+              {formatAmount(commission.amount)}
+            </span>{" "}
+            ({commission.rate}%)
+          </p>
+        )}
 
         <div className="mt-6 flex items-center gap-3 rounded-xl bg-muted/50 p-3">
           <UserAvatar name={agentName} src={agent?.avatar} size="md" />

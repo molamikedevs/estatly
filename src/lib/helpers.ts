@@ -1,7 +1,3 @@
-import { uploadGalleryImagesApi } from "@/api/uploader"
-import type { GalleryImage } from "@/types/database"
-import type { PropertyFormValues } from "@/types/global"
-
 export function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
@@ -29,15 +25,20 @@ export function getInitials(name: string) {
     .toUpperCase()
 }
 
-export function formatPrice(price: number, listingType: string) {
-  const formatted = new Intl.NumberFormat("en-AE", {
+// "AED 2,500,000": Intl handles the currency and thousands separators
+export function formatAmount(amount: number) {
+  return new Intl.NumberFormat("en-AE", {
     style: "currency",
     currency: "AED",
     maximumFractionDigits: 0,
-  }).format(price)
-  return listingType === "rent" ? `${formatted}/yr` : formatted
+  }).format(amount)
 }
 
+// Rentals are priced per year
+export function formatPrice(price: number, listingType: string) {
+  const amount = formatAmount(price)
+  return listingType === "rent" ? `${amount}/yr` : amount
+}
 export function formatSize(sqm: number) {
   return `${Math.round(sqm)} m²`
 }
@@ -86,27 +87,6 @@ export function formatBudgetRange(
     return `AED ${formatBudgetShort(min)} to ${formatBudgetShort(max)}`
   if (min != null) return `From AED ${formatBudgetShort(min)}`
   return `Up to AED ${formatBudgetShort(max!)}`
-}
-
-export async function buildPropertyPayload(newProperty: PropertyFormValues) {
-  // 1. Upload Images
-  const galleryImages = newProperty.gallery_images as GalleryImage[]
-  const resolvedUrls = await uploadGalleryImagesApi({
-    images: galleryImages,
-    bucket: "property-images",
-  })
-
-  // 2. Return payload
-  return {
-    ...newProperty,
-    price: Number(newProperty.price),
-    bedrooms: Number(newProperty.bedrooms),
-    bathrooms: Number(newProperty.bathrooms),
-    size_sqm: Number(newProperty.size_sqm),
-    year_built: newProperty.year_built ? Number(newProperty.year_built) : null,
-    gallery_images: resolvedUrls,
-    main_image: resolvedUrls[0] ?? null,
-  }
 }
 
 // Removes characters that break PostgREST's or() filter (commas, brackets)

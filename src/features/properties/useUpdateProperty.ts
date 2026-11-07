@@ -1,5 +1,4 @@
 import { updatePropertyApi } from "@/api/apiProperties"
-import type { PropertyFormValues } from "@/types/global"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -7,18 +6,14 @@ export function useUpdateProperty() {
   const queryClient = useQueryClient()
 
   const { isPending, mutate: updateProperty } = useMutation({
-    mutationFn: ({
-      newProperty,
-      id,
-    }: {
-      newProperty: PropertyFormValues
-      id: string
-    }) => updatePropertyApi(newProperty, id),
+    mutationFn: updatePropertyApi,
 
     onSuccess: () => {
-      toast.success("Property successfully updated")
+      toast.success("Property updated")
       queryClient.invalidateQueries({ queryKey: ["properties"] })
       queryClient.invalidateQueries({ queryKey: ["property"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["viewings"] })
     },
 
     onError: (err) => toast.error(err.message),

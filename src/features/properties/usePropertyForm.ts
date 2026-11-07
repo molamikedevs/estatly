@@ -1,6 +1,6 @@
 import { useCreateProperty } from "@/features/properties/useCreateProperty"
 import { useUpdateProperty } from "@/features/properties/useUpdateProperty"
-import { propertySchema } from "@/lib/validation"
+import { propertyFormSchema } from "@/lib/validation"
 import type { Property } from "@/types/database"
 import type { PropertyFormValues } from "@/types/global"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,7 +11,6 @@ const EMPTY_VALUES: PropertyFormValues = {
   description: "",
   listing_type: "rent",
   property_type: "apartment",
-  status: "pending-approval",
   price: "",
   bedrooms: "",
   bathrooms: "",
@@ -26,14 +25,13 @@ const EMPTY_VALUES: PropertyFormValues = {
   amenities: [],
 }
 
-// Existing property (numbers) -> form values (strings) for editing
-function propertyToFormValues(p: Property): PropertyFormValues {
+// Database values (numbers) → form values (strings)
+function toFormValues(p: Property): PropertyFormValues {
   return {
     title: p.title,
     description: p.description,
     listing_type: p.listing_type,
     property_type: p.property_type,
-    status: p.status,
     price: String(p.price),
     bedrooms: String(p.bedrooms),
     bathrooms: String(p.bathrooms),
@@ -58,28 +56,28 @@ interface UsePropertyFormParams {
 }
 
 export function usePropertyForm({ property, onClose }: UsePropertyFormParams) {
-  const isEdit = Boolean(property)
-
   const { updateProperty, isPending: isUpdating } = useUpdateProperty()
   const { createProperty, isPending: isCreating } = useCreateProperty()
-  const isPending = isEdit ? isUpdating : isCreating
 
   const form = useForm<PropertyFormValues>({
-    resolver: zodResolver(propertySchema),
-    mode: "onBlur",
-    defaultValues: property ? propertyToFormValues(property) : EMPTY_VALUES,
+    resolver: zodResolver(propertyFormSchema),
+    // Same as every other form: errors after a field is first left
+    mode: "onTouched",
+    defaultValues: property ? toFormValues(property) : EMPTY_VALUES,
   })
 
   const onSubmit = form.handleSubmit((values) => {
-    if (isEdit && property) {
-      updateProperty(
-        { newProperty: values, id: String(property.id) },
-        { onSuccess: onClose }
-      )
+    if (property) {
+      updateProperty({ id: property.id, values }, { onSuccess: onClose })
     } else {
       createProperty(values, { onSuccess: onClose })
     }
   })
 
-  return { form, isEdit, isPending, onSubmit }
+  return {
+    form,
+    isEdit: Boolean(property),
+    isPending: isCreating || isUpdating,
+    onSubmit,
+  }
 }

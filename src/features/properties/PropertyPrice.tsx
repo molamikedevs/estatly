@@ -1,4 +1,4 @@
-import { formatPrice } from "@/lib/helpers"
+import { formatAmount } from "@/lib/helpers"
 import { cn } from "@/lib/utils"
 import type { Property } from "@/types/database"
 
@@ -11,13 +11,6 @@ export default function PropertyPrice({
   property,
   className,
 }: PropertyPriceProps) {
-  const isRent = property.listing_type === "rent"
-  // formatPrice appends "/yr" for rentals; strip it so the suffix can be styled
-  const amount = formatPrice(property.price, property.listing_type).replace(
-    "/yr",
-    ""
-  )
-
   return (
     <p
       className={cn(
@@ -25,8 +18,9 @@ export default function PropertyPrice({
         className
       )}
     >
-      {amount}
-      {isRent && (
+      {formatAmount(property.price)}
+      {/* Its own element, so it can be smaller than the amount */}
+      {property.listing_type === "rent" && (
         <span className="ml-1 text-[0.55em] font-medium text-muted-foreground">
           /year
         </span>
