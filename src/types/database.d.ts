@@ -1,6 +1,4 @@
-import { propertyFormSchema } from "@/lib/validation"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
-export type PropertyFormValues = z.infer<typeof propertyFormSchema>
 
 // ─── Enums / Unions ───────────────────────────────────
 
@@ -68,15 +66,6 @@ export interface UserLogin {
   password: string
 }
 
-// ─── Team ─────────────────────────────────────────────
-
-export interface CreateTeamInput {
-  full_name: string
-  email: string
-  password: string
-  role: Exclude<UserRole, "admin">
-}
-
 // A profile plus their workload, counted in the same query
 export interface TeamMember extends UserProfile {
   listing_count: number
@@ -121,6 +110,8 @@ export interface Property {
   agent?: PropertyAgent | null
 }
 
+// One photo in the property form: existing ones have a url,
+// new ones also carry the File to upload
 export type GalleryImage = {
   id: string
   url: string
@@ -188,17 +179,6 @@ export interface Client {
   status: ClientStatus
   agent: ClientAgent | null
   viewing_count: number
-}
-
-// ─── Form props ───────────────────────────────────────
-
-export interface PropertyFormProps {
-  property?: Property
-  onClose: () => void
-}
-export interface ViewingFormProps {
-  viewing?: Viewing
-  onClose: () => void
 }
 
 // ─── Settings ─────────────────────────────────────────

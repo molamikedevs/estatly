@@ -1,3 +1,4 @@
+import { DURATIONS } from "@/lib/constants"
 import { z } from "zod"
 
 /* ─────────────────────────────────────────────
@@ -7,9 +8,6 @@ import { z } from "zod"
 const CURRENT_YEAR = new Date().getFullYear()
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE = /^[+\d\s()-]*$/
-
-// Viewing lengths in minutes, as strings for select fields
-const DURATIONS = ["15", "30", "45", "60", "90"] as const
 
 /* ─────────────────────────────────────────────
   Auth

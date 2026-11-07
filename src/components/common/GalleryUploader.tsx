@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { resizeImage } from "@/lib/resizeImage"
 import { cn } from "@/lib/utils"
+import type { GalleryImage } from "@/types/database"
 import { ImagePlus, Loader2, Star, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -8,12 +9,6 @@ import { toast } from "sonner"
 const HARD_MAX_SIZE = 25 * 1024 * 1024
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const MAX_IMAGES = 10
-
-export interface GalleryImage {
-  id: string // stable key
-  file?: File // new upload (optimized)
-  url: string // blob URL for new, remote URL for existing
-}
 
 interface GalleryUploaderProps {
   value: GalleryImage[]

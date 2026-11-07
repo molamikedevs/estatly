@@ -8,18 +8,9 @@ import type {
   Path,
 } from "react-hook-form"
 
-import type { UserRole } from "./database"
-
 // ─── Form Value Types (inferred from Zod) ─────────────
 
 export type { PropertyFormValues } from "@/lib/validation"
-
-export interface CreateAgentFormValues {
-  full_name: string
-  email: string
-  password: string
-  role: Exclude<UserRole, "admin">
-}
 
 // ─── Shared Field Primitives ──────────────────────────
 
@@ -104,8 +95,4 @@ export interface SwitchFieldProps<T extends FieldValues> {
   id: string
   label: string
   description?: string
-}
-
-export interface AgentFieldsProps {
-  control: Control<CreateAgentFormValues>
 }
