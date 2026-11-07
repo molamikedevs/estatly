@@ -17,6 +17,7 @@ export default function PropertyDetailsContent({
 }) {
   const {
     galleryImages,
+    commission,
     editOpen,
     setEditOpen,
     deleteOpen,
@@ -49,7 +50,7 @@ export default function PropertyDetailsContent({
           />
           <PropertySections property={property} />
         </div>
-        <PropertySidebar property={property} />
+        <PropertySidebar property={property} commission={commission} />
       </div>
 
       <FormSheet

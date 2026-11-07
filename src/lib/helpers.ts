@@ -25,15 +25,20 @@ export function getInitials(name: string) {
     .toUpperCase()
 }
 
-export function formatPrice(price: number, listingType: string) {
-  const formatted = new Intl.NumberFormat("en-AE", {
+// "AED 2,500,000": Intl handles the currency and thousands separators
+export function formatAmount(amount: number) {
+  return new Intl.NumberFormat("en-AE", {
     style: "currency",
     currency: "AED",
     maximumFractionDigits: 0,
-  }).format(price)
-  return listingType === "rent" ? `${formatted}/yr` : formatted
+  }).format(amount)
 }
 
+// Rentals are priced per year
+export function formatPrice(price: number, listingType: string) {
+  const amount = formatAmount(price)
+  return listingType === "rent" ? `${amount}/yr` : amount
+}
 export function formatSize(sqm: number) {
   return `${Math.round(sqm)} m²`
 }

@@ -1,3 +1,4 @@
+import { useSettings } from "@/features/settings/useSettings"
 import type { Property } from "@/types/database"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -8,6 +9,7 @@ export function usePropertyDetails(property: Property) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const { deleteProperty, isPending: isDeleting } = useDeleteProperty()
+  const { settings } = useSettings()
 
   // Nothing is left to show after a delete, so go back to the list
   function handleConfirmDelete() {
@@ -26,8 +28,17 @@ export function usePropertyDetails(property: Property) {
       ? [property.main_image]
       : []
 
+  // The agency's cut at the rate set in Settings; null until settings load
+  const commission = settings
+    ? {
+        rate: settings.commission_rate,
+        amount: Math.round((property.price * settings.commission_rate) / 100),
+      }
+    : null
+
   return {
     galleryImages,
+    commission,
     editOpen,
     setEditOpen,
     deleteOpen,

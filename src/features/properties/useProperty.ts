@@ -1,22 +1,23 @@
-import { createPropertyApi } from "@/api/apiProperties"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { getPropertyApi } from "@/api/apiProperties"
+import { useQuery } from "@tanstack/react-query"
+import { useParams } from "react-router-dom"
 
-export function useCreateProperty() {
-  const queryClient = useQueryClient()
+export function useProperty() {
+  const { propertyId } = useParams()
+  const id = Number(propertyId)
+  const isValidId = Number.isInteger(id) && id > 0
 
-  const { isPending, mutate: createProperty } = useMutation({
-    mutationFn: createPropertyApi,
-
-    onSuccess: () => {
-      toast.success("Property added. It goes live once approved")
-      queryClient.invalidateQueries({ queryKey: ["properties"] })
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
-      queryClient.invalidateQueries({ queryKey: ["team"] })
-    },
-
-    onError: (err) => toast.error(err.message),
+  const {
+    isLoading,
+    data: property,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["property", id],
+    queryFn: () => getPropertyApi(id),
+    // A bad URL shows "not found" instead of requesting NaN
+    enabled: isValidId,
   })
 
-  return { isPending, createProperty }
+  return { isLoading, property, error, refetch }
 }

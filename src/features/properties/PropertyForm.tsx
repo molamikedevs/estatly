@@ -10,7 +10,7 @@ import TextField from "@/components/form-components/TextField"
 import { FieldGroup } from "@/components/ui/field"
 import { usePropertyForm } from "@/features/properties/usePropertyForm"
 import { DESC_MAX, LISTING_TYPE_OPTIONS, propertyTypes } from "@/lib/constants"
-import type { PropertyFormProps } from "@/types/database"
+import type { Property } from "@/types/database"
 import {
   Banknote,
   Bath,
@@ -21,6 +21,13 @@ import {
 } from "lucide-react"
 import { Controller } from "react-hook-form"
 
+interface PropertyFormProps {
+  // No property: add mode. A property: edit mode
+  property?: Property
+  onClose: () => void
+}
+
+// One form for add and edit: both change the same fields
 export default function PropertyForm({ property, onClose }: PropertyFormProps) {
   const { form, isEdit, isPending, onSubmit } = usePropertyForm({
     property,
@@ -29,7 +36,11 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
   const { control } = form
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-1 flex-col overflow-hidden">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="flex flex-1 flex-col overflow-hidden"
+    >
       <div className="flex-1 scrollbar-thin space-y-6 overflow-y-auto px-6 py-6">
         {/* ─── Basic information ─────────────────────── */}
         <FormSection
@@ -214,8 +225,10 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
         {/* ─── Images ────────────────────────────────── */}
         <FormSection
           title="Images"
-          description="Upload photos for the listing gallery."
+          description="Upload photos for the listing gallery. The first photo is the cover."
         >
+          {/* Controller: GalleryUploader is a custom input, so RHF wires it up
+              through value and onChange instead of a ref */}
           <Controller
             control={control}
             name="gallery_images"
