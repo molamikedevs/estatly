@@ -32,7 +32,7 @@ interface StatusAction {
   tone: string
 }
 
-/** Only the statuses that make sense for this listing type, minus the current one. */
+// Next steps for a live listing: published ⇄ under offer → sold or rented
 function getStatusActions(property: Property): StatusAction[] {
   const closing: StatusAction =
     property.listing_type === "rent"
@@ -49,6 +49,19 @@ function getStatusActions(property: Property): StatusAction[] {
           tone: "text-chart-1",
         }
 
+  // An offer can fall through: the listing goes back on the market
+  if (property.status === "under-offer") {
+    return [
+      {
+        status: "published",
+        label: "Offer fell through",
+        icon: RotateCcw,
+        tone: "text-muted-foreground",
+      },
+      closing,
+    ]
+  }
+
   return [
     {
       status: "under-offer",
@@ -57,7 +70,7 @@ function getStatusActions(property: Property): StatusAction[] {
       tone: "text-info",
     },
     closing,
-  ].filter((action) => action.status !== property.status) as StatusAction[]
+  ]
 }
 
 interface PropertyActionsMenuProps {
@@ -92,8 +105,8 @@ export default function PropertyActionsMenu({
 
   if (canEdit && onEdit) {
     sections.push(
-      <DropdownMenuItem onClick={() => onEdit(property)} className="gap-2">
-        <Pencil className="h-4 w-4 text-muted-foreground" />
+      <DropdownMenuItem onSelect={() => onEdit(property)}>
+        <Pencil className="text-muted-foreground" />
         Edit details
       </DropdownMenuItem>
     )
@@ -101,48 +114,36 @@ export default function PropertyActionsMenu({
 
   if (canPublish && isAwaitingApproval) {
     sections.push(
-      <DropdownMenuItem
-        onClick={() => setStatus("published")}
-        className="gap-2"
-      >
-        <BadgeCheck className="h-4 w-4 text-success" />
+      <DropdownMenuItem onSelect={() => setStatus("published")}>
+        <BadgeCheck className="text-success" />
         Approve & publish
       </DropdownMenuItem>
     )
   }
 
-  const statusActions =
-    canSetSaleStatus && !isAwaitingApproval && !isClosed
-      ? getStatusActions(property)
-      : []
-
-  if (statusActions.length > 0) {
+  // Live listings only: pending ones need approval, closed ones re-listing
+  if (canSetSaleStatus && !isAwaitingApproval && !isClosed) {
     sections.push(
       <DropdownMenuGroup>
         <DropdownMenuLabel className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
           Listing status
         </DropdownMenuLabel>
-        {statusActions.map(({ status, label, icon: Icon, tone }) => (
-          <DropdownMenuItem
-            key={status}
-            onClick={() => setStatus(status)}
-            className="gap-2"
-          >
-            <Icon className={cn("h-4 w-4", tone)} />
-            {label}
-          </DropdownMenuItem>
-        ))}
+        {getStatusActions(property).map(
+          ({ status, label, icon: Icon, tone }) => (
+            <DropdownMenuItem key={status} onSelect={() => setStatus(status)}>
+              <Icon className={tone} />
+              {label}
+            </DropdownMenuItem>
+          )
+        )}
       </DropdownMenuGroup>
     )
   }
 
   if (canPublish && isClosed) {
     sections.push(
-      <DropdownMenuItem
-        onClick={() => setStatus("published")}
-        className="gap-2"
-      >
-        <RotateCcw className="h-4 w-4 text-muted-foreground" />
+      <DropdownMenuItem onSelect={() => setStatus("published")}>
+        <RotateCcw className="text-muted-foreground" />
         Re-list property
       </DropdownMenuItem>
     )
@@ -151,15 +152,16 @@ export default function PropertyActionsMenu({
   if (canDelete && onDelete) {
     sections.push(
       <DropdownMenuItem
-        onClick={() => onDelete(property)}
-        className="gap-2 text-destructive focus:text-destructive"
+        variant="destructive"
+        onSelect={() => onDelete(property)}
       >
-        <Trash2 className="h-4 w-4" />
+        <Trash2 />
         Delete property
       </DropdownMenuItem>
     )
   }
 
+  // Nothing this user can do: no empty menu
   if (sections.length === 0) return null
 
   return (
@@ -170,7 +172,7 @@ export default function PropertyActionsMenu({
             size="icon"
             variant={triggerVariant === "overlay" ? "secondary" : "outline"}
             disabled={isPending}
-            aria-label="Property actions"
+            aria-label={`Actions for ${property.title}`}
             className={cn(
               "h-8 w-8",
               triggerVariant === "overlay" &&

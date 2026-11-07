@@ -4,33 +4,34 @@ import DataRenderer from "@/components/common/DataRenderer"
 import PageHeader from "@/components/common/PageHeader"
 import Pagination from "@/components/common/Pagination"
 import FormSheet from "@/components/form-components/FormSheet"
-import { usePropertiesOperations } from "@/features/properties/usePropertiesOperations"
 import { SKELETON_KEYS } from "@/lib/constants"
 import { EMPTY_PROPERTIES, EMPTY_PROPERTIES_FILTERED } from "@/lib/states"
 import PropertiesOperations from "./PropertiesOperations"
 import PropertyCard from "./PropertyCard"
 import PropertyCardSkeleton from "./PropertyCardSkeleton"
 import PropertyForm from "./PropertyForm"
+import { usePropertiesList } from "./usePropertiesList"
 
+// Cards at least 15rem wide; the grid fits as many columns as there is room for
 const GRID = "grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-4"
 
 export default function PropertiesList() {
   const {
+    properties,
+    count,
     isLoading,
     error,
     refetch,
-    properties,
-    total,
     isFiltered,
-    editProperty,
-    editOpen,
-    setEditOpen,
-    handleEdit,
+    editTarget,
+    openEdit,
+    closeEdit,
     deleteTarget,
-    setDeleteTarget,
     isDeleting,
-    handleConfirmDelete,
-  } = usePropertiesOperations()
+    openDelete,
+    closeDelete,
+    confirmDelete,
+  } = usePropertiesList()
 
   return (
     <div className="space-y-8">
@@ -38,7 +39,7 @@ export default function PropertiesList() {
         <PageHeader
           title="Properties"
           subText="Browse and manage your property listings"
-          count={total}
+          count={count}
           isLoading={isLoading}
         />
         <CreateButton
@@ -51,13 +52,14 @@ export default function PropertiesList() {
         </CreateButton>
       </div>
 
-      {!isLoading && (total > 0 || isFiltered) && <PropertiesOperations />}
+      {/* Always visible, so a search or filter with no results can be cleared */}
+      <PropertiesOperations />
 
       <DataRenderer
         data={properties}
         isLoading={isLoading}
         error={error}
-        onRetry={refetch}
+        onRetry={() => refetch()}
         empty={isFiltered ? EMPTY_PROPERTIES_FILTERED : EMPTY_PROPERTIES}
         loading={
           <div className={GRID}>
@@ -73,33 +75,33 @@ export default function PropertiesList() {
                 <PropertyCard
                   key={property.id}
                   property={property}
-                  onEdit={handleEdit}
-                  onDelete={setDeleteTarget}
+                  onEdit={openEdit}
+                  onDelete={openDelete}
                 />
               ))}
             </div>
-            <Pagination count={total} label="properties" />
+            <Pagination count={count} label="properties" />
           </div>
         )}
       />
 
       <FormSheet
-        open={editOpen}
-        onOpenChange={setEditOpen}
+        open={Boolean(editTarget)}
+        onOpenChange={(open) => !open && closeEdit()}
         size="lg"
         title="Edit property"
         description="Update the listing details below."
       >
-        <PropertyForm
-          property={editProperty}
-          onClose={() => setEditOpen(false)}
-        />
+        {/* Mounts a fresh form per property: useForm reads defaultValues once */}
+        {editTarget && (
+          <PropertyForm property={editTarget} onClose={closeEdit} />
+        )}
       </FormSheet>
 
       <ConfirmDelete
         open={Boolean(deleteTarget)}
-        onOpenChange={(open) => !open && setDeleteTarget(undefined)}
-        onConfirm={handleConfirmDelete}
+        onOpenChange={(open) => !open && closeDelete()}
+        onConfirm={confirmDelete}
         isPending={isDeleting}
         resourceName={deleteTarget?.title}
       />
