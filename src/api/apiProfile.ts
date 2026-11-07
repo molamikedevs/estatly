@@ -8,6 +8,8 @@ import action from "@/lib/handler/action"
 import { supabase } from "@/lib/supabase"
 import { profileSchema, type ProfileFormValues } from "@/lib/validation"
 
+const BUCKET = "avatars"
+
 export async function updateProfileApi(values: ProfileFormValues) {
   const { params, user } = await action({
     params: values,
@@ -30,7 +32,13 @@ export async function updateProfileApi(values: ProfileFormValues) {
 }
 
 // The file is already resized in the browser (see useUploadAvatar)
-export async function uploadAvatarApi(file: File) {
+export async function uploadAvatarApi({
+  file,
+  oldUrl,
+}: {
+  file: File
+  oldUrl?: string | null
+}) {
   const { data: sessionData } = await supabase.auth.getSession()
   const userId = sessionData.session?.user.id
   if (!userId) throw new UnauthorizedError()
@@ -40,18 +48,26 @@ export async function uploadAvatarApi(file: File) {
   const fileName = `avatar-${userId}-${Date.now()}.${ext}`
 
   const { error: uploadError } = await supabase.storage
-    .from("avatars")
+    .from(BUCKET)
     .upload(fileName, file)
 
   if (uploadError) throw new RequestError(400, "Photo could not be uploaded")
 
   // Builds the URL string only, no network request
-  const { data } = supabase.storage.from("avatars").getPublicUrl(fileName)
+  const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(fileName)
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("user_profiles")
-    .update({ avatar: data.publicUrl })
+    .update({ avatar: urlData.publicUrl })
     .eq("user_id", userId)
+    .select("id")
 
   if (error) throw toRequestError(error, "Profile")
+  if (data.length === 0)
+    throw new ForbiddenError("Your photo could not be saved")
+
+  // The new photo is saved, so the old file can go. Best effort: if this
+  // fails, only an unused file is left behind, so the error is ignored
+  const oldPath = oldUrl?.split(`/${BUCKET}/`)[1]
+  if (oldPath) await supabase.storage.from(BUCKET).remove([oldPath])
 }

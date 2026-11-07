@@ -11,7 +11,7 @@ export function useUpdateProfile() {
     onSuccess: () => {
       toast.success("Profile saved")
       queryClient.invalidateQueries({ queryKey: ["user"] })
-      // Your name shows on team cards too
+      // Phone and specialization show on the team cards
       queryClient.invalidateQueries({ queryKey: ["team"] })
     },
 
