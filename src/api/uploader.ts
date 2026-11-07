@@ -1,37 +1,32 @@
+import { RequestError } from "@/lib/errors"
 import { supabase } from "@/lib/supabase"
 import type { GalleryImage } from "@/types/database"
 
-interface PropertyImagesParams {
+interface UploadImagesParams {
   images: GalleryImage[]
   bucket: string
 }
 
+// Uploads new photos and keeps existing URLs. All uploads run at once;
+// Promise.all keeps the input order, so the first photo stays the main one
 export async function uploadGalleryImagesApi({
   images,
   bucket,
-}: PropertyImagesParams): Promise<string[]> {
-  const resolvedUrls: string[] = []
+}: UploadImagesParams): Promise<string[]> {
+  return Promise.all(
+    images.map(async (image) => {
+      if (!image.file) return image.url
 
-  for (const image of images) {
-    if (!image.file) {
-      resolvedUrls.push(image.url)
-      continue
-    }
+      // Random prefix: two photos named "living-room.jpg" never collide
+      const fileName = `${crypto.randomUUID()}-${image.file.name.replaceAll("/", "")}`
 
-    const fileName = `${crypto.randomUUID()}-${image.file.name.replaceAll("/", "")}`
+      const { error } = await supabase.storage
+        .from(bucket)
+        .upload(fileName, image.file)
 
-    const { error } = await supabase.storage
-      .from(bucket)
-      .upload(fileName, image.file)
+      if (error) throw new RequestError(400, "A photo could not be uploaded")
 
-    if (error) {
-      console.error("uploadGalleryImagesApi", error)
-      throw new Error("Image upload failed")
-    }
-
-    const { data } = supabase.storage.from(bucket).getPublicUrl(fileName)
-    resolvedUrls.push(data.publicUrl)
-  }
-
-  return resolvedUrls
+      return supabase.storage.from(bucket).getPublicUrl(fileName).data.publicUrl
+    })
+  )
 }

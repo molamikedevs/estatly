@@ -9,9 +9,10 @@ export function useDeleteProperty() {
     mutationFn: deletePropertyApi,
 
     onSuccess: () => {
-      toast.success("Property successfully deleted")
-      queryClient.invalidateQueries({ queryKey: ["property"] })
+      toast.success("Property deleted")
       queryClient.invalidateQueries({ queryKey: ["properties"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["team"] })
     },
 
     onError: (err) => toast.error(err.message),

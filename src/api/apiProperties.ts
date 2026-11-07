@@ -1,5 +1,9 @@
-import { buildPropertyPayload } from "@/lib/helpers"
+import { uploadGalleryImagesApi } from "@/api/uploader"
+import { ForbiddenError, toRequestError } from "@/lib/errors"
+import action from "@/lib/handler/action"
+import { cleanSearch } from "@/lib/helpers"
 import { supabase } from "@/lib/supabase"
+import { propertySchema, updatePropertyStatusSchema } from "@/lib/validation"
 import type {
   PropertiesQueryParams,
   Property,
@@ -10,57 +14,63 @@ import type { PropertyFormValues } from "@/types/global"
 const PROPERTY_WITH_AGENT =
   "*, agent:user_profiles!properties_agent_id_user_profiles_fkey(full_name, avatar, email)"
 
-/** Remove characters that break PostgREST's or() filter or act as wildcards. */
-function cleanSearch(term: string) {
-  return term
-    .replace(/[,()%_*\\]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-}
+const BUCKET = "property-images"
 
-export async function createPropertyApi(
-  newProperty: PropertyFormValues
-): Promise<Property> {
-  const dbReady = await buildPropertyPayload(newProperty)
+// Validates and converts the form, uploads new photos, returns database values
+async function toPropertyRow(values: PropertyFormValues) {
+  const { params, user } = await action({
+    params: values,
+    schema: propertySchema,
+    authorize: true,
+  })
+  const { gallery_images, ...fields } = params
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("You need to be signed in to add a property")
+  const urls = await uploadGalleryImagesApi({
+    images: gallery_images,
+    bucket: BUCKET,
+  })
 
-  const { data, error } = await supabase
-    .from("properties")
-    .insert([{ ...dbReady, agent_id: user.id }])
-    .select()
-    .single()
-
-  if (error) {
-    console.error("createPropertyApi error:", error)
-    throw new Error("Property could not be created")
+  return {
+    row: { ...fields, gallery_images: urls, main_image: urls[0] ?? null },
+    user,
   }
-
-  return data
 }
 
-export async function updatePropertyApi(
-  newProperty: PropertyFormValues,
-  id: string
-) {
-  const dbReady = await buildPropertyPayload(newProperty)
+export async function createPropertyApi(values: PropertyFormValues) {
+  const { row, user } = await toPropertyRow(values)
+
+  const { error } = await supabase.from("properties").insert({
+    ...row,
+    // Every new listing waits for a manager or admin to approve it
+    status: "pending-approval",
+    agent_id: user!.id,
+  })
+
+  if (error) throw toRequestError(error, "Property")
+}
+
+export async function updatePropertyApi({
+  id,
+  values,
+}: {
+  id: number
+  values: PropertyFormValues
+}) {
+  // No status in the row: it only changes through updatePropertyStatusApi
+  const { row } = await toPropertyRow(values)
 
   const { data, error } = await supabase
     .from("properties")
-    .update(dbReady)
+    .update(row)
     .eq("id", id)
-    .select()
-    .single()
+    .select("id")
 
-  if (error) {
-    console.error("updatePropertyApi error:", error)
-    throw new Error("Property could not be updated")
+  if (error) throw toRequestError(error, "Property")
+
+  // RLS blocks updates silently: no error, zero rows changed
+  if (data.length === 0) {
+    throw new ForbiddenError("You can only edit your own listings")
   }
-
-  return data
 }
 
 export async function getPropertiesApi({
@@ -76,6 +86,7 @@ export async function getPropertiesApi({
 
   if (filter !== "all") query = query.eq("listing_type", filter)
 
+  // Cleaned so input cannot become filter syntax
   const term = cleanSearch(search)
   if (term) query = query.or(`title.ilike.%${term}%,city.ilike.%${term}%`)
 
@@ -96,34 +107,17 @@ export async function getPropertiesApi({
       query = query.order("created_at", { ascending: false })
   }
 
+  // One page of rows plus the total, for the pagination
   const from = (page - 1) * pageSize
   query = query.range(from, from + pageSize - 1)
 
   const { data, error, count } = await query
-  if (error) {
-    console.error("getPropertiesApi error:", error)
-    throw new Error("Properties could not be loaded")
-  }
+  if (error) throw toRequestError(error, "Properties")
 
   return { data: data ?? [], count: count ?? 0 }
 }
 
-export async function getAllPropertiesApi(): Promise<
-  Pick<Property, "id" | "title">[]
-> {
-  const { data, error } = await supabase
-    .from("properties")
-    .select("id, title")
-    .order("title")
-
-  if (error) {
-    console.error("getAllPropertiesApi error:", error)
-    throw new Error("Properties could not be loaded")
-  }
-  return data ?? []
-}
-
-/** Returns null when the listing doesn't exist, so the page shows "not found". */
+// Null when the listing does not exist, so the page shows "not found"
 export async function getPropertyApi(id: number): Promise<Property | null> {
   const { data, error } = await supabase
     .from("properties")
@@ -131,62 +125,55 @@ export async function getPropertyApi(id: number): Promise<Property | null> {
     .eq("id", id)
     .maybeSingle()
 
-  if (error) {
-    console.error("getPropertyApi error:", error)
-    throw new Error("Property could not be loaded")
-  }
-
+  if (error) throw toRequestError(error, "Property")
   return data
 }
 
-export async function updatePropertyStatusApi(
-  id: number,
+export async function updatePropertyStatusApi(values: {
+  id: number
   status: PropertyStatus
-) {
+}) {
+  const { params } = await action({
+    params: values,
+    schema: updatePropertyStatusSchema,
+  })
+
   const { data, error } = await supabase
     .from("properties")
-    .update({ status })
-    .eq("id", id)
-    .select()
-    .single()
+    .update({ status: params.status })
+    .eq("id", params.id)
+    .select("id")
 
-  if (error) {
-    console.error("updatePropertyStatusApi error:", error)
-    throw new Error("Property status could not be updated")
+  if (error) throw toRequestError(error, "Property")
+
+  if (data.length === 0) {
+    throw new ForbiddenError("You cannot change this listing's status")
   }
-  return data
 }
 
-/** Adds one view in a single database step (see increment_property_views). */
+// Adds one view in a single database step (see increment_property_views),
+// so two visits at the same moment cannot overwrite each other
 export async function incrementPropertyViewsApi(id: number): Promise<number> {
   const { data, error } = await supabase.rpc("increment_property_views", {
     property_id: id,
   })
 
-  if (error) {
-    console.error("incrementPropertyViewsApi error:", error)
-    throw new Error("View could not be counted")
-  }
-
+  if (error) throw toRequestError(error, "Property")
   return data as number
 }
 
 export async function deletePropertyApi(id: number) {
-  const { error } = await supabase.from("properties").delete().eq("id", id)
+  // A listing with viewings fails here (23503): toRequestError turns that
+  // into "This property is linked to other records"
+  const { data, error } = await supabase
+    .from("properties")
+    .delete()
+    .eq("id", id)
+    .select("id")
 
-  if (error) {
-    console.error("deletePropertyApi error:", error)
-    throw new Error("Property could not be deleted")
-  }
-}
+  if (error) throw toRequestError(error, "Property")
 
-export async function getPropertiesByStatusApi(): Promise<
-  { status: PropertyStatus; count: number }[]
-> {
-  const { data, error } = await supabase.rpc("properties_by_status")
-  if (error) {
-    console.error("getPropertiesByStatusApi error:", error)
-    throw new Error("Property status breakdown could not be loaded")
+  if (data.length === 0) {
+    throw new ForbiddenError("Only admins can delete listings")
   }
-  return data ?? []
 }

@@ -1,18 +1,18 @@
 import { updatePropertyStatusApi } from "@/api/apiProperties"
-import type { PropertyStatus } from "@/types/database"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 export function useUpdatePropertyStatus() {
   const queryClient = useQueryClient()
+
   const { isPending, mutate: updateStatus } = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: PropertyStatus }) =>
-      updatePropertyStatusApi(id, status),
+    mutationFn: updatePropertyStatusApi,
 
     onSuccess: () => {
-      toast.success("Property status updated")
+      toast.success("Listing status updated")
       queryClient.invalidateQueries({ queryKey: ["properties"] })
       queryClient.invalidateQueries({ queryKey: ["property"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
 
     onError: (err) => toast.error(err.message),

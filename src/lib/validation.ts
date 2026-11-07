@@ -110,7 +110,9 @@ const numberText = (message: string) =>
     .min(1, message)
     .refine((v) => !Number.isNaN(Number(v)) && Number(v) > 0, message)
 
-export const propertySchema = z.object({
+// No status: new listings always start as pending-approval (set by the API)
+// and the status only changes through its own action
+export const propertyFormSchema = z.object({
   title: z
     .string()
     .min(10, "Title must be at least 10 characters")
@@ -138,21 +140,14 @@ export const propertySchema = z.object({
     { message: "Select a property type" }
   ),
 
-  status: z.enum([
-    "published",
-    "under-offer",
-    "sold",
-    "rented",
-    "pending-approval",
-  ]),
-
   price: numberText("Enter a valid price"),
   bedrooms: numberText("Enter the number of bedrooms"),
   bathrooms: numberText("Enter the number of bathrooms"),
   size_sqm: numberText("Enter a valid size"),
 
+  // The year picker stores an ISO date; empty means not set
   year_built: z.string().refine((v) => {
-    if (v === "") return true // optional, empty is fine
+    if (v === "") return true
     const year = new Date(v).getFullYear()
     return !Number.isNaN(year) && year >= 1800 && year <= CURRENT_YEAR
   }, `Enter a year between 1800 and ${CURRENT_YEAR}`),
@@ -174,12 +169,41 @@ export const propertySchema = z.object({
   features: z.array(z.string()).max(20, "Too many features"),
   amenities: z.array(z.string()).max(20, "Too many amenities"),
 
+  // Existing photos have a url; new ones also carry the File to upload
   gallery_images: z
     .array(
       z.object({ id: z.string(), url: z.string(), file: z.any().optional() })
     )
     .max(10, "Up to 10 images allowed"),
 })
+
+// Same rules plus conversion to database values (used by action)
+export const propertySchema = propertyFormSchema.transform(
+  ({ price, bedrooms, bathrooms, size_sqm, year_built, ...rest }) => ({
+    ...rest,
+    price: Number(price),
+    bedrooms: Number(bedrooms),
+    bathrooms: Number(bathrooms),
+    size_sqm: Number(size_sqm),
+    // The column holds the year. Number(isoDate) was NaN, saved as null
+    year_built: year_built ? new Date(year_built).getFullYear() : null,
+  })
+)
+
+const PROPERTY_STATUS_VALUES = [
+  "pending-approval",
+  "published",
+  "under-offer",
+  "sold",
+  "rented",
+] as const
+
+export const updatePropertyStatusSchema = z.object({
+  id: z.number().int().positive(),
+  status: z.enum(PROPERTY_STATUS_VALUES, { message: "Choose a valid status" }),
+})
+
+export type PropertyFormValues = z.infer<typeof propertyFormSchema>
 
 /* ─────────────────────────────────────────────
   Viewings

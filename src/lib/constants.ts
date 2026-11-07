@@ -30,12 +30,6 @@ export const LISTING_TYPE_OPTIONS = [
   { value: "sale", label: "For sale" },
 ]
 
-export const STATUS_OPTIONS = [
-  { value: "draft", label: "Draft" },
-  { value: "published", label: "Published" },
-  { value: "archived", label: "Archived" },
-]
-
 // One list for the filter, the status menu and anywhere else
 export const viewingStatusOptions: { value: ViewingStatus; label: string }[] = [
   { value: "scheduled", label: "Scheduled" },
