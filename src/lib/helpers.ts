@@ -108,3 +108,12 @@ export async function buildPropertyPayload(newProperty: PropertyFormValues) {
     main_image: resolvedUrls[0] ?? null,
   }
 }
+
+// Removes characters that break PostgREST's or() filter (commas, brackets)
+// or act as wildcards (% _ *), so a search can never change the query
+export function cleanSearch(term: string) {
+  return term
+    .replace(/[,()%_*\\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}

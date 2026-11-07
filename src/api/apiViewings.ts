@@ -1,6 +1,7 @@
 import { RESCHEDULABLE_STATUSES } from "@/lib/constants"
 import { ConflictError, ForbiddenError, toRequestError } from "@/lib/errors"
 import action from "@/lib/handler/action"
+import { cleanSearch } from "@/lib/helpers"
 import { supabase } from "@/lib/supabase"
 import {
   rescheduleViewingSchema,
@@ -10,10 +11,44 @@ import {
   type ViewingFormValues,
 } from "@/lib/validation"
 import type {
+  Client,
+  Property,
+  PropertyStatus,
   Viewing,
   ViewingStatus,
   ViewingsQueryParams,
 } from "@/types/database"
+
+// Listings a client can still visit: not sold, rented or waiting for approval
+const BOOKABLE_STATUSES: PropertyStatus[] = ["published", "under-offer"]
+
+// For the property picker in the viewing form
+export async function getBookablePropertiesApi(): Promise<
+  Pick<Property, "id" | "title">[]
+> {
+  const { data, error } = await supabase
+    .from("properties")
+    .select("id, title")
+    .in("status", BOOKABLE_STATUSES)
+    .order("title")
+
+  if (error) throw toRequestError(error, "Properties")
+  return data ?? []
+}
+
+// For the client picker: only clients still looking. Agents get their own (RLS)
+export async function getActiveClientsApi(): Promise<
+  Pick<Client, "id" | "full_name">[]
+> {
+  const { data, error } = await supabase
+    .from("clients")
+    .select("id, full_name")
+    .eq("status", "active")
+    .order("full_name")
+
+  if (error) throw toRequestError(error, "Clients")
+  return data ?? []
+}
 
 export async function createViewingApi(values: ViewingFormValues) {
   // Schema turns form strings into numbers; agent_id comes from the session
@@ -46,6 +81,7 @@ export async function rescheduleViewingApi(
       status: "scheduled",
     })
     .eq("id", params.id)
+    // The server enforces the rule, not just the menu
     .in("status", RESCHEDULABLE_STATUSES)
     .select("id")
 
@@ -89,6 +125,8 @@ export async function getViewingsApi({
   search,
   pageSize,
 }: ViewingsQueryParams): Promise<{ data: Viewing[]; count: number }> {
+  // !inner: a viewing whose property does not match the search is dropped,
+  // instead of coming back with property: null
   let query = supabase.from("viewings").select(
     `*,
        property:properties!inner(title, city, neighborhood, main_image),
@@ -97,22 +135,20 @@ export async function getViewingsApi({
     { count: "exact" }
   )
 
-  // Filter
   if (filter !== "all") query = query.eq("status", filter)
 
-  // Search on the joined property
-  if (search)
-    query = query.or(`title.ilike.%${search}%,city.ilike.%${search}%`, {
+  // Search on the joined property; cleaned so input cannot become filter syntax
+  const term = cleanSearch(search)
+  if (term)
+    query = query.or(`title.ilike.%${term}%,city.ilike.%${term}%`, {
       referencedTable: "properties",
     })
 
-  // Sort
   query = query.order("scheduled_at", { ascending: sortBy === "soonest" })
 
-  // Paginate
+  // One page of rows plus the total, for the pagination
   const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-  query = query.range(from, to)
+  query = query.range(from, from + pageSize - 1)
 
   const { data, error, count } = await query
   if (error) throw toRequestError(error, "Viewings")

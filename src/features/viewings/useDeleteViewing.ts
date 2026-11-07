@@ -12,6 +12,8 @@ export function useDeleteViewing() {
       toast.success("Viewing deleted")
       queryClient.invalidateQueries({ queryKey: ["viewings"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["clients"] })
+      queryClient.invalidateQueries({ queryKey: ["team"] })
     },
 
     onError: (err) => toast.error(err.message),

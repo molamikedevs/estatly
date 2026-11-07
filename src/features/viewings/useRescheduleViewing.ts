@@ -12,6 +12,7 @@ export function useRescheduleViewing() {
       toast.success("Viewing rescheduled")
       queryClient.invalidateQueries({ queryKey: ["viewings"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["team"] })
     },
 
     onError: (err) => toast.error(err.message),

@@ -90,6 +90,8 @@ export function toRequestError(
     switch (error.code) {
       case "PGRST116": // .single() found no row
         return new NotFoundError(resource)
+      case "PGRST103": // .range() asked for a page past the end
+        return new RequestError(416, "This page no longer exists")
       case "42501": // blocked by RLS on insert or update
         return new ForbiddenError()
       case "23505": // unique value already used

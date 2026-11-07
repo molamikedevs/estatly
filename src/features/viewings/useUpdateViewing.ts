@@ -12,6 +12,7 @@ export function useUpdateViewing() {
       toast.success("Viewing updated")
       queryClient.invalidateQueries({ queryKey: ["viewings"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["team"] })
     },
 
     onError: (err) => toast.error(err.message),

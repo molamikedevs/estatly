@@ -1,28 +1,22 @@
 import DatePickerField from "@/components/common/DatePickerField"
 import { FormFooter } from "@/components/form-components/FormFooter"
 import SelectField from "@/components/form-components/SelectField"
-import { useClients } from "@/features/clients/useClients"
-import { useAllProperties } from "@/features/properties/useAllProperties"
 import { durationOptions } from "@/lib/constants"
-import type { ViewingFormProps } from "@/types/database"
+import { useClientOptions } from "./useClientOptions"
+import { usePropertyOptions } from "./usePropertyOptions"
 import { useViewingForm } from "./useViewingForm"
+
+interface ViewingFormProps {
+  onClose: () => void
+}
 
 export default function ViewingForm({ onClose }: ViewingFormProps) {
   const { form, isPending, onSubmit } = useViewingForm({ onClose })
   const { control } = form
 
-  const { properties, isLoading: loadingProperties } = useAllProperties()
-  const { clients, isLoading: loadingClients } = useClients()
-
-  const propertyOptions = (properties ?? []).map((p) => ({
-    value: String(p.id),
-    label: p.title,
-  }))
-
-  const clientOptions = (clients ?? []).map((c) => ({
-    value: String(c.id),
-    label: c.full_name || c.email,
-  }))
+  // Filtered on the server, shaped into options in the hooks
+  const { propertyOptions, isLoading: loadingProperties } = usePropertyOptions()
+  const { clientOptions, isLoading: loadingClients } = useClientOptions()
 
   return (
     <form
@@ -38,7 +32,7 @@ export default function ViewingForm({ onClose }: ViewingFormProps) {
             name="property_id"
             id="property_id"
             label="Property"
-            placeholder={loadingProperties ? "Loading..." : "Select a property"}
+            placeholder={loadingProperties ? "Loading…" : "Select a property"}
             options={propertyOptions}
             required
           />
@@ -47,7 +41,7 @@ export default function ViewingForm({ onClose }: ViewingFormProps) {
             name="client_id"
             id="client_id"
             label="Client"
-            placeholder={loadingClients ? "Loading..." : "Select a client"}
+            placeholder={loadingClients ? "Loading…" : "Select a client"}
             options={clientOptions}
             required
           />
@@ -84,7 +78,7 @@ export default function ViewingForm({ onClose }: ViewingFormProps) {
         isSubmitting={isPending}
         onCancel={onClose}
         submitLabel="Schedule viewing"
-        submittingLabel="Scheduling..."
+        submittingLabel="Scheduling…"
       />
     </form>
   )
